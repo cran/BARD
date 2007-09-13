@@ -1,0 +1,123 @@
+\begin{thebibliography}{20}
+\newcommand{\enquote}[1]{``#1''}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Aerts \emph{et~al.}(2003)Aerts, Eisinger, Heuvelink, and
+  Stewart}]{AerEisHeu03}
+Aerts JC, Eisinger E, Heuvelink GB, Stewart TJ (2003).
+\newblock \enquote{Using Linear Integer Programming for Multi-Site Land-Use
+  Allocation.}
+\newblock \emph{Geographical Analysis}, \textbf{35}(2), 148--69.
+
+\bibitem[{Altman(1997)}]{Altman97}
+Altman M (1997).
+\newblock \enquote{Is Automation the Answer: The Computational Complexity of
+  Automated Redistricting.}
+\newblock \emph{Rutgers Computer and Law Technology Journal}, \textbf{23}(1),
+  81--141.
+
+\bibitem[{Altman(1998)}]{Altman98}
+Altman M (1998).
+\newblock \enquote{Modeling the Effect of Mandatory District Compactness on
+  Partisan Gerrymanders.}
+\newblock \emph{Political Geography}, \textbf{17}(8), 989--1012.
+
+\bibitem[{Altman \emph{et~al.}(2003)Altman, Gill, and McDonald}]{AltGilMcD03}
+Altman M, Gill J, McDonald MP (2003).
+\newblock \emph{Numerical Issues in Statistical Computing for the Social
+  Scientist}.
+\newblock John Wiley and Sons, New York.
+
+\bibitem[{Altman \emph{et~al.}(2005)Altman, MacDonald, and
+  McDonald}]{AltMacMcD05}
+Altman M, MacDonald K, McDonald MP (2005).
+\newblock \enquote{From Crayons to Computers: The Evolution of Computer Use in
+  Redistricting.}
+\newblock \emph{Social Science Computer Review}, \textbf{23}(3), 334--346.
+
+\bibitem[{Blum and Roli(2003)}]{BlumRoli03}
+Blum C, Roli A (2003).
+\newblock \enquote{Metaheuristics in Combinatorial Optimization.}
+\newblock \emph{ACM Computing Surveys}, \textbf{35}(3), 268--308.
+
+\bibitem[{Cain \emph{et~al.}(2006)Cain, Donald, and McDonald}]{CainMacMc05}
+Cain B, Donald KM, McDonald MP (2006).
+\newblock \enquote{From Equality to Fairness: The Path of Political Reform
+  Since Baker v. Carr.}
+\newblock In B~Cain, T~Mann (eds.), \enquote{Party Lines,} Brookings.
+
+\bibitem[{Cirincione \emph{et~al.}(2000)Cirincione, Darling, and
+  O'Rourke}]{CirDarOro00}
+Cirincione C, Darling T, O'Rourke T (2000).
+\newblock \enquote{South Carolina's 1990's Congressional Districting.}
+\newblock \emph{Political Geography}, \textbf{19}, 163--179.
+
+\bibitem[{di~Cortona \emph{et~al.}(1999)di~Cortona, Manzi, Pennisi, Ricca, and
+  Simeone}]{CortonaEtAl99}
+di~Cortona PG, Manzi C, Pennisi A, Ricca F, Simeone B (1999).
+\newblock \emph{Evaluation and Optimization of Electoral Systems}.
+\newblock SIAM Pres, Philadelphia.
+
+\bibitem[{Forest(2004)}]{Forest04}
+Forest B (2004).
+\newblock \enquote{Information sovereignty and GIS: the evolution of
+  'communities of interest' in political redistricting.}
+\newblock \emph{Political Geography}, \textbf{23}, 425--451.
+
+\bibitem[{Gronke and Wilson(1999)}]{GronWil99}
+Gronke P, Wilson J (1999).
+\newblock \enquote{Competing Redistricting Plans as Evidence of Political
+  Motives.}
+\newblock \emph{American Politics Quarterly}, \textbf{27}, 147--76.
+
+\bibitem[{Knuth(1997)}]{Knuth97}
+Knuth D (1997).
+\newblock \emph{The Art of Computer Programming : Seminumerical Algorithms}.
+\newblock Addison Wesley, 2nd edition.
+
+\bibitem[{McDonald(2006)}]{McDonald06}
+McDonald MP (2006).
+\newblock \enquote{Drawing the Line on District Competition.}
+\newblock \emph{PS: Political Science and Politics}, \textbf{39}, 99--102.
+
+\bibitem[{Parker(1990)}]{Parker90}
+Parker FR (1990).
+\newblock \emph{Black Votes Count}.
+\newblock University of North Carolina Press.
+
+\bibitem[{Samuelson(1948)}]{Samuelson48}
+Samuelson PA (1948).
+\newblock \enquote{Consumption Theory in Terms of Revealed Preference.}
+\newblock \emph{Econometrica}, \textbf{15}, 243--253.
+
+\bibitem[{Vickrey(1961)}]{Vickrey61}
+Vickrey W (1961).
+\newblock \enquote{On the Prevention of Gerrymandering.}
+\newblock \emph{Political Science quarterly}, \textbf{76}, 105--110.
+
+\bibitem[{Weaver and Hess(1963)}]{WeaverHess63}
+Weaver JB, Hess SW (1963).
+\newblock \enquote{A Procedure for Nonpartisan Districting.}
+\newblock \emph{The Yale Law Journal}, \textbf{72}, 228--308.
+
+\bibitem[{Wolpert and Macready(1997)}]{WolMac97}
+Wolpert D, Macready W (1997).
+\newblock \enquote{No Free Lunch Theorems for Optimization.}
+\newblock \emph{IEEE Transactions on Evolutionary Computation}, \textbf{1},
+  67--82.
+
+\bibitem[{Xiao(2003)}]{Xiao03}
+Xiao N (2003).
+\newblock \emph{Geographical Optimization using Evolutionary Algorithms}.
+\newblock Ph.D. thesis, University of Iowa.
+
+\bibitem[{Xiao(2006)}]{Xiao06}
+Xiao N (2006).
+\newblock \enquote{An Evolutionary Algorithm for Site Search Problems.}
+\newblock \emph{Geographical Analysis}, \textbf{38}, 227--47.
+
+\end{thebibliography}

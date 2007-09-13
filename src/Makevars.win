@@ -1,0 +1,2 @@
+PKG_CFLAGS = -DMINGW
+PKG_CXXFLAGS = -DMINGW   -Wno-deprecated

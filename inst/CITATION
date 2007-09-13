@@ -1,0 +1,17 @@
+citHeader("To cite the BARD package in publications use:")
+
+citEntry(entry="Misc",
+         title = "Bard",
+         author = personList(as.person("M. Altman"),
+                             	as.person("M.P. McDonald")
+                                ),
+	 howpublished = "software",
+         year         = "2007",
+         note         = "Software: R Package, BARD, (version pre-release alpha) ",
+         url          = "http://bard.sf.net/",
+
+         textVersion =
+         paste("Altman, M., M.P. McDonald (2006)",
+              "(Software version: R Package, BARD, (version pre-release alpha) )"
+               )
+)

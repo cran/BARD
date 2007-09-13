@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99c (Web2C 7.4.5)
+The top-level auxiliary file: bardJSS.aux
+The style file: jss.bst
+Database file #1: bardJSS.bib
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+You've used 20 entries,
+            3129 wiz_defined-function locations,
+            765 strings with 7717 characters,
+and the built_in function-call counts, 14998 in all, are:
+= -- 1243
+> -- 369
+< -- 14
++ -- 145
+- -- 119
+* -- 1188
+:= -- 2103
+add.period$ -- 76
+call.type$ -- 20
+change.case$ -- 122
+chr.to.int$ -- 20
+cite$ -- 20
+duplicate$ -- 1338
+empty$ -- 1410
+format.name$ -- 168
+if$ -- 3040
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 212
+newline$ -- 109
+num.names$ -- 82
+pop$ -- 447
+preamble$ -- 1
+purify$ -- 119
+quote$ -- 0
+skip$ -- 335
+stack$ -- 0
+substring$ -- 1271
+swap$ -- 462
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 168
+warning$ -- 0
+while$ -- 130
+width$ -- 0
+write$ -- 265

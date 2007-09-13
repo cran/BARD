@@ -1,0 +1,63 @@
+# district utility functions
+export( importBardShape, exportBardShape,
+        readBardImage, writeBardImage,
+        readBardCheckpoint, writeBardCheckpoint )
+
+# general utility functions
+export( miniball )
+
+# adjacency/graph functions
+export ( nb2graph, neighbors.nb, neighbors, n.comp.include )
+export( basem, "basem<-", "basem.default", "basem<-.default" )
+
+# score functions
+export ( calcGroupScore, calcContiguityScore, calcLWCompactScore, calcPopScore, 
+  calcRangeScore, calcHolesScore,calcReockScore )
+
+# plan generation
+export ( createKmeansPlan, createRandomPlan, createContiguousPlan, 
+  createAssignedPlan, createRandomPopPlan )
+
+# plan fixup
+export (fillHolesPlan)
+
+#plan refinement
+export ( refineGreedyPlan, refineAnnealPlan, refineNelderPlan, refineGenoudPlan, refineGRASPPlan )
+
+# profiling functions
+export(samplePlans, profilePlans)
+
+# plan comparison
+export(reportPlans,scorePlans)
+S3method(diff,bardPlan)
+S3method(plot, bardPlanDiff)
+S3method(summary, bardPlanDiff)
+S3method(print, bardPlanDiff)
+
+
+#cluster setup
+export(startBardCluster,stopBardCluster)
+
+# interactive plans
+export(editPlanInteractive,createPlanInteractive)
+
+#  plotting and summary methods
+S3method(plot, bardBasemap)
+S3method(summary, bardBasemap)
+S3method(print, bardBasemap)
+S3method(print, bardBasemap.summary)
+S3method(plot, bardPlan)
+S3method(plot,bardPlan.summary)
+S3method(summary, bardPlan)
+S3method(print,bardPlan)
+S3method(print, bardPlan.summary)
+S3method(summary, bardSample)
+S3method(print,bardSample)
+S3method(print, bardSample.summary)
+S3method(plot,bardSample.summary)
+
+
+
+# include Compiled C library
+useDynLib("BARD")
+

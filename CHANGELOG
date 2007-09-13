@@ -1,0 +1,45 @@
+Changelog
+
+0.01. Initial packaging on SF
+0.02. Added some performance enhancements 
+  - only update cost function for districts that are changed
+  - maintain boundary list, rather than selecting from all blocks
+0.03 Working on integrating miniball code
+0.04 Reorganization
+0.05 Plan comparison functions
+0.06 Cirincione plan gen
+0.07 Start refactoring score functions
+0.2  Restart refactoring
+0.3  Numerous changes
+     -- additional plan generation functions
+     -- improved import import/export
+     -- generic plotting,printing, summary methods
+     -- visual update framework for demos and illustration
+     -- more refinement functions
+     -- cluster computing with "snow"
+     -- memory of previous solutions
+     -- incremental cost functions
+     -- hole detection and repair
+0.4 ALPHA -- all major areas of functionality in place, but untested, undocumented
+    -- c code for contiguity checking (20x faster!)
+0.5 ALPHA -- tuning, cluster fixes, greedy refinement
+0.6 ALPHA 
+  -- complete code comments
+  -- code capitalization consistency
+  -- created shallow copy function for memory-efficiency in plan sampling
+  -- memory efficiency in plan referencing basemaps
+  -- complete code docs: keywords, refs [TODO: examples]
+  -- Fixed incremental score updating (in score functions)
+  -- Fixed Reoc Score
+  -- Comparisons - missing value checks, refactor to return score matrices, preconfigured report
+  -- Tuned and added options to contiguous plan generation
+  -- detect score function without dynamic support
+  -- automatically work with plan or district scores
+0.7 ALPHA
+  -- GRASP refinement
+  -- interactive plan creation and editing using iplots
+  -- plan sampling and profiling completed
+0.8 BETA
+  -- PASSES ALL R CMD CHECKS
+  -- Tested on snow clusters
+  -- Lots of bug fixes   

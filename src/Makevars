@@ -1,0 +1,2 @@
+PKG_CFLAGS =  -DLDOUBLE
+PKG_CXXFLAGS = -DLDOUBLE -Wno-deprecated
