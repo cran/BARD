@@ -1,13 +1,19 @@
-\BOOKMARK [1][-]{Section.0.Introduction - Automated Redistricting for Political Participation and Analysis.1}{Introduction - Automated Redistricting for Political Participation and Analysis}{}
-\BOOKMARK [1][-]{Section.1.A Mathematical Formulation of Redistricting Criteria.1}{A Mathematical Formulation of Redistricting Criteria}{}
-\BOOKMARK [1][-]{Section.2.Improving Algorithms for Automated Redistricting.1}{Improving Algorithms for Automated Redistricting}{}
-\BOOKMARK [2][-]{Subsection.3.0.Computational Challenges.2}{Computational Challenges}{Section.2.Improving Algorithms for Automated Redistricting.1}
-\BOOKMARK [2][-]{Subsection.3.1.Available Working Software.2}{Available Working Software}{Section.2.Improving Algorithms for Automated Redistricting.1}
-\BOOKMARK [2][-]{Subsection.3.2.New Computational Approaches.2}{New Computational Approaches}{Section.2.Improving Algorithms for Automated Redistricting.1}
-\BOOKMARK [1][-]{Section.3.BARD's Modular Approach to redistricting.1}{BARD's Modular Approach to redistricting}{}
-\BOOKMARK [2][-]{Subsection.4.0.Optimization Details.2}{Optimization Details}{Section.3.BARD's Modular Approach to redistricting.1}
-\BOOKMARK [1][-]{Section.4.Plan evaluation and exploration.1}{Plan evaluation and exploration}{}
-\BOOKMARK [1][-]{Section.5.How to use BARD.1}{How to use BARD}{}
-\BOOKMARK [1][-]{Section.6.Summary.1}{Summary}{}
-\BOOKMARK [1][-]{Section.7.Acknowledgements.1}{Acknowledgements}{}
-\BOOKMARK [1][-]{Section.8.References.1}{References}{}
+\BOOKMARK [1][-]{Section.0.Introduction.1}{Introduction}{}
+\BOOKMARK [1][-]{Section.1.Redistricting with BARD.1}{Redistricting with BARD}{}
+\BOOKMARK [1][-]{Section.2.Example: Using BARD for Plan Evaluation and Modification.1}{Example: Using BARD for Plan Evaluation and Modification}{}
+\BOOKMARK [1][-]{Section.3.A Mathematical Formulation of Redistricting Criteria.1}{A Mathematical Formulation of Redistricting Criteria}{}
+\BOOKMARK [2][-]{Subsection.4.0.Redistricting Criteria.2}{Redistricting Criteria}{Section.3.A Mathematical Formulation of Redistricting Criteria.1}
+\BOOKMARK [1][-]{Section.4.Use of Automated Redistricting for Plan Analysis.1}{Use of Automated Redistricting for Plan Analysis}{}
+\BOOKMARK [1][-]{Section.5.Improving Algorithms for Automated Redistricting Refinement.1}{Improving Algorithms for Automated Redistricting Refinement}{}
+\BOOKMARK [2][-]{Subsection.6.0.Available Software.2}{Available Software}{Section.5.Improving Algorithms for Automated Redistricting Refinement.1}
+\BOOKMARK [2][-]{Subsection.6.1.New Metaheuristic Approaches.2}{New Metaheuristic Approaches}{Section.5.Improving Algorithms for Automated Redistricting Refinement.1}
+\BOOKMARK [2][-]{Subsection.6.2.Optimization Methods in BARD.2}{Optimization Methods in BARD}{Section.5.Improving Algorithms for Automated Redistricting Refinement.1}
+\BOOKMARK [1][-]{Section.6.Plan Refinement, Sampling and Profiling.1}{Plan Refinement, Sampling and Profiling}{}
+\BOOKMARK [1][-]{Section.7.Efficiency in Implementation and Design.1}{Efficiency in Implementation and Design}{}
+\BOOKMARK [2][-]{Subsection.8.0.Data Structures.2}{Data Structures}{Section.7.Efficiency in Implementation and Design.1}
+\BOOKMARK [2][-]{Subsection.8.1.Performance Tuning.2}{Performance Tuning}{Section.7.Efficiency in Implementation and Design.1}
+\BOOKMARK [2][-]{Subsection.8.2.Scalability.2}{Scalability}{Section.7.Efficiency in Implementation and Design.1}
+\BOOKMARK [1][-]{Section.8.Future Developments.1}{Future Developments}{}
+\BOOKMARK [1][-]{Section.9.Summary.1}{Summary}{}
+\BOOKMARK [1][-]{Section.10.Acknowledgements.1}{Acknowledgements}{}
+\BOOKMARK [1][-]{Section.11.Appendix: Memory Management Details.1}{Appendix: Memory Management Details}{}

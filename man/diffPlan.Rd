@@ -11,7 +11,7 @@ scorePlans(plans, scoreFUNs, domatch = TRUE)
 }
 \arguments{
   \item{plans}{ list of plans }
-  \item{x} {first plan}
+  \item{x}{first plan}
   \item{plan2}{second plan}
   \item{scoreFUNs}{ list of score functions}
   \item{domatch}{ rearrange district ID's for a best match between two plans}

@@ -38,7 +38,7 @@
         #define MINIBALL_NO_STD_NAMESPACE
     #endif
 
-    #if defined(__GNUC__) && (__GNUC_MINOR__<=90)         // assume old GNU
+    #if defined(__GNUC__) && (__GNUC__==2) && (__GNUC_MINOR__<=90)         // assume old GNU
         #define MINIBALL_NO_STD_NAMESPACE
     #endif
 
@@ -56,8 +56,13 @@
     #else                                                 // no Visual C++
         #ifndef MINIBALL_NO_STD_NAMESPACE
             #include<cstdlib>
+	    #ifdef __GNUC__
+        	inline void random_seed (unsigned int seed) {srand(seed);}
+        	inline double random_double () {return double(rand())/RAND_MAX;}
+	    #else
             inline void random_seed (unsigned int seed){std::srand48(seed);}
             inline double random_double () {return std::drand48();}
+	    #endif
         #else
             /*#include<cstdlib>*/
             #include<stdlib.h> 

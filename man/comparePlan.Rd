@@ -19,7 +19,8 @@ This function evaluates scores, and differences among a set of plans.
   domatch=TRUE,
   dodiff=TRUE,
   dodetails=FALSE,
-  doprofileextras=TRUE
+  doprofileextras=TRUE,
+  plotOpts=NULL
   )
 }
 
@@ -33,6 +34,7 @@ This function evaluates scores, and differences among a set of plans.
 \item{dodetails}{Logical. Print detailed information}
 \item{dodiff}{Logical. Report differences between pairs of plans}
 \item{doprofileextras}{Logical. Report profile summaries for bardSample results}
+\item{plotOpts}{List of plotting options to send to plan plotting command}
 }
 
 \details{

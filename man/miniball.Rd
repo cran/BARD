@@ -30,7 +30,7 @@ plot(xy)
 mb <- miniball(xy)
 
 #distances from point to center
-dc <- rowSums(t(t(xy)-mb$center)^2)
+dc <- sqrt(rowSums(t(t(xy)-mb$center)^2))
 
 }
 

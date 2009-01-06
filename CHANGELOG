@@ -43,3 +43,21 @@ Changelog
   -- PASSES ALL R CMD CHECKS
   -- Tested on snow clusters
   -- Lots of bug fixes   
+0.9 
+  -- Added TABU search
+  -- Added moment of inertia score
+  -- Added weighted Kmeans plan generation
+  -- Allow plot customizations
+  -- Perf improvements on greedy alg
+1.0 
+  -- Fix R 2.8, maptools, R CMD check warnings
+1.01 
+  -- Test under R 2.8.1
+  -- Workaround for iplots() under Mac OS
+  -- Avoid warnings for spdep under Mac OS
+  -- Pass R CMD CHECK completely
+  -- Many changes to vignette
+1.02
+  -- compile under gcc 2.43
+1.03
+  -- pass doc checks on R 2.9 unstable

@@ -1,27 +1,19 @@
-
-* Paper
-- optimizations, tuning, incremental cost, score memory, clustering, shallow copies, basemap management for clustering
-- CRAN 
-- Detecting holes
-- pure random redistricting cites
-- interactive generation
-- bias/responsiveness
-- [Docs] Examples: bard.package.R, basics.R , bardCluster, profilePlans, basem , comparisons, plandiff & generics, calcHolesScoreh , interactive, GRASP
-
-
 After 1.0:
  - Rgenoud cluster tuning
  - Miniball upgrade
  - ASA port
  - ASA parallel
- - Memory leak in plot.polylist investigate
+ - Memory leak in plot.polylist investigate (workaround in place)
  - NULL changelists in score functions
  - compare plans different basemaps, ndists
  - bias/responsiveness
  - tune annealing initial params
  - re-annealing
-  - tune genoud operators, generations, population size
-  - TABU search extension
+ - tune genoud operators, generations, population size
+ - tune TABU search -- tabulist based on single/bidirectional
+ - dynamic score tuning in Tabu
+ - option for flat areas in greedy search
  - profiling cluster optimizations across samples
-
-
+ - perim/area using union, PBMsmap, spatialDF objects
+ - allow double exchanges
+ - block-level incremental moment scores

@@ -4,6 +4,8 @@
 \alias{createKmeansPlan}
 \alias{createAssignedPlan}
 \alias{createContiguousPlan}
+\alias{createWeightedContiguousPlan}
+\alias{createWeightedKmeansPlan}
 \title{Create an initial plan for later refinement}
 \description{
 These methods create plans starting with random seeds. These plans should
@@ -14,6 +16,8 @@ createRandomPlan(basemap,ndists)
 createRandomPopPlan(basemap,ndists,predvar="POP")
 createAssignedPlan(basemap,predvar="BARDPlanID")
 createKmeansPlan(basemap,ndists)
+createWeightedKmeansPlan( basemap, ndists, centers = c(), weightVar = NULL,
+                 trimfactor = 2.5, smallBlock = c("cap", "closest"))
 createContiguousPlan(basemap, ndists, predvar = "POP", threshold = 0.05,
                  ssize = 20, usebb = TRUE, maxtries = (10/threshold),
                  neighborstarts = TRUE, fillholes = TRUE)
@@ -22,13 +26,17 @@ createContiguousPlan(basemap, ndists, predvar = "POP", threshold = 0.05,
 \arguments{
  \item{basemap}{Bard basemap from which to create plan}
  \item{ndists}{number of districts to create} 
- \item{predvar}{name of variable containing variabe of interst (for createAssignedPlan can be a vector or block assignments)} 
+ \item{predvar}{name of variable of interest (for createAssignedPlan can be a vector or block assignments)} 
  \item{threshold}{tolerance threshold for districts being "equal" in population}
  \item{ssize}{check up to ssize neighbors at random, shoosing the one with the fewest foreign neighbors}
   \item{usebb}{use bounding box compactness}
   \item{maxtries}{maximum number of tries to create plan}
   \item{neighborstarts}{whether to start new district at neighbors of existing districts}
   \item{fillholes}{fill any holes remaining}
+  \item{centers}{suggested centers for weighted kmeans}
+  \item{weightVar}{name of weighting variable in basemap, for weighting}
+  \item{trimfactor}{rescales and trims weights, see below }
+  \item{smallBlock}{how weighted kmeans handles blocks that are weighted to 0: caps minimimum weights at 1; closest post-assigns zero-weighted blocks to the nearest district}
 }
 
 \details{
@@ -59,7 +67,11 @@ from the ideal district average population, which in this case is 581,117.)
 The next district begins with the random selection of a census block group
 from among those that touch one of the completed districts.''
 
-(Note that ssize was not included as an option, originally)
+(Note that ssize was not included as an option, originally) 
+
+
+\code{createWeightedKmeansPlan} weights kmeans by a particular variable, most often used with population. This is implemented through block replication, so to limit memory use, the weights are rescaled so that minimum and maximum weights span approximately \code{trimfactor} orders of magnitude. Zero-weight blocks can either be capped at 1 an incorporated in the kmeans calculation, or left out and assigned to the closest district, based on the value of \code{smallblock}.
+
 
 }
 
@@ -111,6 +123,8 @@ Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAn
   kplan <- createKmeansPlan(suffolk.map,ndists)
   rplan <- createRandomPlan(suffolk.map,ndists)
   aplan <- createAssignedPlan(suffolk.map,predvar=1:ndists)
+  wkplan<-createWeightedKmeansPlan(suffolk.map,ndists,weightVar="POP")
+
   \dontrun{
   	cplan <- createContiguousPlan(suffolk.map,ndists)
   }

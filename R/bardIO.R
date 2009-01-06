@@ -39,7 +39,10 @@
 importBardShape <-
 function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE) {
   filen<-sub("\\.shp","",filen)
+  #migrate to spatial data frames
+  ow<-options(warn=-1)
   tmp.shape<-try( read.shape(filen) )
+  options(ow)
   if (inherits(tmp.shape,"try-error")) {
       return(NULL)
   }
@@ -50,7 +53,10 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE)
   } else if ("id" %in% names(tmp.df)) {
     mapid<-"id"
   }
+  #migrate to spatial data frames
+  ow<-options(warn=-1)
   tmp.polys <- Map2poly(tmp.shape,region.id=TRUE )
+  options(ow)
   
   # Note: poly2nb is very slow, so read from a file if present
 
@@ -115,7 +121,10 @@ function(plan,filen,id="BARDPlanID",gal=paste(filen,".GAL",sep="")) {
   newDf <- cbind(basemap$df,BARDplan)
   names(newDf)[length(newDf)] <- id
   
+  #migrate to spatial data frames
+  ow<-options(warn=-1)
   saveres1<-try(write.polylistShape(basemap$polys,newDf,filen))
+  options(ow)
   saveres2<-try(write.nb.gal(basemap$nb,gal))
   retval<-(!inherits(saveres1,"try-error")  &&  !inherits(saveres2,"try-error"))
   return(retval)
@@ -156,13 +165,13 @@ readBardImage <-
 function(filen) {
     filen<-paste(filen,"_bard_image.Rdata",sep="")
     retval<-local({
-      basemap<-NULL
+      basemaps<-NULL
       plans<-NULL
       loadres<-try(load(filen))
       if (inherits(loadres,"try-error")) {
         lrval <- NULL
       } else {
-	if (is.null(basemap) || is.null(plans)) {
+	if (is.null(basemaps) && is.null(plans)) {
 		# failed to load correct values 
 		lrval<-NULL
 	} else {

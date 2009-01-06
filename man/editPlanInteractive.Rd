@@ -64,11 +64,11 @@ Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAn
   
   # create some initial plans
   kplan <- createKmeansPlan(suffolk.map,ndists)
-  ow<-options(warn=-1)
+  \dontrun{
   if (require("iplots",quietly=TRUE)) {
   	kplan<-editPlanInteractive(kplan, reportFUN=function(x)print(calcPopScore(x))) 
   }
-  options(ow)
+  }
 }
 
 \keyword{IO}

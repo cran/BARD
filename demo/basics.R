@@ -112,10 +112,10 @@
  reportPlans(plans=list("kmeans"=kplan,"random 1"=rplan,"random pop"=rplan2), doplot=TRUE)
 
 # Nelder is ineffective -- just a demo
-improvedRplan<-refineNelderPlan(plan=rplan2, score.fun=myScore, displaycount=100, historysize=0, dynamicscoring=FALSE,   usecluster = TRUE, tracelevel=1, maxit=100)
+improvedRplan<-refineNelderPlan(plan=rplan2, score.fun=myScore, displaycount=100, historysize=0, dynamicscoring=FALSE,  tracelevel=1, maxit=100)
 
 # This is for real -- really slow though
-#improvedRplan<-refineAnnealPlan(plan=rplan2, score.fun=myCombinedS, displaycount=100, historysize=0, dynamicscoring=FALSE,   usecluster = TRUE, tracelevel=1)
+#improvedRplan<-refineAnnealPlan(plan=rplan2, score.fun=myCombinedS, displaycount=100, historysize=0, dynamicscoring=FALSE,  tracelevel=1)
 
 
 ########################################################################
@@ -126,10 +126,9 @@ improvedRplan<-refineNelderPlan(plan=rplan2, score.fun=myScore, displaycount=100
 
 samples<-samplePlans(kplan, score.fun=myScore, ngenplans=20, gen.fun = "createRandomPlan", refine.fun="refineNelderPlan",refine.args=list(maxit=200,dynamicscoring=TRUE))
 
-
 profplans<-profilePlans(  list(kplan,rplan), score.fun=calcContiguityScore, addscore.fun=calcPopScore, numevals=2, weight=c(0,.5,1), refine.fun="refineNelderPlan",refine.args=list(maxit=200,dynamicscoring=TRUE) )
  
 summary(samples)
 plot(summary(samples))
 reportPlans(samples)
-plot(summary(pfrofile
+plot(summary(profplans))

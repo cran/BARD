@@ -330,6 +330,78 @@ calcGroupScore<-function(plan,groups=list(),penalties=1,
     return(score)
 }
 
+#########################################################################
+#
+# calcMomentScore
+# 
+# Calculates plans compliance with moment of inertia, can be used for general
+# penalized distrance scores
+#
+# Arguments:
+#     As above.
+#
+# Returns:
+#     Standardized, as above.
+#     Moment of inertia
+# 
+#    SEE R HELP FILES FOR COMPLETE DOCS
+# 
+#########################################################################
+
+calcMomentScore<-function(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2,
+           lastscore=NULL, changelist=NULL ) { 
+
+ if(is.null(lastscore)) {
+    ndists<-attr(plan,"ndists")
+    distids <- 1:ndists
+    score <- numeric(ndists)
+  } else {
+    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
+    score <- lastscore
+  }
+  
+ if ((!is.null(centers)) &&length(centers)!=ndists) {
+  warning("wrong number of centers specified")
+  return(NA)
+ }
+ if  (!is.null(weightVar) && is.null(basem(plan)$df[weightVar])) {
+ 	  warning("nonexistent weight variable  specified")
+	  return(NA)
+ }
+    score[distids]<-sapply(distids,function(x)
+      calcMomentScoreD(plan,x,standardize,centers,weightVar,penaltyExp))
+    return(score)
+}
+
+#########################################################################
+#
+# combineDynamicScores
+# 
+# Helper function to combine dynamic scores
+#
+#    SEE R HELP FILES FOR COMPLETE DOCS
+# 
+############################################################################
+
+combineDynamicScores<-function(plan,lastscore=NULL,changelist=NULL,scorefuns=list(),
+	distcombfun=sum,scorecombfun=sum) {
+	if (!is.null(changelist) && !is.null(lastscore) && !is.null(attr(lastscore,"lastscorev"))) {
+		lastscorev <-attr(lastscore,"lastscorev")
+		scores<-vector(length=length(scorefuns))
+
+		for (i in seq(1,length=length(scorefuns)))  {
+		   scores[i]<-
+			scorefuns[i](plan,lastscore=lastscorev[i],changelist=changelist)
+		}
+	} else {
+		scores<-lapply(scorefuns,function(x)x(plan))
+	}
+	
+	retval<-distcombfun(sapply(scores,scorecombfun))
+	attr(retval,"lastscorev")<-scores
+	return(retval)
+}
+
 ##############################################################################
 #           INTERNAL MODULE FUNCTIONS -- DO NOT EXPORT
 ###############################################################################
@@ -408,10 +480,9 @@ calcLWCompactScoreD<-function(plan,distid, standardize=TRUE) {
       return(1)
     }
     basemap<-basem(plan)
-    tmpBB<- sapply(basemap$polys[blocks],function(x)attr(x,"bbox"))
-    boxMax<- apply(tmpBB[3:4,],1,max)
-    boxMin<- apply(tmpBB[1:2,],1,min)
-    lw <- (boxMax[1]-boxMin[1])/(boxMax[2]-boxMin[2])
+	bb<-getBbox(basemap,blocks)
+   
+	lw <- (bb$boxMax[1]-bb$boxMin[1])/(bb$boxMax[2]-bb$boxMin[2])
     if (lw>1) {lw <- 1/lw}
     score<-1-lw
     return(score)
@@ -498,6 +569,71 @@ calcGroupScoreD<-function(plan,distid,groups=list(),penalties=1) {
   return(score)
 }
 
+
+#########################################################################
+#
+#  calcMomentScoreD
+#
+# Returns weighted cost of distance to centers. See calcMomentScoreD
+#
+#########################################################################
+
+calcMomentScoreD<-function(plan,distid,standardize,
+		centers=NULL,weightVar=NULL,penaltyExp=2) {
+    blocks<-which(plan==distid) 
+    if (length(blocks)==0) {
+      return(1)
+    }
+    if (is.null(weightVar)) {
+    	weights<-1
+    }
+	blockCenters<-getBardCentroids(plan,blocks)
+	
+	# use district centroid if not specified
+	if (is.null(centers)) {
+		distarea<-sapply(basem(plan)$polys[blocks],function(x)attr(x,"area"))
+		centerXY<-apply(blockCenters,2,function(x)weighted.mean(x,distarea))
+	} else {
+		centerXY<-getBardCentroids(plan,centers[distid])
+	}
+
+    distance <- sqrt(rowSums(t(t(blockCenters)-as.vector(centerXY))^2))
+	
+    
+    if (is.null(weightVar)) { 
+    	tweights<-1
+	} else {
+		tweights<-basem(plan)$df[[weightVar]][blocks]
+    }
+	if (standardize) {
+		tweights<-tweights/sum(tweights)*length(tweights)
+	}
+
+    score <- sum((distance*tweights)^penaltyExp)
+    if (standardize) {
+		score = 1-1/(score+1)
+	}
+	return(score)
+}
+
+#
+# getBbox
+#
+# Helper function to calculate bounding box on bard plan subsets
+#
+
+
+getBbox<-function(basemap,blocks) {
+	tmpBB<- sapply(basemap$polys[blocks],function(x)attr(x,"bbox"))
+    boxMax<- apply(tmpBB[3:4,,drop=FALSE],1,max)
+    boxMin<- apply(tmpBB[1:2,,drop=FALSE],1,min)
+	retval<-list()
+	retval$boxMin<-boxMin
+	retval$boxMax<-boxMax
+	return(retval)
+}
+
+
 ##############################################################################
 #          Testing Functions
 ###############################################################################
@@ -519,3 +655,5 @@ calcGroupScoreD<-function(plan,distid,groups=list(),penalties=1) {
     }
     return(TRUE)
   }
+  
+ 

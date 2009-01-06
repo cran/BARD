@@ -5,6 +5,7 @@
 \alias{refineGreedyPlan}
 \alias{refineNelderPlan}
 \alias{refineGRASPPlan}
+\alias{refineTabuPlan}
 \title{Create an initial plan for later refinement}
 \description{
 These methods create plans starting with random seeds. These plans should
@@ -20,6 +21,8 @@ refineAnnealPlan(plan, score.fun, displaycount = NULL, historysize = 0,
                  dynamicscoring = FALSE,  tracelevel=1, greedyFinish=FALSE)
 refineNelderPlan( plan, score.fun, displaycount = NULL, maxit = NULL,
                  historysize = 0, dynamicscoring = FALSE,  tracelevel = 1)
+refineTabuPlan(  plan, score.fun, displaycount = NULL, historysize = 0,
+                 dynamicscoring = FALSE, tracelevel = 1, tabusize = 100,tabusample=500)
 refineGRASPPlan (plan, score.fun, samplesize = 50, predvar = NULL,
                  displaycount = NULL, historysize = 0, 
 		dynamicscoring = FALSE, usecluster = TRUE, tracelevel = 1)
@@ -37,13 +40,26 @@ refineGRASPPlan (plan, score.fun, samplesize = 50, predvar = NULL,
 \item{maxit}{Maximum number of iterations before stopping}
 \item{predvar}{Population variable for GRASP plan}
 \item{samplesize}{Number of samples to use for GRASP}
+\item{tabusize}{Size of tabu list}
+\item{tabusample}{Number of samples to take at each iteration }
 }
 
 \details{
-	The greedy algorithm uses hill climbing: at every iteration it compares all possible assignments of blocks to a spatially contiguous district, and selects the best scoring.
+	Greedy -- The greedy algorithm uses hill climbing: at every iteration it compares all possible assignments of single blocks to a spatially contiguous district, and selects the best scoring. Stops when no improvement can be made
+
+
+	Tabu -- A modification of the greedy method. Samples the assignments of simple blocks. Always takes a move that yields a better solution than the best seen before. Otherwise takes a trade that yields something better than the most recent seen, unless that trade has been used recently and is still on the tabu list.
+	
+	
 	Genoud -- uses the \code{\link[rgenoud]{genoud}} implementation of the genetic algorithm. This function tunes the nine genoud operators for the redistricting problem.
+	
+	
 	Anneal -- uses simulated annealing. A plan generation function is provided that generates plans through one-way assignments or two-way exchanges between neighboring blocks of different districts.
+	
+	
 	Nelder -- uses nelder-mead. For demonstration only. Not very effective.
+	
+	
 	GRASP -- GRASP uses greedy randomized adaptive search. Essentially this randomly generates plans via randomPopPlan, and refines using greedy refinement. Greedy refinement is also used on the seed plan. The best of the set is returened. Extremely compute intensive and will make use of clusters if available.
 
 }
@@ -81,9 +97,12 @@ Scoring functions: \code{\link{calcContiguityScore}}
 suffolk.map <- importBardShape( file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts"))
 numberdists <- 5
 rplan <- createRandomPlan(suffolk.map,numberdists)
-myScore<-function(plan,...){sum(calcContiguityScore(plan,standardize=FALSE))}
+myScore<-function(plan,...){calcContiguityScore(plan,standardize=FALSE)}
 # for example - not very effective
 improvedRplan<-refineNelderPlan(plan=rplan,score.fun=myScore,displaycount=50,tracelevel=0, maxit=300)
+\dontrun{
+	improvedRplan<-refineTabuPlan(plan=rplan,score.fun=myScore)
+}
 }
 \keyword{IO}
 \keyword{spatial}

@@ -228,6 +228,84 @@ createKmeansPlan<-function(basemap,ndists) {
 
 #################################
 #
+# createWeightedKmeansPlan
+#
+# Generate a plan via kmeans of geographic centroids, weighted
+# by another variable. 
+#
+# The resulting plan is usually nearly
+# contiguous and vaguely compac. Neither
+# is guaranteed
+#
+# See R documentation for more information
+#
+# Arguments
+#   basemap 
+#   ndists
+#   centers
+#   trimfactor
+#   smallBlock
+#
+# Returns
+#   plan assignment vector
+#
+##################################
+
+createWeightedKmeansPlan<-function(basemap,ndists,centers=c(),weightVar=NULL,trimfactor=2.5,
+	smallBlock=c("cap","closest")) {
+
+  smallBlock<-match.arg(smallBlock)
+  trimmedWeight<-function(tv) {
+		popadj<- (10^max(0,floor(log10(max(tv)-min(tv)))-trimfactor))
+		res<-round(tv/popadj)
+		return(res)
+	}
+	
+ if (is.null(weightVar)) {
+    tw<-1 
+  } else if (!any(names(basemap$df)==weightVar)) {
+
+  	warning("Weight variable does not exist")
+	tw<-1
+  } else {
+	tw<-trimmedWeight(basemap$df[[weightVar]])
+  }
+  
+  
+  # deal with 0 weighted blocks simply
+  if (smallBlock != "closest") {
+	tw[which(tw==0)] <- 1
+  }
+  
+  dist.centroids<-getBardCentroids(basemap)
+  if (length(centers)==0) {
+	kmcenters<-ndists
+  } else if(length(centers)!=ndists) {
+	warning("Number of centers must be the same as number of districts")
+	kmcenters<-ndists
+  } else {
+	kmcenters<-dist.centroids[centers,]
+  }
+	
+  dist.centroids <- cbind(dist.centroids,1:nrow(dist.centroids))
+  dist.centroids <- dist.centroids[rep(1:nrow(dist.centroids),tw),]
+  tmpplan <-  kmeans(dist.centroids[,1:2],centers<-kmcenters)$cluster
+  tmpplan <- aggregate(tmpplan,by=list(dist.centroids[,3]),FUN=function(x)round(mean(x)))
+  plan<-vector(length=length(tw))
+  plan[tmpplan[[1]]]<-tmpplan[[2]]
+  attr(plan,"ndists")<-ndists
+  basem(plan)<-basemap
+  class(plan)<-"bardPlan"
+  if (smallBlock == "closest") {
+    is.na(plan[which(plan==0)])<-TRUE
+	plan <- fillHolesPlan(plan,method="closest")
+  }
+  return(plan)
+}
+
+
+#################################
+#
 # CDOcontiguityPlan
 #
 # Generate a plan via the "coniguity algorithm"
@@ -563,7 +641,6 @@ plot.bardPlan.summary<-function(x,...) {
 # newPlot - refreshes plot
 #
 #################################
-
 "plot.bardPlan" <-
 function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,...) {
   if(is.null(basemap)) {
@@ -580,30 +657,35 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,...) {
   if (is.null(ndists)) {
       ndists <- length(unique(x))
   }
-	colors=topo.colors(ndists);
+  	arglist<-list(...)
+	if (!is.null(arglist$col)) {
+		colors <- arglist$col
+	} else {
+	     colors<-topo.colors(ndists);
+        }
 	if (newPlot) {
     ow<-options("warn"=-1)   # annoying warning from plot.polylist about
                              #change in defaults, even though explicitly settin
                              # forcefill
-		plot(mappolys, col="white",  forcefill=T)
-		options(ow)
-	}
-	for (i in 1:ndists) {
-		if (is.null(changed)) {
-			tmp <- x==i;
-		} else {
-			ti <- which(x[changed]==i);
-			tmp <- logical(length(x));
-			tmp[changed[ti]]<-TRUE;
-		}
+                plot(mappolys, col="white",  forcefill=T,...)
+                options(ow)
+        }
+        for (i in 1:ndists) {
+                if (is.null(changed)) {
+                        tmp <- x==i;
+                } else {
+                        ti <- which(x[changed]==i);
+                        tmp <- logical(length(x));
+                        tmp[changed[ti]]<-TRUE;
+                }
 
-		if (length(which(tmp)) > 0 ) {
-			submap <- subset(mappolys, tmp);
-      ow<-options("warn"=-1)
-			plot(submap, add=T, col=colors[i],forcefill=T)
-			options(ow)
+                if (length(which(tmp)) > 0 ) {
+			ow<-options("warn"=-1)
+                        submap <- subset(mappolys, tmp);
+                        plot(submap, add=T, col=colors[i],forcefill=T,...)
+                        options(ow)
     }
-	}
+        }
  return(invisible(TRUE))
 }
 
@@ -667,4 +749,24 @@ checkPlans<-function(plans) {
       retval<-FALSE
     }
     return(retval)
+}
+
+#
+# getBardCentroids
+#
+# helper function to extract centroids
+#
+
+getBardCentroids<-function(x,i=NULL) {
+  if (class(x)=="bardPlan") {
+	basemap<-basem(x)
+  } else {
+	basemap<-x
+  }
+  if (is.null(i)) i<-1:length(basemap$polys)
+  dist.centroids<-t(
+    sapply(basemap$polys[i],
+      function(x)c(attr(x,"centroid"),recursive=TRUE))
+    )
+  return(dist.centroids)
 }

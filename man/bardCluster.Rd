@@ -46,7 +46,7 @@ Plan refinement algorithms \code{\link{refineGenoudPlan}}
 
 Plan sampling: \code{\link{samplePlans}}, \code{\link{profilePlans}}
 
-Cluster computing: [snow:makeCluster]{makeCluster}
+Cluster computing: \link[snow:makeCluster]{makeCluster}
  }
  
 \examples{

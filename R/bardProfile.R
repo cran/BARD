@@ -129,10 +129,14 @@ profilePlans<-function(
         attr(combined,"s2last")<-s2
         return(combined)
       }
+     return(retvalscore)
     } else {
-      retvalscore<-function(p){weight.fun(score.fun(p),addscore.fun(p),w)}
+      retvalscorealt<-function(p){weight.fun(score.fun(p),addscore.fun(p),w)}
+      return(retvalscorealt)
     }
-    return(retvalscore)
+ 
+    # SHOULDN'T REACH HERE
+    warning("bug in code")
   }
   for (w in weight) {
     if (tracelevel>0) {

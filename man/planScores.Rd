@@ -5,6 +5,7 @@
 \alias{calcGroupScore}
 \alias{calcReockScore}
 \alias{calcHolesScore}
+\alias{calcMomentScore}
 \alias{calcContiguityScore}
 \title{Scoring functions for redistricting.}
 \description{
@@ -19,6 +20,7 @@ calcLWCompactScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcReockScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcContiguityScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcHolesScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
+calcMomentScore(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2, lastscore=NULL, changelist=NULL ) 
 }
 
 \arguments{
@@ -26,11 +28,14 @@ calcHolesScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
  \item{lastscore}{optional, previous value returned by function, for incremental evaluation}
  \item{changelist}{Optional, a two column matrix of (column1) block ID's that were changed since lastscore was computed, (column2) previous plan assignments for those blocks} 
  \item{standardize}{logical, should scores be standardized}
+ \item{penalties}{penalties for splitting groups}
  \item{predvar}{name of variable in the basemap associated with plan} 
   \item{predvar2}{name of second variable in the basemap associated with plan}
   \item{targrange}{acceptable target range for ratio of predictive variables}
   \item{groups}{a list of vectors, each vector should comprise the ids of the blocks  in that group, groups may overlap}
-  \item{penalties}{a single number or vector of penalties for splitting each of the enumerated groups}
+  \item{penaltyExp}{a single number or vector of penalties for splitting each of the enumerated groups}
+  \item{centers}{optional centers to use for calculating moment of inertia score, if absent, score is calculated using (weighted) district centroid (centroid of block centroids)}
+  \item{weightVar}{name of variable in basemap to use for weighting}
 }
 
 \details{
@@ -50,6 +55,7 @@ designated "nesting" districts, or known communities of interest. Returns propor
 
 calcHolesScores - Penalizes plans for having unassigned blocks
 
+calcMomentScore - calculates moment of inertia compactness score of the district, the sum or squared distance of the block centroids (weighted by are of the block) to the district centroids. Options allow changing the penalty exponent (e.g. penaltyExp=1 will sum distances), assign a weightVar which will be used instead of area (e.g. population, for population moment of inertia), or specify fixed district centers to use as a substitute for district centroid (e.g. to use for warehouse allocation problems) 
 }
 \note{
 
@@ -88,10 +94,20 @@ C. Cirincione , T.A. Darling, and T.G. O'Rourke. 2000. ``Assessing South Carolin
 
   Micah Altman, Karin Mac Donald, and Michael P. McDonald, 2005. ``From Crayons to Computers: The Evolution of Computer Use in Redistricting'' Social Science Computer Review 23(3): 334-46. 
   
+  Altman, Micah, 1998. Districting Principles and Democratic Representation,
+Doctoral Thesis, California Institute of Technology.
+  
+  Niemi, R. G.; Grofman, B.; Carlucci, C.; and Hofeller T., 1990. Measuring Compactness and the Role of a Compactness Standard in a Test for Partisan and Racial Gerrymandering Journal of Politics 22:4 1155-1181.
+  
+  
  }
 
 \seealso{ 
-Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAnnealPlan}}, \code{\link{refineGenoudPlan}}, \code{\link{refineNelderPlan}}
+Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAnnealPlan}}, \code{\link{refineGenoudPlan}},
+\code{\link{refineTabuPlan}},
+\code{\link{refineNelderPlan}}.
+
+Combining dynamic scores \code{\link{combineDynamicScores}}.
  }
  
 \examples{
@@ -103,6 +119,7 @@ Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAn
   # create some initial plans
   kplan <- createKmeansPlan(suffolk.map,ndists)
   rplan <- createRandomPlan(suffolk.map,ndists)
+  wkplan<-createWeightedKmeansPlan(suffolk.map,ndists,weightVar="POP")
   
   calcPopScore(kplan)
   calcPopScore(rplan)
@@ -119,9 +136,17 @@ Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAn
   calcGroupScore(rplan,groups=list(c(1:10),c(100:120)),penalties=c(1,2))
   kplan2<-kplan1<-kplan
   cl<-cbind(c(318,320),c(kplan1[318],kplan1[320]))
-
-  calcPopScore(kplan2,lastscore=calcPopScore(kplan1),changelist=cl) == 
-    calcPopScore(kplan2)
+ 
+  if ( ! all(calcPopScore(kplan2,lastscore=calcPopScore(kplan1),changelist=cl) == calcPopScore(kplan2))) {
+    	warning("dynamic score does not match!")
+  }
+    
+  calcPopScore(kplan,predvar="POP")
+  calcPopScore(wkplan,predvar="POP")
+  calcMomentScore(kplan)
+  calcMomentScore(wkplan)
+  calcMomentScore(kplan,weightVar="POP")
+  calcMomentScore(wkplan,weightVar="POP")
 
 
 }

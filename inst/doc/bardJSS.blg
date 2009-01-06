@@ -3,44 +3,44 @@ The top-level auxiliary file: bardJSS.aux
 The style file: jss.bst
 Database file #1: bardJSS.bib
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-You've used 20 entries,
+You've used 42 entries,
             3129 wiz_defined-function locations,
-            765 strings with 7717 characters,
-and the built_in function-call counts, 14998 in all, are:
-= -- 1243
-> -- 369
-< -- 14
-+ -- 145
-- -- 119
-* -- 1188
-:= -- 2103
-add.period$ -- 76
-call.type$ -- 20
-change.case$ -- 122
-chr.to.int$ -- 20
-cite$ -- 20
-duplicate$ -- 1338
-empty$ -- 1410
-format.name$ -- 168
-if$ -- 3040
-int.to.chr$ -- 1
+            910 strings with 11479 characters,
+and the built_in function-call counts, 32575 in all, are:
+= -- 2717
+> -- 849
+< -- 32
++ -- 338
+- -- 275
+* -- 2635
+:= -- 4558
+add.period$ -- 159
+call.type$ -- 42
+change.case$ -- 269
+chr.to.int$ -- 41
+cite$ -- 42
+duplicate$ -- 2923
+empty$ -- 3013
+format.name$ -- 402
+if$ -- 6604
+int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 212
-newline$ -- 109
-num.names$ -- 82
-pop$ -- 447
+missing$ -- 437
+newline$ -- 219
+num.names$ -- 174
+pop$ -- 951
 preamble$ -- 1
-purify$ -- 119
+purify$ -- 257
 quote$ -- 0
-skip$ -- 335
+skip$ -- 698
 stack$ -- 0
-substring$ -- 1271
-swap$ -- 462
-text.length$ -- 0
+substring$ -- 2779
+swap$ -- 978
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 168
+type$ -- 360
 warning$ -- 0
-while$ -- 130
+while$ -- 270
 width$ -- 0
-write$ -- 265
+write$ -- 548

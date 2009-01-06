@@ -162,7 +162,8 @@ reportPlans<-function(
   domatch=TRUE,
   dodiff=TRUE,
   dodetails=FALSE,
-  doprofileextras=TRUE
+  doprofileextras=TRUE,
+  plotOpts=NULL
   ) {
    
 
@@ -218,7 +219,8 @@ reportPlans<-function(
       print(pdiff)
      }
      if (doplot) {
-      plot(pdiff,plotall=TRUE)
+      #plot(pdiff,plotall=TRUE)
+	do.call("plot",c(list(pdiff),plotOpts))
      }
     }
    }
@@ -395,18 +397,23 @@ print.bardPlanDiff<-function(x,...) {
     invisible()
 }
 
-plot.bardPlanDiff<-function(x,plotall=F, ...) {
+plot.bardPlanDiff<-function(x,plotall=F, horizontal=T, ...) {
   plan1<-attr(x,"plan1")
   plan2<-attr(x,"plan2recode")
   op<-NULL
   if (plotall) {
-    op<-par(mfcol=c(1,3))
-    plot(plan1)
-    plot(plan2)
+    if (horizontal) {
+	    op<-par(mfcol=c(1,3))
+	    } else {
+	   op<-par(mfcol=c(3,1))
+	 }
+
+    plot(plan1,main="plan 1",...)
+    plot(plan2,main="plan 2",...)
   }
   dplan<-plan1
   is.na(dplan)<-(plan1!=plan2)
-  plot(dplan,...)
+  plot(dplan,main="Plan Overlap",...)
   par(op)
   invisible()
 }

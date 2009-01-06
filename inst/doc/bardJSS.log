@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2007.8.1)  13 SEP 2007 16:53
+This is pdfTeX, Version 3.14159-1.10b (Web2C 7.4.5) (format=pdflatex 2007.11.8)  6 JAN 2009 14:19
 **bardJSS
 (./bardJSS.tex{/usr/share/texmf/pdftex/config/pdftex.cfg}
 LaTeX2e <2001/06/01>
@@ -86,7 +86,7 @@ Package hyperref Info: Backreferencing OFF on input line 1812.
 
 Implicit mode ON; LaTeX internals redefined
 Package hyperref Info: Bookmarks ON on input line 1916.
-(/usr/share/latex2html/texinputs/url.sty
+(/usr/share/texmf/tex/latex/html/url.sty
 Package: url 1999/03/02  ver 1.4  Verb mode for urls, email addresses, and file
  names
 )
@@ -287,20 +287,20 @@ Package: vmargin 2000/08/01 V2.3 (VK) set document margins
 ) (./bardJSS.aux)
 \openout1 = `bardJSS.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 93.
+LaTeX Font Info:    ... okay on input line 93.
  (/usr/share/texmf/tex/context/base/supp-pdf.tex
 (/usr/share/texmf/tex/context/base/supp-mis.tex
 loading : Context Support Macros / Missing
@@ -329,33 +329,33 @@ loading : Context Support Macros / PDF
 \nofMParguments=\count118
 \everyMPtoPDFconversion=\toks27
 )
-Package hyperref Info: Link coloring ON on input line 82.
+Package hyperref Info: Link coloring ON on input line 93.
  (/usr/share/texmf/tex/latex/hyperref/nameref.sty
 Package: nameref 2001/01/27 v2.19 Cross-referencing by name of section
 \c@section@level=\count119
 )
-LaTeX Info: Redefining \ref on input line 82.
-LaTeX Info: Redefining \pageref on input line 82.
+LaTeX Info: Redefining \ref on input line 93.
+LaTeX Info: Redefining \pageref on input line 93.
  (./bardJSS.out)
 (./bardJSS.out)
 \openout3 = `bardJSS.out'.
 
- <jsslogo.jpg, id=59, 540.0175pt x 393.47pt>
+ <jsslogo.jpg, id=83, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
  <use jsslogo.jpg>
-LaTeX Font Info:    Try loading font information for T1+pzc on input line 82.
+LaTeX Font Info:    Try loading font information for T1+pzc on input line 93.
 
 (/usr/share/texmf/tex/latex/psnfss/t1pzc.fd
 File: t1pzc.fd 2001/06/04 font definitions for T1/pzc.
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <28> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 82.
-LaTeX Font Info:    Try loading font information for U+msa on input line 82.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 93.
+LaTeX Font Info:    Try loading font information for U+msa on input line 93.
 
 (/usr/share/texmf/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2002/01/19 v2.2g AMS font definitions
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 82.
+LaTeX Font Info:    Try loading font information for U+msb on input line 93.
 
 (/usr/share/texmf/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2002/01/19 v2.2g AMS font definitions
@@ -365,67 +365,113 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
  [1
 
 {/usr/share/texmf/dvips/config/pdftex.map} <./jsslogo.jpg>]
-Underfull \vbox (badness 1515) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 []/aer10@10.95pt/2 []
  []
 
-[2]
+[2] <bardiagram.pdf, id=135, page=1, 614.295pt x 794.97pt>
+File: bardiagram.pdf Graphic file (type pdf)
+
+<use bardiagram.pdf, page 1>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+LaTeX Font Info:    Try loading font information for T1+aess on input line 136.
+
+(/usr/share/texmf/tex/latex/ae/t1aess.fd
+File: t1aess.fd 1997/11/16 Font definitions for T1/aess.
+)
+Underfull \vbox (badness 1072) has occurred while \output is active []
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/3
  []
 
 [3]
+
+LaTeX Warning: Text page 4 contains only floats.
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 []/aer10@10.95pt/4 []
  []
 
-[4] <fig_example.pdf, id=138, 614.295pt x 794.97pt>
-File: fig_example.pdf Graphic file (type pdf)
- <use fig_example.pdf>
+[4 <./bardiagram.pdf>]
+LaTeX Font Info:    Try loading font information for T1+aett on input line 157.
+
+ (/usr/share/texmf/tex/latex/ae/t1aett.fd
+File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
+)
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/5
  []
 
 [5]
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 178.
+
+ (/usr/lib64/R/share/texmf/omsaer.fd
+File: omsaer.fd 1999/12/27
+)
+LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 178.
+
+<bardJSS-plot1a.pdf, id=597, 505.89pt x 433.62pt>
+File: bardJSS-plot1a.pdf Graphic file (type pdf)
+ <use bardJSS-plot1a.pdf>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 []/aer10@10.95pt/6 []
  []
 
-[6 <./fig_example.pdf
-Warning: pdflatex (file ./fig_example.pdf): pdf inclusion: Page Group detected 
-which pdfTeX can't handle. Ignoring it.
->]
+[6] <edit_map.pdf, id=610, page=1, 505.89pt x 361.35pt>
+File: edit_map.pdf Graphic file (type pdf)
+
+<use edit_map.pdf, page 1>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/7
  []
 
-[7]
+[7 <./bardJSS-plot1a.pdf>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 []/aer10@10.95pt/8 []
  []
 
-[8]
-Underfull \vbox (badness 6445) has occurred while \output is active []
+[8 <./edit_map.pdf
+Warning: pdflatex (file ./edit_map.pdf): pdf inclusion: Page Group detected whi
+ch pdfTeX can't handle. Ignoring it.
+>]
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/9
  []
 
-[9]
+[9] <bardJSS-plot2a.pdf, id=632, 505.89pt x 433.62pt>
+File: bardJSS-plot2a.pdf Graphic file (type pdf)
+ <use bardJSS-plot2a.pdf>
+Underfull \vbox (badness 3590) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 []/aer10@10.95pt/10 []
  []
 
-[10]
-LaTeX Font Info:    Try loading font information for T1+aess on input line 596.
-
- (/usr/share/texmf/tex/latex/ae/t1aess.fd
-File: t1aess.fd 1997/11/16 Font definitions for T1/aess.
-)
+[10 <./bardJSS-plot2a.pdf>]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/11
  []
@@ -436,14 +482,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [12]
-Underfull \vbox (badness 5288) has occurred while \output is active []
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/13
  []
 
 [13]
+Underfull \vbox (badness 1303) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 []/aer10@10.95pt/14 []
  []
@@ -454,11 +500,6 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [15]
-LaTeX Font Info:    Try loading font information for T1+aett on input line 832.
-
- (/usr/share/texmf/tex/latex/ae/t1aett.fd
-File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
-)
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 []/aer10@10.95pt/16 []
  []
@@ -468,7 +509,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/17
  []
 
-[17] (./bardJSS.bbl
+[17]
+Underfull \vbox (badness 6445) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 []/aer10@10.95pt/18 []
  []
@@ -478,54 +522,159 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/19
  []
 
-[19])
-Underfull \hbox (badness 10000) in paragraph at lines 932--932
-
- []
-
-LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 932.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
+[19]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 []/aer10@10.95pt/20 []
  []
 
 [20]
+Underfull \vbox (badness 5288) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [][] /aer10@10.95pt/21
  []
 
-[21] (./bardJSS.aux) ) 
+[21] <bardJSS-plot3a.pdf, id=877, 505.89pt x 433.62pt>
+File: bardJSS-plot3a.pdf Graphic file (type pdf)
+
+<use bardJSS-plot3a.pdf>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/22 []
+ []
+
+[22]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/23
+ []
+
+[23 <./bardJSS-plot3a.pdf>]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/24 []
+ []
+
+[24]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/25
+ []
+
+[25]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/26 []
+ []
+
+[26]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/27
+ []
+
+[27]
+Underfull \vbox (badness 6445) has occurred while \output is active []
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/28 []
+ []
+
+[28]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/29
+ []
+
+[29] (./bardJSS.bbl
+Underfull \vbox (badness 1527) has occurred while \output is active []
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/30 []
+ []
+
+[30]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/31
+ []
+
+[31]
+Underfull \hbox (badness 2707) in paragraph at lines 80--86
+[]/aer10@10.95pt/Eddelbuettel D, with con-tri-bu-tions by An-toine Lu-cas, Tusz
+yn-ski J, Bengts-son H, Ur-
+ []
+
+
+Underfull \hbox (badness 1910) in paragraph at lines 80--86
+/aer10@10.95pt/banek S (2007).  /aeti10@10.95pt/di-gest: Cre-ate cryp-to-graphi
+c hash di-gests of R ob-jects/aer10@10.95pt/.  R pack-
+ []
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/32 []
+ []
+
+[32]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/33
+ []
+
+[33])
+Underfull \hbox (badness 10000) in paragraph at lines 1163--1163
+
+ []
+
+LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1163.
+
+
+Underfull \vbox (badness 1221) has occurred while \output is active []
+
+
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[]/aer10@10.95pt/34 []
+ []
+
+[34]
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+[][] /aer10@10.95pt/35
+ []
+
+[35] (./bardJSS.aux) ) 
 Here is how much of TeX's memory you used:
- 4972 strings out of 95437
- 63479 string characters out of 1190234
- 119079 words of memory out of 1000001
- 7740 multiletter control sequences out of 10000+50000
- 74165 words of font info for 129 fonts, out of 500000 for 1000
+ 5138 strings out of 95437
+ 65974 string characters out of 1190233
+ 123264 words of memory out of 1000001
+ 7829 multiletter control sequences out of 10000+50000
+ 84280 words of font info for 145 fonts, out of 500000 for 1000
  14 hyphenation exceptions out of 1000
- 35i,10n,34p,604b,366s stack positions out of 1500i,500n,5000p,200000b,5000s
- 331 PDF objects out of 300000
- 83 named destinations out of 131072
- 117 words of extra memory for PDF output out of 65536
+ 35i,11n,34p,1050b,366s stack positions out of 1500i,500n,5000p,200000b,5000s
+ 991 PDF objects out of 300000
+ 147 named destinations out of 131072
+ 179 words of extra memory for PDF output out of 65536
 {/usr/share/texmf/dvips/tetex/09fbbfac.enc}</usr/share/te
-xmf/fonts/type1/bluesky/cm/cmtt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/
-cmsltt10.pfb>{/usr/share/texmf/dvips/tetex/f7b6d320.enc}</usr/share/texmf/fonts
-/type1/bluesky/cm/cmss10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmbx8.pfb
->{/usr/share/texmf/dvips/tetex/bbad153f.enc}</usr/share/texmf/fonts/type1/blues
-ky/cm/cmsy8.pfb>{/usr/share/texmf/dvips/tetex/74afc74c.enc}</usr/share/texmf/fo
-nts/type1/bluesky/cm/cmbxti10.pfb>{/usr/share/texmf/dvips/tetex/aae443f0.enc}</
-usr/share/texmf/fonts/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1
-/bluesky/cm/cmex10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmmi8.pfb></usr
-/share/texmf/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf/fonts/type1/bl
-uesky/cm/cmti8.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr9.pfb></usr/shar
-e/texmf/fonts/type1/bluesky/cm/cmr6.pfb></usr/share/texmf/fonts/type1/bluesky/c
-m/cmr8.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsl10.pfb></usr/share/texm
-f/fonts/type1/bluesky/cm/cmbx10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cm
-bx12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmb10.pfb></usr/share/texmf/f
-onts/type1/bluesky/cm/cmti10.pfb>{/usr/share/texmf/dvips/psnfss/8r.enc}</usr/sh
-are/texmf/fonts/type1/urw/zapfchan/uzcmi8a.pfb></usr/share/texmf/fonts/type1/bl
-uesky/cm/cmr10.pfb>
-Output written on bardJSS.pdf (21 pages, 268384 bytes).
+xmf/fonts/type1/bluesky/cm/cmtt9.pfb>{/usr/share/texmf/dvips/tetex/f7b6d320.enc
+}</usr/share/texmf/fonts/type1/bluesky/cm/cmbx8.pfb>{/usr/share/texmf/dvips/tet
+ex/bbad153f.enc}</usr/share/texmf/fonts/type1/bluesky/cm/cmsy9.pfb>{/usr/share/
+texmf/dvips/tetex/aae443f0.enc}</usr/share/texmf/fonts/type1/bluesky/cm/cmmi9.p
+fb>{/usr/share/texmf/dvips/tetex/74afc74c.enc}</usr/share/texmf/fonts/type1/blu
+esky/cm/cmbxti10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsy8.pfb></usr/s
+hare/texmf/fonts/type1/bluesky/cm/cmex10.pfb></usr/share/texmf/fonts/type1/blue
+sky/cm/cmti9.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsy6.pfb></usr/share
+/texmf/fonts/type1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/
+cm/cmmi8.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmti8.pfb></usr/share/tex
+mf/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/c
+mtt10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsltt10.pfb></usr/share/tex
+mf/fonts/type1/bluesky/cm/cmss10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/c
+msl10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr9.pfb></usr/share/texmf/f
+onts/type1/bluesky/cm/cmr6.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr8.pf
+b></usr/share/texmf/fonts/type1/bluesky/cm/cmbx10.pfb></usr/share/texmf/fonts/t
+ype1/bluesky/cm/cmbx12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmb10.pfb><
+/usr/share/texmf/fonts/type1/bluesky/cm/cmti10.pfb>{/usr/share/texmf/dvips/psnf
+ss/8r.enc}</usr/share/texmf/fonts/type1/urw/zapfchan/uzcmi8a.pfb></usr/share/te
+xmf/fonts/type1/bluesky/cm/cmr10.pfb>
+Output written on bardJSS.pdf (35 pages, 9201137 bytes).

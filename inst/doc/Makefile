@@ -2,6 +2,8 @@
 
 REVAL=TRUE
 
+# test:	bardJSS.tex
+
 all:	bardJSS.pdf
 
 %.tex:	%.Rnw

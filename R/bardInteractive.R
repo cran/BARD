@@ -44,11 +44,21 @@
   basemap<-basem(plan)
   ndists<-attr(plan,"ndists")
   #interactive setup
+
   
-  if(!mrequire("iplots", quietly = TRUE, warn.conflicts=FALSE)) {
+  if(!checkIplots()) {
     warning("Sorry, this requires the iplots package. Please install it.")
     return(plan)
   }
+
+  ### Workaround for codetools warnings in R CMD check
+  imap<-try(imap,silent=TRUE)
+  if (inherits(imap,"try-error")){
+	imap<-function(...){}
+        iset.col<-iplot.off<-iplot.opt<-iset.selectNone<-iset.selected<-iset.col<-imap 
+  }
+  ### end workaround
+
   if(!mrequire("tcltk", quietly = TRUE, warn.conflicts=FALSE)) {
     warning("This requires the tcltk package. Please install it.")
     return(plan)
@@ -158,4 +168,39 @@ polys2map<-function(polys){
   retval$names<-mapnames
   class(retval)="map"
   return(retval)
+}
+
+
+####
+#
+#	Check iplots
+#
+#	Iplots won't run on MacOS outside of JGR, this requires some
+#	checking...
+#
+####
+
+checkIplots<-function() {
+   # special OSX
+   if (length(grep("^darwin",R.version$os))) {
+	success <- FALSE
+	try ( silent = TRUE, {
+  		mrequire("rJava", quietly = TRUE, warn.conflicts=FALSE)
+		.jinit()
+		 if (any(.jcall("java/lang/System","S","getProperty","main.class")=="org.rosuda.JGR.JGR")) {
+			.jpackage("iplots")
+			success<-TRUE	
+		 } else {
+			cat("Iplots on MacOS must be run under JGR. Please install and launch JGR and try again.\n")
+		}
+
+	})
+	return(success)
+   }
+
+  # normal ...
+  if(!mrequire("iplots", quietly = TRUE, warn.conflicts=FALSE)) {
+	return(FALSE)
+  }
+  return(TRUE)
 }

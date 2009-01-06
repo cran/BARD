@@ -15,9 +15,9 @@ BARD supports heuristic exploration of plans, in order to show trade-offs among 
 \tabular{ll}{
 Package: \tab BARD\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2007-1-15 \cr
-License: \tab GPL 2.0 \cr
+Version: \tab 1.01\cr
+Date: \tab 2009-1-2 \cr
+License: \tab AGPL 3.0 \cr
 }
 
 Bard supports several areas of functionality: 
@@ -25,16 +25,16 @@ Bard supports several areas of functionality:
   ( \link{readBardImage}, \link{writeBardImage}, \link{readBardCheckpoint}, \link{writeBardCheckpoint},\link{importBardShape}, \link{exportBardShape} )
   
   2. Initial plan generation. Quick heuristics for generating random plans, or plans based on a fixed set of criteria.
-  (link{createRandomPlan}, \link{createRandomPopPlan}, \link{createContiguousPlan}, \link{createKmeansPlan}, \link{fillHolesPlan})
+  (\link{createRandomPlan}, \link{createRandomPopPlan}, \link{createContiguousPlan}, \link{createKmeansPlan}, \link{createWeightedKmeansPlan},\link{fillHolesPlan})
   
   3. Interactive plan editing. Adjust plans interactively, using a mouse.
   (\link{editPlanInteractive})
 
   4. Plan scoring. Scoring functions for use in plan refinement, profiling, and comparison.
-  (\link{calcContiguityScore}, \link{calcReockScore}, \link{calcLWCompactScore}, \link{calcGroupScore}, \link{calcPopScore}, \link{calcHolesScore}, \link{calcRangeScore})
+  (\link{calcContiguityScore}, \link{calcReockScore}, \link{calcLWCompactScore}, \link{calcGroupScore}, \link{calcPopScore}, \link{calcHolesScore}, \link{calcRangeScore}, \link{calcMomentScore})
   
   5. Plan refinement. Multi-criteria optimization heuristics for refining plans to meet specified goals.
-  (\link{refineGreedyPlan}, \link{refineAnnealPlan}, \link{refineGenoudPlan}, \link{refineNelderPlan}, \link{refineGRASPPlan},\link{startBardCluster} )
+  (\link{refineGreedyPlan}, \link{refineAnnealPlan}, \link{refineGenoudPlan}, \link{refineNelderPlan}, \link{refineGRASPPlan},\link{startBardCluster} ,\link{refineTabuPlan})
   
   6. Plan profiling and exploration. Generate profiles of plans to explore tradeoffs among redistricting criteria. This can be used in conjunction with \emph{snow} to distribute plan generation across a computing cluster
   
@@ -92,19 +92,24 @@ C. Cirincione , T.A. Darling, and T.G. O'Rourke. 2000. ``Assessing South Carolin
 
 reportPlans(plans=list("kmeans"=kplan,"random 1"=rplan,"random pop"=rplan2), doplot=TRUE)
 
-   ow<-options(warn=-1)
+   \dontrun{
    if (require("iplots",quietly=TRUE)) {
 	rplan<-editPlanInteractive(rplan,calcPopScore,predvar="POP")
    }
-   options(ow)
+   }
 
   myScore<-function(plan,...)  {
     return(calcContiguityScore(plan,...))
   }      
 
-#just for quik demonstration -- nelder method not effective
+#just for quick demonstration -- nelder method not effective
 
 improvedRplan<-refineNelderPlan(plan=rplan2, score.fun=myScore, displaycount=100, historysize=0, dynamicscoring=FALSE, tracelevel=1, maxit=100)
+
+\dontrun{
+ # This works better, but will take a while
+ improvedRplan<-refineAnnealPlan(plan=rplan2, score.fun=myScore, historysize=0, dynamicscoring=FALSE, tracelevel=1)
+}
 
 samples<-samplePlans(kplan, score.fun=myScore, ngenplans=10, gen.fun = "createRandomPlan", refine.fun="refineNelderPlan",refine.args=list(maxit=200,dynamicscoring=TRUE))
 
