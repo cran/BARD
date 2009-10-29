@@ -62,7 +62,13 @@
   if(!mrequire("tcltk", quietly = TRUE, warn.conflicts=FALSE)) {
     warning("This requires the tcltk package. Please install it.")
     return(plan)
-  }
+  } else {
+    if (!exists("tk_select.list")) {
+	# we never get here...
+	# avoid complaints from code checker
+	tk_select.list<-function(...){}
+    }
+  } 
   if (!interactive()) {
     warning("Can't edit plans interactively, if not in an interactive session")
     return(plan)

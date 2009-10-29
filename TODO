@@ -17,3 +17,4 @@ After 1.0:
  - perim/area using union, PBMsmap, spatialDF objects
  - allow double exchanges
  - block-level incremental moment scores
+ - kmeans balanced population

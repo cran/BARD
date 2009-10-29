@@ -61,3 +61,9 @@ Changelog
   -- compile under gcc 2.43
 1.03
   -- pass doc checks on R 2.9 unstable
+1.04
+  -- Imports tweaking
+  -- Vignette typos
+1.05
+  -- license issues
+  -- CMD check under 2.10

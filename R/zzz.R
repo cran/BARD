@@ -14,7 +14,7 @@
 }
 
 
-.onLoad <- function(lib, pkg) {
+.onLoad <-function(lib, pkg){
   # woraround spdep warning
  if (length(grep("^darwin",R.version$os))) {
 	ow <- options(warn=-1)
@@ -27,7 +27,7 @@
   return(retval)
 }
 
-.onUnLoad<- function (lib) {
+.onUnLoad<-function(lib){
   stopBardCluster()
 }
 

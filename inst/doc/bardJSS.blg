@@ -1,46 +1,46 @@
-This is BibTeX, Version 0.99c (Web2C 7.4.5)
+This is BibTeX, Version 0.99c (Web2C 7.5.7)
 The top-level auxiliary file: bardJSS.aux
 The style file: jss.bst
 Database file #1: bardJSS.bib
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-You've used 42 entries,
+You've used 44 entries,
             3129 wiz_defined-function locations,
-            910 strings with 11479 characters,
-and the built_in function-call counts, 32575 in all, are:
-= -- 2717
-> -- 849
-< -- 32
-+ -- 338
-- -- 275
-* -- 2635
-:= -- 4558
-add.period$ -- 159
-call.type$ -- 42
-change.case$ -- 269
-chr.to.int$ -- 41
-cite$ -- 42
-duplicate$ -- 2923
-empty$ -- 3013
-format.name$ -- 402
-if$ -- 6604
+            922 strings with 11751 characters,
+and the built_in function-call counts, 34008 in all, are:
+= -- 2843
+> -- 860
+< -- 35
++ -- 347
+- -- 278
+* -- 2735
+:= -- 4750
+add.period$ -- 168
+call.type$ -- 44
+change.case$ -- 277
+chr.to.int$ -- 43
+cite$ -- 44
+duplicate$ -- 3048
+empty$ -- 3161
+format.name$ -- 405
+if$ -- 6895
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 437
-newline$ -- 219
-num.names$ -- 174
-pop$ -- 951
+missing$ -- 460
+newline$ -- 229
+num.names$ -- 182
+pop$ -- 986
 preamble$ -- 1
-purify$ -- 257
+purify$ -- 266
 quote$ -- 0
-skip$ -- 698
+skip$ -- 733
 stack$ -- 0
-substring$ -- 2779
-swap$ -- 978
+substring$ -- 2945
+swap$ -- 1031
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 360
+type$ -- 378
 warning$ -- 0
-while$ -- 270
+while$ -- 286
 width$ -- 0
-write$ -- 548
+write$ -- 574

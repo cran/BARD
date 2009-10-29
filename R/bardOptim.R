@@ -428,7 +428,7 @@ refineGreedyPlanPlus <- function(plan, score.fun, displaycount=NULL, historysize
 		# non-improvement -- what to do...
 
 	  if (tabusize==0) {
-	    browser()
+		#browser()
 		break
 		# GREEDY, local opt
 		# finished ...

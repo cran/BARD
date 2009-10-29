@@ -1,19 +1,19 @@
 citHeader("To cite the BARD package in publications use:")
 
-citEntry(entry="AltMcD",
+citEntry(entry="article",
          title = "BARD: Better Automated Redistricting",
          author = personList(as.person("M. Altman"),
                              	as.person("M.P. McDonald")
                                 ),
 	 howpublished = "software",
          year         = "2009",
-         note         = "Software: R Package, BARD, (version 1.01) ",
+         note         = "Software: R Package, BARD, (version 1.04) ",
          journal  ="Journal of Statistical Software",
          volume="Forthcoming",
          url          ="http://bard.sf.net/",
 
          textVersion =
          paste("Altman, M., M.P. McDonald (2009)",
-              "BARD: Better Automated Redistricting (version 1.01), Journal of Statistical Software: Forthcoming."
+              "BARD: Better Automated Redistricting (version 1.04), Journal of Statistical Software: Forthcoming."
                )
 )

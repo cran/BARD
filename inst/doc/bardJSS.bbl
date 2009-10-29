@@ -1,10 +1,17 @@
-\begin{thebibliography}{42}
+\begin{thebibliography}{44}
 \newcommand{\enquote}[1]{``#1''}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname url\endcsname\relax
   \def\url#1{\texttt{#1}}\fi
 \expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
 \providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Aerts \emph{et~al.}(2003)Aerts, Eisinger, Heuvelink, and
+  Stewart}]{AerEisHeu03}
+Aerts JC, Eisinger E, Heuvelink GB, Stewart TJ (2003).
+\newblock \enquote{Using Linear Integer Programming for Multi-Site Land-Use
+  Allocation.}
+\newblock \emph{Geographical Analysis}, \textbf{35}(2), 148--69.
 
 \bibitem[{Altman(1997)}]{Altman97}
 Altman M (1997).
@@ -108,11 +115,6 @@ Gelman A, King G (1994).
   Redistricting Plans.}
 \newblock \emph{American Journal of Political Science}, \textbf{38}, 513--54.
 
-\bibitem[{Gelman \emph{et~al.}(2007)Gelman, King, and Thomas}]{GelKing07}
-Gelman A, King G, Thomas AC (2007).
-\newblock \emph{JudgeIt: JudgeIt}.
-\newblock R package version 1.1.4, \urlprefix\url{http://gking.harvard.edu/}.
-
 \bibitem[{Glover(1986)}]{Glover86}
 Glover F (1986).
 \newblock \enquote{Future Paths for Integer Programming and Links to Artificial
@@ -141,10 +143,10 @@ Gudgin G, Taylor P (1979).
 \newblock \emph{Seats, Votes, and the Spatial Organization of Elections}.
 \newblock Pion Limited.
 
-\bibitem[{Imai \emph{et~al.}(2007)Imai, Lu, and Strauss}]{Imai07}
-Imai K, Lu Y, Strauss A (2007).
-\newblock \enquote{Kosuke Imai and Ying Lu and Aaron Strauss.}
-\newblock \emph{Journal of Statistical Software}, \textbf{forthcoming}.
+\bibitem[{Johnson(1982)}]{Johnson1982}
+Johnson DS (1982).
+\newblock \enquote{The NP-Completeness Column: An Ongoing Guide.}
+\newblock \emph{Journal of Algorithms}, \textbf{3}, 182--195.
 
 \bibitem[{King \emph{et~al.}(1997)King, Palmquist, Adams, Altman, Benoit, Gay,
   Mayer, and Reinhardt}]{ROAD}
@@ -174,6 +176,11 @@ McDonald MP (2006).
 \newblock \enquote{Redistricting and District Competition.}
 \newblock In MP~McDonald, J~Samples (eds.), \enquote{The Marketplace of
   Democracy: Electoral Competition in American Politics,} Brookings Press.
+
+\bibitem[{Nagel(1965)}]{Nagel1965}
+Nagel SS (1965).
+\newblock \enquote{Simplified Bipartisan Computer Redistricting.}
+\newblock \emph{The Stanford Law Review}, \textbf{17}, 863--869.
 
 \bibitem[{Niemi \emph{et~al.}(1991)Niemi, Grofman, Carlucci, and
   Hofeller}]{Niemi91}
@@ -255,5 +262,10 @@ Wolpert D, Macready W (1997).
 Xiao N (2003).
 \newblock \emph{Geographical Optimization using Evolutionary Algorithms}.
 \newblock Ph.D. thesis, University of Iowa.
+
+\bibitem[{Xiao(2006)}]{Xiao06}
+Xiao N (2006).
+\newblock \enquote{An Evolutionary Algorithm for Site Search Problems.}
+\newblock \emph{Geographical Analysis}, \textbf{38}, 227--47.
 
 \end{thebibliography}

@@ -73,9 +73,9 @@ C. Cirincione , T.A. Darling, and T.G. O'Rourke. 2000. ``Assessing South Carolin
 
 \seealso{
 
-   \code{\link[spdep:spdep-package]{spdep}} , 
-   \code{\link[maptools:maptools-package]{maptools}} ,
-   \code{\link[rgenoud:rgenoud-package]{rgenoud}} 
+   \code{\link[spdep]{spdep}} , 
+   \code{\link[maptools]{maptools}} ,
+   \code{\link[rgenoud]{genoud}} 
 }
 \examples{
   
