@@ -56,15 +56,15 @@
 # 
 ##################################
 
-refineGreedyPlan <- function(plan, score.fun, displaycount=NULL, historysize=0, dynamicscoring=FALSE,   tracelevel=1 ) {
+refineGreedyPlan <- function(plan, score.fun, displaycount=NULL, historysize=0, dynamicscoring=FALSE,   tracelevel=1, checkpointCount=0, resume=FALSE ) {
     retval <- refineGreedyPlanPlus(plan=plan,score.fun=score.fun,displaycount=displaycount,historysize=historysize,
-								 dynamicscoring=dynamicscoring,tracelevel=tracelevel,tabusize=0)
+     dynamicscoring=dynamicscoring,tracelevel=tracelevel,tabusize=0, checkpointCount=checkpointCount, resume=resume)
     return(retval)     
 }
 
-refineTabuPlan <- function(plan, score.fun, displaycount=NULL, historysize=0, dynamicscoring=FALSE,   tracelevel=1,tabusize=100, tabusample=500 ) {
+refineTabuPlan <- function(plan, score.fun, displaycount=NULL, historysize=0, dynamicscoring=FALSE,   tracelevel=1,tabusize=100, tabusample=500, checkpointCount=0, resume=FALSE) {
     retval <- refineGreedyPlanPlus(plan=plan,score.fun=score.fun,displaycount=displaycount,historysize=historysize,
-								 dynamicscoring=dynamicscoring,tracelevel=tracelevel,tabusize=tabusize)
+    dynamicscoring=dynamicscoring,tracelevel=tracelevel,tabusize=tabusize, checkpointCount=checkpointCount, resume=resume)
     return(retval)     
 }
 
@@ -318,39 +318,55 @@ refineAnnealPlan <- function(plan, score.fun,
 
 
 refineGreedyPlanPlus <- function(plan, score.fun, displaycount=NULL, historysize=0,
-	tabusize =0, dynamicscoring=FALSE,   tracelevel=1,tabusample=500 ) {
+	tabusize =0, dynamicscoring=FALSE,   tracelevel=1,tabusample=500,
+	checkpointCount=0, resume=FALSE) {
                                                           
-  # no score history -- greedy plan generation doesn't revisit plans
-   
-  if (tabusize==0) {
-	historysize<-0
-  } else {
-	tabulist <- matrix(nrow=tabusize,ncol=2)
+  if (resume) {
+      checkpoint.env<-get("BardCheckPoint",envir=.GlobalEnv)
+      lslist=setdiff(ls(checkpoint.env),c("checkpoint.env","resume","checkpointCount"))
+      for (enitem in lslist) {
+	 assign(enitem,get(enitem,envir=checkpoint.env))
+      }   
   }
-                 
-  # get plan stuff
-  ndists<-attr(plan,"ndists")
-  basemap<-basem(plan)
-  nb<-basemap$nb
   
-  # tracking vars
-  bestScore<-prevscore<-score.fun(plan)
-  mitercount<-0
-  lastplan<-plan
-  lastplotted<-plan
+  if (checkpointCount>0 && !resume) {
+        checkpoint.env<-new.env()
+  	assign("BardCheckPoint",checkpoint.env,envir=.GlobalEnv)
+  }
+  
+  
+  if (!resume) {
+   # no score history -- greedy plan generation doesn't revisit plans
+   
+   if (tabusize==0) {
+	historysize<-0
+   } else {
+	tabulist <- matrix(nrow=tabusize,ncol=2)
+   }
+            
+   # get plan stuff
+   ndists<-attr(plan,"ndists")
+   basemap<-basem(plan)
+   nb<-basemap$nb
+  
+   # tracking vars
+   bestScore<-prevscore<-score.fun(plan)
+   mitercount<-0
+   lastplan<-plan
+   lastplotted<-plan
   
    if (!is.null(displaycount)) {
       try(plot(plan))
     }
   
-  # helper functions
-  candpairs<-function(i) {
+   # helper functions
+   candpairs<-function(i) {
      candres<-as.matrix(expand.grid(i,neighbors(nb,i)))
 	 # later for switches eliminate duplicates
 	 # candres<-t(apply(candres,1,function(x)if(x[1]>x[2]){c(x[1],x[2])}else{c(x[2],x[1])}))
 	 # candres<-unique(candres)
 	 return(candres)
-  }
+   }
   
    
    # tricky -- displaycount in scorewrapper set to NULL, since we display inside
@@ -375,12 +391,14 @@ refineGreedyPlanPlus <- function(plan, score.fun, displaycount=NULL, historysize
     } else {
       return(testplan)
     }
-  }
+   }
 
-  maxiter <- length(plan)
-  iterSinceImproved<-0
-  mitercount<-0
-  bestPar<-NULL
+   maxiter <- length(plan)
+   iterSinceImproved<-0
+   mitercount<-0
+   bestPar<-NULL
+  } # end if resume
+  
   repeat {
      mitercount <- mitercount +1
 	 iterSinceImproved<-iterSinceImproved +1
@@ -487,6 +505,7 @@ refineGreedyPlanPlus <- function(plan, score.fun, displaycount=NULL, historysize
         flush.console()
      }           
      
+
      if (!is.null(displaycount)) {
       
         if ((mitercount %% displaycount) ==0) {
@@ -494,6 +513,13 @@ refineGreedyPlanPlus <- function(plan, score.fun, displaycount=NULL, historysize
            lastplotted<-candidatePar  
         }
       }
+     if (checkpointCount>0 && (mitercount %% checkpointCount ==0)) {
+       
+       	for (enitem in ls()) {
+		assign(enitem,get(enitem),envir=checkpoint.env)
+	}
+     
+     }
   }
   
   retval<-bestPar

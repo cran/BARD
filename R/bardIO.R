@@ -412,5 +412,10 @@ plot.bardBasemap<-function(x,...) {
 }
 
 
+as.data.frame.bardBasemap<-function (x, row.names = NULL, optional = FALSE, ...) {
+	as.data.frame(x$shape)
+}
 
-  
+dim.bardBasemap<-function(x) {
+	dim(x$shape)
+}

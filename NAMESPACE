@@ -17,10 +17,10 @@ export ( calcGroupScore, calcContiguityScore, calcLWCompactScore, calcPopScore,
 # plan generation
 export ( createKmeansPlan, createRandomPlan, createContiguousPlan, 
   createAssignedPlan, createRandomPopPlan, createWeightedKmeansPlan,
-  createContiguousDistrict )
+  createContiguousDistrict, createGreedyContiguousPlan )
 
 # plan fixup
-export (fillHolesPlan)
+export (fillHolesPlan,fixUnassignedPlan,fixContiguityPlan)
 
 #plan refinement
 export ( refineGreedyPlan, refineAnnealPlan, refineNelderPlan, refineGenoudPlan, refineGRASPPlan, refineTabuPlan )
@@ -56,6 +56,10 @@ S3method(summary, bardSample)
 S3method(print,bardSample)
 S3method(print, bardSample.summary)
 S3method(plot,bardSample.summary)
+S3method("==",bardBasemap)
+S3method("!=",bardBasemap)
+S3method(dim,bardBasemap)
+S3method(as.data.frame,bardBasemap)
 
 
 

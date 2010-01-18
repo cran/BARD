@@ -1,11 +1,15 @@
 \name{fillHolesPlan}
 \alias{fillHolesPlan}
-\title{Fill holes in a redistricting plan.}
+\alias{fixContiguityPlan}
+\alias{fixUnassignedPlan}
+\title{Fixes up districting plan.}
 \description{
-This fills holes (unassigned blocks) in a redistricting plan, using selectable methods.
+These functions assign unassigned blocks, and join non-contiguous regions.  
 }
 \usage{
+fixUnassignedPlan(plan,method=c("random","fixed","closest"), fixed=1)
 fillHolesPlan(plan,method=c("random","fixed","closest"), fixed=1)
+fixContiguityPlan(plan,scoreFUN=NULL,...) 
 }
 
 
@@ -13,11 +17,18 @@ fillHolesPlan(plan,method=c("random","fixed","closest"), fixed=1)
  \item{plan}{input plan}
  \item{method}{Hole filling method to use}
  \item{fixed}{id for ``fixed'' method}
+ \item{scoreFUN}{score to minimize when merging non-contiguous portions, if omitted, minimizes number of blocks reallocated}
+ \item{\dots}{additional arguments to pass to score function}
 
 }
 
 \details{
-Fixed method assigns all missing blocks to a fixed value. Random method assigns blocks randomly. Closest assigns to a randomly chosen adjoining district (iteratively, if blocks are surrounded by other missing blocks
+	\code{fillUnassignedPlan} - Assigns non-assigns plocks . Fixed method assigns all missing blocks to a fixed value. Random method assigns blocks randomly. Closest assigns to a randomly chosen adjoining district (iteratively, if blocks are surrounded by other missing blocks).
+(\code{fixHolesPlan} is an alias for fillUnassignedPlan)
+
+\code{fixContiguityPlan} - Evaluates all districts. For each disctict with noncontigous portions, iteratively assigns to an existing contiguous district, greedily minimizing the given score function. 
+
+
 }
 
 \value{
@@ -50,6 +61,12 @@ Fixed method assigns all missing blocks to a fixed value. Random method assigns 
   is.na(kplan2[c(1,10,20,100)])<-TRUE
   print(kplan2)
   kplan3 <- fillHolesPlan(kplan2,method="closest")
+  
+  # create non contiguous plan
+  rplan<-createRandomPopPlan(suffolk.map,5)
+  
+  # fix it
+  rplanc<-fixContiguityPlan(rplan,calcPopScore)
   
 }
 \keyword{spatial}

@@ -14,7 +14,7 @@ be refined with one of the refinement functions.
 }
 
 \usage{
-refineGreedyPlan(plan, score.fun, displaycount=NULL, historysize=0, dynamicscoring=FALSE,   tracelevel=1)
+refineGreedyPlan(plan, score.fun, displaycount=NULL, historysize=0, dynamicscoring=FALSE,   tracelevel=1, checkpointCount=0, resume=FALSE)
 refineGenoudPlan(plan, score.fun, displaycount = NULL, historysize = 0,
                  dynamicscoring = FALSE, usecluster = TRUE, tracelevel=1)
 refineAnnealPlan(plan, score.fun, displaycount = NULL, historysize = 0,
@@ -22,7 +22,7 @@ refineAnnealPlan(plan, score.fun, displaycount = NULL, historysize = 0,
 refineNelderPlan( plan, score.fun, displaycount = NULL, maxit = NULL,
                  historysize = 0, dynamicscoring = FALSE,  tracelevel = 1)
 refineTabuPlan(  plan, score.fun, displaycount = NULL, historysize = 0,
-                 dynamicscoring = FALSE, tracelevel = 1, tabusize = 100,tabusample=500)
+                 dynamicscoring = FALSE, tracelevel = 1, tabusize = 100,tabusample=500, checkpointCount=0, resume=FALSE)
 refineGRASPPlan (plan, score.fun, samplesize = 50, predvar = NULL,
                  displaycount = NULL, historysize = 0, 
 		dynamicscoring = FALSE, usecluster = TRUE, tracelevel = 1)
@@ -42,13 +42,15 @@ refineGRASPPlan (plan, score.fun, samplesize = 50, predvar = NULL,
 \item{samplesize}{Number of samples to use for GRASP}
 \item{tabusize}{Size of tabu list}
 \item{tabusample}{Number of samples to take at each iteration }
+\item{checkpointCount}{Saves checkpoints to global \code{BardCheckPoint} variable, of internal state every Nth iteration, so that function can be resumed}
+\item{resume}{Resume interupted optimization, from checkpointed state}
 }
 
 \details{
-	Greedy -- The greedy algorithm uses hill climbing: at every iteration it compares all possible assignments of single blocks to a spatially contiguous district, and selects the best scoring. Stops when no improvement can be made
+	Greedy -- The greedy algorithm uses hill climbing: at every iteration it compares all possible assignments of single blocks to a spatially contiguous district, and selects the best scoring. Stops when no improvement can be made. This can be interrupted and restarted with the checkpoint and resume arguments. 
 
 
-	Tabu -- A modification of the greedy method. Samples the assignments of simple blocks. Always takes a move that yields a better solution than the best seen before. Otherwise takes a trade that yields something better than the most recent seen, unless that trade has been used recently and is still on the tabu list.
+	Tabu -- A modification of the greedy method. Samples the assignments of simple blocks. Always takes a move that yields a better solution than the best seen before. Otherwise takes a trade that yields something better than the most recent seen, unless that trade has been used recently and is still on the tabu list. This can be interrupted and restarted with the checkpoint and resume arguments. 
 	
 	
 	Genoud -- uses the \code{\link[rgenoud]{genoud}} implementation of the genetic algorithm. This function tunes the nine genoud operators for the redistricting problem.

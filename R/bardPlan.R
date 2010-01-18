@@ -33,6 +33,89 @@
 #
 ##############################################################################
 
+#################################
+#
+# FixContiguityPlan
+#
+#  This takes an input plan which is not contiguous and greedily
+# merges noncontiguous fragments into existing districts
+#
+# Arguments
+#  plan   <- input plan
+#  scoreFUN  - score function                       
+#
+# Returns
+#   plan assignment vector
+#
+#  See R documentation for full details.
+# 
+##################################
+
+fixContiguityPlan<-function(plan,scoreFUN=NULL,...) {
+	
+  if (any(is.na(plan))) {
+	warning("Must use fixUnassignedPlan first -- unassigned blocks exist")
+	return(plan)
+  }		
+  
+  
+  ndists <- attr(plan,"ndists")
+  nb <- basem(plan)$nb
+  newplan<-plan
+  
+  fragments<-function(nci) {
+     sapply(1:nci$nc,function(x)which(nci$comp.id==x),simplify=FALSE)
+  }
+  
+  prevlength<-0
+  repeat {
+    	     
+    
+    nidlists<-sapply(1:ndists, function(x){n.comp.include(nb,which(newplan==x))},simplify=FALSE)
+    
+
+    # check contiguity
+    
+    nclist<-sapply(nidlists,function(x)x$nc)
+    if (all(nclist==1)) {
+    	    break
+    }
+    
+    # extract fragments
+    fraglist<-unlist(sapply(nidlists[nclist>1],fragments,simplify=FALSE),recursive=FALSE)
+    
+    # unique pairs of possible assignments of fragments -> districts
+    tradelist<-matrix(ncol=2,byrow=T,unlist(recursive=F,sapply(1:length(fraglist), function(x)t(cbind(x,
+    setdiff(unique(newplan[unique(unlist(nb[fraglist[[x]]]))]),newplan[fraglist[[x]][1]]))))))
+    
+    tmpscore<-vector(length=dim(tradelist)[1])
+    
+    #cat (length(tmpscore),"\n")
+    #flush.console()
+
+    
+    for (i in 1:length(tmpscore)) {
+    	if (is.null(scoreFUN)) {
+    		tmpscore[i]<-length(fraglist[[tradelist[i,1]]])
+    	} else {
+    		tmpplan <- newplan
+    		tmpplan[fraglist[[tradelist[i,1]]]]<-tradelist[i,2]
+    		tmpscore[i]<-sum(scoreFUN(tmpplan,...))
+    	}
+    }
+    
+        #if (prevlength==length(tmpscore)) {
+    	#    browser()
+    #} else {
+    #	 prevlength<-length(tmpscore)
+    #}
+    # update newplan
+    bestswitch<-which.min(tmpscore)
+    newplan[fraglist[[tradelist[bestswitch,1]]]]<-tradelist[bestswitch,2]
+  }
+  return(newplan)
+}
+
 
 #################################
 #
@@ -83,6 +166,22 @@ fillHolesPlan<-function(plan,method=c("random","fixed","closest"), fixed=1) {
         }       
   )
  return(plan)
+}
+
+fixUnassignedPlan<-fillHolesPlan
+
+#################################
+#
+# createGreedyContiguousPlan
+#
+#
+#
+##################################
+
+createGreedyContiguousPlan<-function( basemap, ndists, predvar="POP", scoreFUN = calcPopScore) {
+	tmpplan <- createRandomPopPlan(basemap,ndists,predvar)
+	tmpplan <- fixContiguityPlan(tmpplan,scoreFUN,predvar)
+	return(tmpplan)
 }
 
 
@@ -394,7 +493,9 @@ createContiguousPlan<-function(basemap,ndists,
   maxtries=(10/threshold),
   neighborstarts=TRUE,
   fillholes=TRUE,
-  districtonly=FALSE) {
+  districtonly=FALSE,
+  traceLevel = 0) {
+  
     DEBUG<-FALSE
     maxtries<-max(1,maxtries)
 
@@ -402,20 +503,23 @@ createContiguousPlan<-function(basemap,ndists,
     for (i in 1:maxtries) {
       result<-CDOInner(
            basemap=basemap,ndists=ndists,predvar="POP",
-           threshold=threshold, DEBUG=DEBUG,ssize=ssize, usebb=usebb,
+           threshold=threshold, DEBUG=(traceLevel-1),ssize=ssize, usebb=usebb,
            neighborstarts=neighborstarts,fillholes=fillholes,
            districtonly=districtonly)
 
       if (result$success) {
         break
       }
-      if (DEBUG) {
+      if (traceLevel) {
          print(paste("************** retrying plan: ", i))
          flush.console()
       }
     }
     if(districtonly) {
     	attr(result$plan,"districtonly")<-TRUE
+    }
+    if (!result$success) {
+    	warning("method failed to converge on all districts, check plan scores")
     }
     return(result$plan)
 }
@@ -525,9 +629,15 @@ CDOInner<-function(basemap,ndists,
            # dynamic update of pop, bbox, neighborhood
            curpop <- curpop + tmppop[newblock]
           if (usebb) {
-              tmpbb <- unlist(getBbox(basemap,newblock))
-              curbbox[1] <- min(curbbox[1],tmpbb[1]); curbbox[2] <- min(curbbox[2],tmpbb[2])
-              curbbox[3] <- max(curbbox[3],tmpbb[3]); curbbox[4] <- max(curbbox[4],tmpbb[4])
+              #### THIS INCREMENTAL UPDATE CODE IS NOT WORKING
+              #### profile to see if worth rewriting
+              #tmpbb <- unlist(getBbox(basemap,newblock))
+              #curbbox[1] <- min(curbbox[1],tmpbb[1]); curbbox[2] <-min(curbbox[2],tmpbb[2])
+              #curbbox[3] <- max(curbbox[3],tmpbb[3]); curbbox[4] <- max(curbbox[4],tmpbb[4])
+              
+              ### This works 
+              curbbox<-unlist(getBbox(basemap,blocklist))
+
            }
            #update neighborhood list
            tmpnb <- neighbors(basemap$nb,newblock)
@@ -564,8 +674,7 @@ CDOInner<-function(basemap,ndists,
                stop("failed consistency check on dynamic neighbor")
             }
             if (usebb) {
-              #tmpBB<- #sapply(basemap$polys[blocklist==i],function(x)attr(x,"bbox"))
-              #curbboxn<-c(apply(tmpBB[1:2,,drop=F],1,min),apply(tmpBB[3:4,,drop=F],1,max))
+             
              curbboxn<-unlist(getBbox(basemap,blocklist))
              if (any(curbbox!=curbboxn)) {
                print("current")
@@ -604,12 +713,13 @@ CDOInner<-function(basemap,ndists,
   } else if (fillholes) {
     is.na(blocklist[which(blocklist==0)])<-TRUE
     blocklist<-fillHolesPlan(blocklist,method="closest")
+    blocklist<-fixContiguityPlan(blocklist,calcPopScore,predvar)
   } else {
     blocklist[which(blocklist==0)] <- ndists
   }
   
   # checks on final plan
-  if (DEBUG) {
+  if (DEBUG>1) {
            plot(blocklist)
            Sys.sleep(5)
   }

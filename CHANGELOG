@@ -30,7 +30,7 @@ Changelog
   -- memory efficiency in plan referencing basemaps
   -- complete code docs: keywords, refs [TODO: examples]
   -- Fixed incremental score updating (in score functions)
-  -- Fixed Reoc Score
+  -- Fixed Reock Score
   -- Comparisons - missing value checks, refactor to return score matrices, preconfigured report
   -- Tuned and added options to contiguous plan generation
   -- detect score function without dynamic support
@@ -76,5 +76,11 @@ Changelog
   -- Clarified original districts of recoded plans
   -- Added option to sample, score, compare single districts
   -- Spatial holes  district scoring
+ 1.08
+ -- added methods for map comparison, conversion to data frames, dim
+ -- bug fix for dynamic combine function
+ -- added function to fix contiguity problems in a plan
+ -- added checkpoint code for greedy and tabu
+ 
   
   

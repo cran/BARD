@@ -35,7 +35,13 @@ basem.default(object, ...)
   # read in a shapefile with demographic data
   suffolk.map <- importBardShape(file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts"))
   kplan<-createRandomPlan(suffolk.map,5)
-  copy.of.suffolk.map<-basem(kplan) 
+  copy.of.suffolk.map<-basem(kplan)
+  copy.of.suffolk.map==suffolk.map
+  dim(copy.of.suffolk.map)
+  
+  # data frame w/out geography
+  
+  suffolk.data<-as.data.frame(suffolk.map)
 
 }
 

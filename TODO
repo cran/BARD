@@ -16,11 +16,14 @@ Todo:
  - profiling cluster optimizations across samples
  - allow double exchanges
  - block-level incremental moment scores
- - kmeans balanced population
  - CRS projections
  -  Compare plans w/differnt districts
- - createContigPlans --> performance drops as ndists increase
- - cache list of exchangeable blocks in Greedy
- - total score in siimulated annealing, keep best plan, temperature
- - Repair contiguity option
- - create arealist, perimeter, joint perimeter list for performance
+ - as.data.frame <- data frame update methods
+- create arealist, perimeter, joint perimeter list for performance
+ - total score in simulated annealing, keep best plan, temperature
+ - checkpoint during plan profiling
+ - performance: contiguous plan in N
+ - memory leak in greedy? in C?
+ - createContiguousPlan --> performance drops as ndists increase, profile, include bbox time
+ - profile greedy
+

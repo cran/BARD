@@ -425,10 +425,12 @@ combineDynamicScores<-function(plan,lastscore=NULL,changelist=NULL,scorefuns=lis
 		scores<-lapply(scorefuns,function(x)x(plan))
 	}
 	
-	retval<-distcombfun(sapply(scores,scorecombfun))
+	retval<-scorecombfun(sapply(scores,distcombfun))
 	attr(retval,"lastscorev")<-scores
 	return(retval)
 }
+
+
 
 ##############################################################################
 #           INTERNAL MODULE FUNCTIONS -- DO NOT EXPORT
@@ -486,6 +488,7 @@ calcContiguityScoreD<-function(plan,distid,standardize=TRUE) {
     if (standardize) {
       score <- 1-(1/nregions)
     }
+    
     return(score)
 }
 

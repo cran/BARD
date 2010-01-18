@@ -6,6 +6,7 @@
 \alias{createContiguousPlan}
 \alias{createContiguousDistrict}
 \alias{createWeightedKmeansPlan}
+\alias{createGreedyContiguousPlan}
 \title{Create an initial plan for later refinement}
 \description{
 These methods create plans starting with random seeds. These plans should
@@ -20,10 +21,11 @@ createWeightedKmeansPlan( basemap, ndists, centers = c(), weightVar = NULL,
                  trimfactor = 2.5, smallBlock = c("cap", "closest"))
 createContiguousPlan(basemap, ndists, predvar = "POP", threshold = 0.05,
                  ssize = 20, usebb = TRUE, maxtries = (10/threshold),
-                 neighborstarts = TRUE, fillholes = TRUE, districtonly=FALSE)
+                 neighborstarts = TRUE, fillholes = TRUE, districtonly=FALSE, traceLevel=0)
 createContiguousDistrict(basemap, ndists, predvar = "POP", threshold = 0.05,
                  ssize = 20, usebb = TRUE, maxtries = (10/threshold),
                  neighborstarts = TRUE, fillholes = TRUE)
+createGreedyContiguousPlan( basemap, ndists, predvar="POP", scoreFUN=calcPopScore)
 }
 
 \arguments{
@@ -41,6 +43,8 @@ createContiguousDistrict(basemap, ndists, predvar = "POP", threshold = 0.05,
   \item{trimfactor}{rescales and trims weights, see below }
   \item{smallBlock}{how weighted kmeans handles blocks that are weighted to 0: caps minimimum weights at 1; closest post-assigns zero-weighted blocks to the nearest district}
   \item{districtonly}{whether to generate a single district of the plan only}
+  \item{scoreFUN}{Bard score function}
+  \item{traceLevel}{for debugging}
 }
 
 \details{
@@ -53,7 +57,7 @@ createContiguousDistrict(basemap, ndists, predvar = "POP", threshold = 0.05,
 go more than (1+threshold)/(totalpopulation/plan), unless that block would cause all
 districts to exceed their thresholds.  With blocks of single individuals, and a threshold of 0 this is equivalent to the random assignment discusses. in Bush v. Vera [2004]
 
-
+\code{createGreedyContiguousPlan} uses \code{createRandomPopPlan} followed by \code{fixContiguityPlan}
 
 \code{createContiguousPlan} duplicates the algorthim in Cirincione, et. al (see the references). As per
 pg 196:
@@ -72,6 +76,8 @@ The next district begins with the random selection of a census block group
 from among those that touch one of the completed districts.''
 
 (Note that ssize was not included as an option, originally) 
+
+In practice this method gets sometimes fails because creation of earlier districts prevents the creation of contiguous later districts. In this case, the method restarts, up to the maximum number of retstarts. If \code{fillholes} is true, then even a final failed attempt will be patched with \code{fixUnassignedPlan} and \code{fixContiguousPlan}, however, beware that this may yield some districts as empty, or districts out of the target criteria range. In this case a warning is issued. 
 
 The \code{districtonly} option will cause a single district only to be created, which is a quick-and-dirty way of pseudo-sampling districts. 
 
@@ -115,7 +121,8 @@ C. Cirincione , T.A. Darling, and T.G. O'Rourke. 2000. ``Assessing South Carolin
 
 \seealso{ 
 Interactive editing \code{\link{editPlanInteractive}}
-Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAnnealPlan}}, \code{\link{refineGenoudPlan}}, \code{\link{refineNelderPlan}}
+Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAnnealPlan}}, \code{\link{refineGenoudPlan}}, \code{\link{refineNelderPlan}}.
+Plan fixups \code{\link{fixUnassignedPlan}} , \code{\link{fixContiguityPlan}}
  }
  
 \examples{
@@ -134,19 +141,28 @@ Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAn
   aplan <- createAssignedPlan(suffolk.map,predvar=1:ndists)
   wkplan<-createWeightedKmeansPlan(suffolk.map,ndists,weightVar="POP")
 
-  \dontrun{
-  	cplan <- createContiguousPlan(suffolk.map,ndists)
-  }
+  
+  cplan <- createContiguousPlan(suffolk.map,ndists)
+  plot(cplan)
+  summary(cplan)
   
  
   plot(kplan)
   summary(kplan)
   plot(summary(rplan))
   
-  c1plan<-createContiguousDistrict(suffolk.map,ndists)
-  c1plan
+  
+  c1plan<-createGreedyContiguousPlan(suffolk.map,ndists)
+  
   plot(c1plan)
   summary(c1plan)
+  
+  # single district only 
+  c2plan<-createContiguousDistrict(suffolk.map,ndists)
+  c2plan
+  plot(c2plan)
+  summary(c2plan)
+  
 }
 
 \keyword{IO}

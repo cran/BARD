@@ -15,8 +15,8 @@ BARD supports heuristic exploration of plans, in order to show trade-offs among 
 \tabular{ll}{
 Package: \tab BARD\cr
 Type: \tab Package\cr
-Version: \tab 1.01\cr
-Date: \tab 2009-1-2 \cr
+Version: \tab 1.07 \cr
+Date: \tab 2010-1-8 \cr
 License: \tab AGPL 3.0 \cr
 }
 
@@ -24,9 +24,14 @@ Bard supports several areas of functionality:
   1. Plan input output. Reading and writing plans in various formats.
   ( \link{readBardImage}, \link{writeBardImage}, \link{readBardCheckpoint}, \link{writeBardCheckpoint},\link{importBardShape}, \link{exportBardShape} )
   
-  2. Initial plan generation. Quick heuristics for generating random plans, or plans based on a fixed set of criteria.
-  (\link{createRandomPlan}, \link{createRandomPopPlan}, \link{createContiguousPlan}, \link{createKmeansPlan}, \link{createWeightedKmeansPlan},\link{fillHolesPlan})
+  2. Initial plan generation. 
   
+  Quick heuristics for generating random plans, or plans based on a fixed set of criteria.
+  (\link{createRandomPlan}, \link{createRandomPopPlan}, \link{createContiguousPlan}, \link{createKmeansPlan}, \link{createWeightedKmeansPlan}, \link{createGreedyContiguousPlan})
+  
+  Heuristics for fixing contiguity and unassigned blocks.
+(\link{fixContiguityPlan},   \link{fixUnassignedPlan})
+
   As a quick method for exploration, single districts can be pseudo-sampled.
   (\link{createContiguousDistrict},\link{quickSampleDistricts})
   
