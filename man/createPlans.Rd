@@ -25,7 +25,7 @@ createContiguousPlan(basemap, ndists, predvar = "POP", threshold = 0.05,
 createContiguousDistrict(basemap, ndists, predvar = "POP", threshold = 0.05,
                  ssize = 20, usebb = TRUE, maxtries = (10/threshold),
                  neighborstarts = TRUE, fillholes = TRUE)
-createGreedyContiguousPlan( basemap, ndists, predvar="POP", scoreFUN=calcPopScore)
+createGreedyContiguousPlan( basemap, ndists, predvar="POP", scoreFUN=calcPopScore,display=FALSE,...)
 }
 
 \arguments{
@@ -44,7 +44,9 @@ createGreedyContiguousPlan( basemap, ndists, predvar="POP", scoreFUN=calcPopScor
   \item{smallBlock}{how weighted kmeans handles blocks that are weighted to 0: caps minimimum weights at 1; closest post-assigns zero-weighted blocks to the nearest district}
   \item{districtonly}{whether to generate a single district of the plan only}
   \item{scoreFUN}{Bard score function}
-  \item{traceLevel}{for debugging}
+  \item{display}{whether to display plans while creating -- for demos and teaching}
+  \item{traceLevel}{for debugging, tracelevel > 2 will turn on dynamic plotting}
+  \item{\dots}{arguments for score function}
 }
 
 \details{
@@ -88,6 +90,10 @@ The resulting plan object is flagged as a `single-district' plan and score funct
 \code{createWeightedKmeansPlan} weights kmeans by a particular variable, most often used with population. This is implemented through block replication, so to limit memory use, the weights are rescaled so that minimum and maximum weights span approximately \code{trimfactor} orders of magnitude. Zero-weight blocks can either be capped at 1 an incorporated in the kmeans calculation, or left out and assigned to the closest district, based on the value of \code{smallblock}.
 
 
+}
+
+\note{
+	Turning on dynamic plotting is great for teaching and demos, but slows down plan creation by several orders of magnitude.
 }
 
 \value{

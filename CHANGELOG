@@ -81,6 +81,10 @@ Changelog
  -- bug fix for dynamic combine function
  -- added function to fix contiguity problems in a plan
  -- added checkpoint code for greedy and tabu
+ 1.09
+ -- bugfix in editPlanInteractive
+ -- added display mode for createGreedyContiguousPlan and createContiguousPlan
+ -- choropleth mapping of plans
  
   
   

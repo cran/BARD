@@ -51,7 +51,7 @@
 # 
 ##################################
 
-fixContiguityPlan<-function(plan,scoreFUN=NULL,...) {
+fixContiguityPlan<-function(plan,scoreFUN=NULL,...,display=FALSE) {
 	
   if (any(is.na(plan))) {
 	warning("Must use fixUnassignedPlan first -- unassigned blocks exist")
@@ -68,8 +68,15 @@ fixContiguityPlan<-function(plan,scoreFUN=NULL,...) {
   }
   
   prevlength<-0
+  
+  # display stuff
+  itercount=1
+  oldplan=plan  
+  if (display) {
+     updatePlot(plan,printit=F)
+  }
   repeat {
-    	     
+    itercount <- itercount + 1	     
     
     nidlists<-sapply(1:ndists, function(x){n.comp.include(nb,which(newplan==x))},simplify=FALSE)
     
@@ -112,6 +119,12 @@ fixContiguityPlan<-function(plan,scoreFUN=NULL,...) {
     # update newplan
     bestswitch<-which.min(tmpscore)
     newplan[fraglist[[tradelist[bestswitch,1]]]]<-tradelist[bestswitch,2]
+    if (display) {
+     updatePlot(newplan,oldplan,itercount=itercount,printit=F)
+    }
+  }
+  if (display) {
+    updatePlot(newplan,printit=F)
   }
   return(newplan)
 }
@@ -178,9 +191,9 @@ fixUnassignedPlan<-fillHolesPlan
 #
 ##################################
 
-createGreedyContiguousPlan<-function( basemap, ndists, predvar="POP", scoreFUN = calcPopScore) {
+createGreedyContiguousPlan<-function( basemap, ndists, predvar="POP", scoreFUN = calcPopScore,display=FALSE,...) {
 	tmpplan <- createRandomPopPlan(basemap,ndists,predvar)
-	tmpplan <- fixContiguityPlan(tmpplan,scoreFUN,predvar)
+	tmpplan <- fixContiguityPlan(tmpplan,scoreFUN,predvar,...,display=display)
 	return(tmpplan)
 }
 
@@ -503,7 +516,7 @@ createContiguousPlan<-function(basemap,ndists,
     for (i in 1:maxtries) {
       result<-CDOInner(
            basemap=basemap,ndists=ndists,predvar="POP",
-           threshold=threshold, DEBUG=(traceLevel-1),ssize=ssize, usebb=usebb,
+           threshold=threshold, DEBUG=max(0,(traceLevel-1)),ssize=ssize, usebb=usebb,
            neighborstarts=neighborstarts,fillholes=fillholes,
            districtonly=districtonly)
 
@@ -560,6 +573,11 @@ CDOInner<-function(basemap,ndists,
     ndistcount<-ndists-1
     innertargetpop <- targetpop
   }
+  
+  # display
+   if (DEBUG>2) {
+  	updatePlot(blocklist,printit=F)
+    }
   for (i in 1:ndistcount) {  
    isdone<-FALSE   
    nstarts<-1  
@@ -585,7 +603,9 @@ CDOInner<-function(basemap,ndists,
       curnb <- curnb[which(blocklist[curnb]==0)]
       
       # CORE LOOP: add neighbors at random to current districts
-      
+        oldplan<-blocklist
+     itercount<-0
+ 
       while ( (curpop < innertargetpop) && (length(curnb)>0))  {
 
            if (DEBUG>1) { 
@@ -643,6 +663,12 @@ CDOInner<-function(basemap,ndists,
            tmpnb <- neighbors(basemap$nb,newblock)
            tmpnb <- tmpnb[which(blocklist[tmpnb]==0)]
            curnb <- unique( c(tmpnb, setdiff(curnb,newblock)))
+           
+              itercount<-itercount+1
+      	    if (DEBUG>2) {
+              updatePlot(blocklist,oldplan,itercount=itercount,printit=F,sleepTime=0)
+         
+           }
                            
                 
       }  # end neighbor grow loop
@@ -653,14 +679,13 @@ CDOInner<-function(basemap,ndists,
             print("MAXSTARTS EXCEEDED")
             flush.console()
         } 
-        if (DEBUG>1) {
-            plot(blocklist)
-        }
+  
             curnbn <- neighbors(basemap$nb,which(blocklist==i))
             curnbn <- curnbn[which(blocklist[curnbn]==0)]
             curpopn <- sum(tmppop[which(blocklist==i)])
             print(paste("Restart check","dist",i, "nstarts", nstarts,"maxstarts", MAXSTARTS,
              curpop, targetlow,targethigh))
+          if (DEBUG>4) {
             if (any(curpopn!=curpop)) {
                 print (curpop)
                 print (curpopn)
@@ -683,15 +708,13 @@ CDOInner<-function(basemap,ndists,
                print (curbboxn)
                stop("failed consistency check on dynamic bbox")
             }
+            }
           }
             
            if (length(curnb)==0) {
              print("NO NEIGHBORS")
            } 
            flush.console()
-           if (DEBUG>2) {
-           	Sys.sleep(2)
-           }
       } 
 
       if ((nstarts<MAXSTARTS) && ((curpop<targetlow) || (curpop>targethigh)) ) {
@@ -701,6 +724,9 @@ CDOInner<-function(basemap,ndists,
             flush.console()
          }
          blocklist[which(blocklist==i)] <- 0
+       if (DEBUG>2) {
+  	updatePlot(blocklist,printit=F)
+      }
       } else {
         isdone<-TRUE
       }
@@ -719,10 +745,7 @@ CDOInner<-function(basemap,ndists,
   }
   
   # checks on final plan
-  if (DEBUG>1) {
-           plot(blocklist)
-           Sys.sleep(5)
-  }
+
   if (i<ndists && !districtonly ) {
           if (DEBUG) {
             print("PLAN INCOMPLETE")
@@ -760,7 +783,9 @@ CDOInner<-function(basemap,ndists,
      }
     }
   }
- 
+  if (DEBUG>2) {
+  	updatePlot(blocklist,printit=F)
+  }
   return(list(plan=blocklist,success=success))
 }
 

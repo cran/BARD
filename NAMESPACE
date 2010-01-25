@@ -29,7 +29,7 @@ export ( refineGreedyPlan, refineAnnealPlan, refineNelderPlan, refineGenoudPlan,
 export(samplePlans, quickSampleDistricts, profilePlans)
 
 # plan comparison
-export(reportPlans,scorePlans)
+export(reportPlans,scorePlans,choroplotPlan)
 S3method(diff,bardPlan)
 S3method(plot, bardPlanDiff)
 S3method(summary, bardPlanDiff)

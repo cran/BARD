@@ -36,7 +36,7 @@ Bard supports several areas of functionality:
   (\link{createContiguousDistrict},\link{quickSampleDistricts})
   
   3. Interactive plan editing. Adjust plans interactively, using a mouse.
-  (\link{editPlanInteractive})
+  (\link{editPlanInteractive},\link{createPlanInteractive})
 
   4. Plan scoring. Scoring functions for use in plan refinement, profiling, and comparison.
   (\link{calcContiguityScore}, \link{calcReockScore}, 
@@ -50,7 +50,7 @@ Bard supports several areas of functionality:
   (\link{samplePlans}, \link{quickSampleDistricts}, \link{profilePlans}, \link{startBardCluster} )
   
   8. Plan comparison and analysis. Plot, score, and compare plans.
-  (\link{reportPlans}, \link{scorePlans}, \link{diff.bardPlan})
+  (\link{reportPlans}, \link{scorePlans}, \link{diff.bardPlan}, \link{choroplotPlan})
 
 }
 

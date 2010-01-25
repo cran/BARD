@@ -9,7 +9,7 @@ These functions assign unassigned blocks, and join non-contiguous regions.
 \usage{
 fixUnassignedPlan(plan,method=c("random","fixed","closest"), fixed=1)
 fillHolesPlan(plan,method=c("random","fixed","closest"), fixed=1)
-fixContiguityPlan(plan,scoreFUN=NULL,...) 
+fixContiguityPlan(plan,scoreFUN=NULL,...,display=FALSE) 
 }
 
 
@@ -19,7 +19,7 @@ fixContiguityPlan(plan,scoreFUN=NULL,...)
  \item{fixed}{id for ``fixed'' method}
  \item{scoreFUN}{score to minimize when merging non-contiguous portions, if omitted, minimizes number of blocks reallocated}
  \item{\dots}{additional arguments to pass to score function}
-
+ \item{display}{dynamic plotting for demos and teaching}
 }
 
 \details{

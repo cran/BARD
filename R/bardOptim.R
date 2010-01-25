@@ -700,29 +700,45 @@ scoreWrapper<-function(FUN,plan,
 # 
 #################################
 
-updatePlot<-function(plan,oldplan,score,itercount) {
+updatePlot<-function(plan,oldplan=NULL,score=0,itercount=0,refreshcount=500,skipplotcount=1,printit=T
+, sleepTime=.05) {
   if (is.null(oldplan)) {
     changed<-1:length(plan)
   } else {
     changed <- which(plan!=oldplan)
   }
 
-  if (length(changed)>0) {
-    # WARNING: newPlot FALSE creates memory leak because of add flag 
-    #          in plot.polylist
-    #res <- try(plot(plan,changed=changed,newPlot=FALSE))
+  if ((length(changed)>0) && (!itercount %% skipplotcount)) {
     
-    # use try, in case window got closed manually
-    res <- try(plot(plan,newPlot=TRUE))
+    if ((skipplotcount<2) && itercount %% refreshcount) {
+      # WARNING: newPlot FALSE creates memory leak because of add flag 
+      #          in plot.polylist
+      res <- try(plot(plan,changed=changed,newPlot=FALSE),silent=TRUE)
+       Sys.sleep(sleepTime)
+
+
+    } else {
+    
+       # use try, in case window got closed manually
+       #try(dev.off(), silent=TRUE)
+       res <- try(plot(plan,newPlot=TRUE),silent=TRUE)
+       Sys.sleep(sleepTime)
+       
+    }
     
     if (inherits(res,"try-error")) {
-       try(plot(plan,newPlot=TRUE))
+       try(plot(plan,newPlot=TRUE),silent=TRUE)
     }
-    print(paste("Iterations:",itercount,"(",paste(score,collapse=" "),")", Sys.time()) )
-  }  else {
+    
+    } else {
+    }
+  if (printit>0) {
       print(paste("Iterations:",itercount,"(",paste(score,collapse=" "),")*", Sys.time()) )
+      flush.console()
+
+
   }
-  flush.console()
+
   return(NULL)
 }
 

@@ -74,12 +74,13 @@
     return(plan)
   }
     
-  pmap<-polys2map(basemap$polys)
+  pmap<-Polygons2map(basemap$polys)
   choice<-0
   im<-imap(pmap)
   on.exit(iplot.off(im))
-  iplot.opt(col=plan)
+  iplot.opt(col=plan+2)
   iset.selectNone()
+ 
   
   # selection loop
   while(choice!="DONE") {
@@ -89,13 +90,20 @@
     if (is.na(as.numeric(choice))) {
         choice<-"DONE"
     } else {
-        plan[iset.selected()]<-as.numeric(choice)
+        print(iset.selected())
+        print(as.numeric(choice))
+        #plan[iset.selected()]<-as.numeric(choice)
+        #deal with holes
+    	selected<-unique(as.numeric(m2$names[iset.selected()]))
+    	plan[selected]<-as.numeric(choice)
+
+        
         iset.selectNone()
-        iset.col(plan)
+        iset.col(plan+2)
         if (!is.null(reportFUN)) {
           reportFUN(plan,...)
           flush.console()
-        }
+        }        
     }
   }
   return(plan)
@@ -160,8 +168,10 @@ polys2map<-function(polys){
   missx<-which(is.na(mapx))
   missy<-which(is.na(mapy))
   missxy<-unique(c(missx,missy))
-  mapx<-mapx[-missxy]
-  mapy<-mapy[-missxy]
+  if (length(missxy)>0) {
+  	  mapx<-mapx[-missxy]
+  	  mapy<-mapy[-missxy]
+  }
   is.na(mapx[which(is.infinite(mapx))])<-TRUE
   is.na(mapy[which(is.infinite(mapy))])<-TRUE
   retval<-list()
@@ -175,6 +185,32 @@ polys2map<-function(polys){
   class(retval)="map"
   return(retval)
 }
+
+# for newer list of Polygons S4 class
+
+Polygons2map<-function(polys){
+  mapx<-unlist(sapply(polys,function(x)sapply(x@Polygons,function(x)c(x@coords[,1],Inf))))
+  mapy<-unlist(sapply(polys,function(x)sapply(x@Polygons,function(x)c(x@coords[,2],Inf))))
+  missx<-which(is.na(mapx))
+  missy<-which(is.na(mapy))
+  missxy<-unique(c(missx,missy))
+  if (length(missxy)>0) {
+  	  mapx<-mapx[-missxy]
+  	  mapy<-mapy[-missxy]
+  }
+  is.na(mapx[which(is.infinite(mapx))])<-TRUE
+  is.na(mapy[which(is.infinite(mapy))])<-TRUE
+  retval<-list()
+  retval$x<-mapx
+  retval$y<-mapy
+  retval$range<-c(min(mapx,na.rm=T),max(mapx,na.rm=T),min(mapy,na.rm=T),max(mapy,na.rm=T))
+  mapnames<-unlist(sapply(1:length(polys),function(x)replicate(length(polys[[x]]@Polygons),x)))
+  mapnames<-as.character(mapnames)
+  retval$names<-mapnames
+  class(retval)="map"
+  return(retval)
+}
+
 
 
 ####

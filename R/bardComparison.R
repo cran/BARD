@@ -479,3 +479,46 @@ plot.bardPlanDiff<-function(x,plotall=F, horizontal=T,col=NULL, ...) {
   invisible()
 }
 
+##
+## choropleth
+##
+
+choroplotPlan<-function(plan,scores,numlevels=5,
+	method=c("quant","equal","absolute"),
+	main="choropleth map", absmin=0,absmax=1,ramplow="blue",ramphigh="red",...) {
+	methchoice<-match.arg(method)
+	switch(methchoice,
+	   absolute = {
+		levels <- seq(from=absmin, to=absmax, length.out=numlevels+1)[-1]
+	   },
+	   equal = {
+		levels <- seq(from=min(scores), to=max(scores), length.out=numlevels+1)[-1]
+	   },
+	   quant=  {
+		levels <- quantile(scores,prob=seq(0,1,length.out=numlevels+1)[-1])
+	   }
+	)
+	
+	if (min(levels)<0 && max(levels)>0) {
+		cr<-colorRampPalette(c(ramplow,"white",ramphigh))
+	} else if (min(levels)<0) {
+		cr<-colorRampPalette(c(ramplow,"white"))
+	} else {
+		cr<-colorRampPalette(c("white",ramphigh))
+	}
+
+	choro.col<-cr(numlevels)
+	
+	lindex<-sapply(scores,function(x)min(which(x<=levels)))
+	plot(plan,col=choro.col[lindex],...)
+	if (!is.null(names(levels))) {
+		legnames<-names(levels)
+	} else {
+		legnames<-format(levels,digits=6)
+	}
+	legnames<-paste("<=",legnames)
+	legend("bottomright", legend=legnames,fill=choro.col)
+	title(main=main)
+	
+}
+
