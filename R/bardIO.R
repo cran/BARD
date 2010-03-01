@@ -40,23 +40,30 @@ importBardShape <-
 function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE) {
   filen<-sub("\\.shp","",filen)
   #migrate to spatial data frames
-  ow<-options(warn=-1)
-  tmp.shape<-try( read.shape(filen) )
-  options(ow)
+  tmp.shape<-try( readShapePoly(filen) )
+  
   if (inherits(tmp.shape,"try-error")) {
       return(NULL)
   }
-  tmp.df <- tmp.shape$att.data
+  tmp.polys <-tmp.shape@polygons
+
+  tmp.df <- tmp.shape@data
+  
+  tmp.bboxs<-sapply(tmp.polys,function(x)bbox(x))
+  tmp.centroids<-sapply(tmp.polys,function(x)x@labpt)
+  # HMM -- performance of this is 1000x slower ?
+  #tmp.bboxs<-sapply(1:dim(tmp.shape)[1],function(x)bbox(tmp.shape[x,]))
+  #tmp.centroids<-sapply(1:dim(tmp.shape)[1],function(x)coordinates(tmp.shape[x,]))
+
+  
   mapid <- NULL 
   if ("ID" %in% names(tmp.df)) {
     mapid<-"ID"
   } else if ("id" %in% names(tmp.df)) {
     mapid<-"id"
   }
-  #migrate to spatial data frames
-  ow<-options(warn=-1)
-  tmp.polys <- Map2poly(tmp.shape,region.id=TRUE )
-  options(ow)
+
+
   
   # Note: poly2nb is very slow, so read from a file if present
 
@@ -71,11 +78,11 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE)
   # not an else, since top condition may change
   if (is.null(gal)) {
     print("Generating gal file...")
-    tmp.nb <- poly2nb(tmp.polys)
+    tmp.nb <- poly2nb(tmp.shape)
   }
   
   tmp.timestamp<-Sys.time()
-  retval<-list(shape=tmp.shape,polys=tmp.polys,nb=tmp.nb,df=tmp.df,timestamp=tmp.timestamp)
+  retval<-list(shape=tmp.shape,polys=tmp.polys,nb=tmp.nb,df=tmp.df,centroids=tmp.centroids, bboxs=tmp.bboxs, timestamp=tmp.timestamp)
   class(retval)<-"bardBasemap"
   if (wantplan) {
     tmp.plan <- NULL
@@ -91,6 +98,9 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE)
     return(retval)
   }
 }
+
+
+
 
 ##############################################################################
 #
@@ -118,17 +128,14 @@ function(plan,filen,id="BARDPlanID",gal=paste(filen,".GAL",sep="")) {
   filen<-sub("\\.shp","",filen)
     basemap<-basem(plan)
   BARDplan <- as.vector(plan)
-  newDf <- cbind(basemap$df,BARDplan)
-  names(newDf)[length(newDf)] <- id
+  basemap$shape@data[id]<-BARDplan
   
-  #migrate to spatial data frames
-  ow<-options(warn=-1)
-  saveres1<-try(write.polylistShape(basemap$polys,newDf,filen))
-  options(ow)
+  saveres1<-try(writeSpatialShape(basemap$shape,filen))
   saveres2<-try(write.nb.gal(basemap$nb,gal))
   retval<-(!inherits(saveres1,"try-error")  &&  !inherits(saveres2,"try-error"))
   return(retval)
 }
+
 
 ##############################################################################
 #
@@ -175,6 +182,15 @@ function(filen) {
 		# failed to load correct values 
 		lrval<-NULL
 	} else {
+		# check to convert from old formats
+		if (!is.null(basemaps)) {
+			basemaps<-sapply(basemaps,convertBaseMap.old,simplify=FALSE)
+		}
+		if (!is.null(plans)) {
+			plans<-sapply(plans,
+			function(x){ basem(x)<-convertBaseMap.old(basem(x)); x},
+			simplify=FALSE)
+		}
         	lrval <- list(basemaps=basemaps,plans=plans)
 	}
       }
@@ -244,6 +260,118 @@ function(filen, continue=TRUE) {
 
 
 ###
+###  Functions to deal with the conversion of basemaps using the old 
+#### polylist structure
+###
+
+importBardShape.polyList <-
+function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE) {
+  filen<-sub("\\.shp","",filen)
+  #migrate to spatial data frames
+  ow<-options(warn=-1)
+  tmp.shape<-try( maptools:::read.shape(filen) )
+  options(ow)
+  if (inherits(tmp.shape,"try-error")) {
+      return(NULL)
+  }
+  tmp.df <- tmp.shape$att.data
+  mapid <- NULL 
+  if ("ID" %in% names(tmp.df)) {
+    mapid<-"ID"
+  } else if ("id" %in% names(tmp.df)) {
+    mapid<-"id"
+  }
+  #migrate to spatial data frames
+  ow<-options(warn=-1)
+  tmp.polys <-  maptools:::Map2poly(tmp.shape,region.id=TRUE )
+  options(ow)
+  
+  # Note: poly2nb is very slow, so read from a file if present
+
+    
+  tmp.nb <- try(read.gal(gal))
+  if (inherits(tmp.nb,"try-error")) {
+        print(paste("No gal file found:",gal))
+        gal <- NULL
+  }
+  
+  
+  # not an else, since top condition may change
+  if (is.null(gal)) {
+    print("Generating gal file...")
+    tmp.nb <- poly2nb(tmp.polys)
+  }
+  
+  tmp.timestamp<-Sys.time()
+  retval<-list(shape=tmp.shape,polys=tmp.polys,nb=tmp.nb,df=tmp.df,timestamp=tmp.timestamp)
+  class(retval)<-"bardBasemap"
+  if (wantplan) {
+    tmp.plan <- NULL
+    if (!is.null(tmp.df[[id]])) {
+      tmp.plan <- tmp.df[[id]]
+      attr(tmp.plan,"ndists")<-length(unique(tmp.plan))
+      basem(tmp.plan)<-retval
+      class(tmp.plan)<-"bardPlan"
+    }
+     retval<-list(retval,plan=tmp.plan)
+  } else {
+   
+    return(retval)
+  }
+}
+
+importBardShape.old <- importBardShape.polyList 
+
+isOldBasemap<-function(basemap) {
+	if (class(basemap)!="bardBasemap") {
+		return(NA)
+	}
+	if (inherits(basemap$shape,"SpatialPolygonsDataFrame")) {
+		return(FALSE)
+	}
+	return (TRUE)
+}
+
+exportBardShape.polylist <-
+function(plan,filen,id="BARDPlanID",gal=paste(filen,".GAL",sep="")) {
+  filen<-sub("\\.shp","",filen)
+    basemap<-basem(plan)
+  BARDplan <- as.vector(plan)
+  newDf <- cbind(basemap$df,BARDplan)
+  names(newDf)[length(newDf)] <- id
+  
+  #migrate to spatial data frames
+  ow<-options(warn=-1)
+  saveres1<-try(maptools:::write.polylistShape(basemap$polys,newDf,filen))
+  options(ow)
+  saveres2<-try(write.nb.gal(basemap$nb,gal))
+  retval<-(!inherits(saveres1,"try-error")  &&  !inherits(saveres2,"try-error"))
+  return(retval)
+}
+
+exportBardShape.old <-
+exportBardShape.polylist 
+
+convertBaseMap.polylist<-function(basemap) {
+	if (!isOldBasemap(basemap)) {
+		return(basemap)
+	}
+	warning("Attempting to convert basemap from previous polyList representation.")
+	fn.tmp <- tempfile()
+	plan.tmp<- createAssignedPlan(basemap,replicate(length(basemap$polys),1))
+	exportBardShape.old(plan.tmp, fn.tmp,id="TMPID")
+	retval<-importBardShape(fn.tmp,id="TMPID")
+
+	# remove tmp id
+	tmpcol<-which(names(retval$shape@data)=="TMPID")
+	retval$shape@data<-retval$shape@data[,-tmpcol]
+	retval$df<-retval$df[,-tmpcol]
+
+	return(retval)
+}
+convertBaseMap.old<-convertBaseMap.polylist		
+
+###
 ###  Generic methods
 ###
 
@@ -268,7 +396,7 @@ print.bardBasemap.summary<-function(x,...) {
 }
 
 plot.bardBasemap<-function(x,...) {
-  plot(x$polys,...)
+ plot(x$shape,...)
 }
 
 "==.bardBasemap"<-function(e1,e2) {

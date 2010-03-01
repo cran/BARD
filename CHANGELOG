@@ -67,3 +67,14 @@ Changelog
 1.05
   -- license issues
   -- CMD check under 2.10
+1.06 
+  -- tmp workaround for deprecated spatialPolygons
+1.07 
+  -- migrated to SpatialDataFrame objects
+  -- Add perimeter/area compactness scores
+  -- Add options to generate/analyze single districts
+  -- Clarified original districts of recoded plans
+  -- Added option to sample, score, compare single districts
+  -- Spatial holes  district scoring
+  
+  

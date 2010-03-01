@@ -22,7 +22,7 @@ scorePlans(plans, scoreFUNs, domatch = TRUE)
 }
 \value{
 	Score plans returns a score data frame
-	diff returns a fifference lists
+	diff returns a difference lists
 }
 \examples{
   suffolk.map <- importBardShape(

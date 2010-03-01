@@ -27,6 +27,8 @@ writeBardImage(filen, basemaps=NULL, plans=NULL)
   Write method returns logical success, invisibly.
 }
 
+\note{ \code{readBardImage} attempts to detect and convert images created by previous versions of BARD, however it may fail to convert them due to limits in the underlying R libraries it depends. Use \code{\link{exportBardShape}} in the previous version  \code{\link{importBardShape}} to migrate if automatic conversion is unsuccessful. }
+
 \author{
   Micah Altman
   \email{Micah\_Altman@harvard.edu}

@@ -1,3 +1,6 @@
+
+
+
 ##############################################################################
 #
 # bard initial plan generation
@@ -114,7 +117,7 @@ createAssignedPlan<-function(basemap,predvar="BARDPlanID") {
   # convert to continuous ordered integers
   plan<-as.numeric(factor(tmpplan,levels=sort(unique(tmpplan))))
   
-  if (!identical(as.integer(sort(unique(plan))), sort(unique(tmpplan)))) {
+  if (!identical(as.numeric(sort(unique(plan))), sort(unique(tmpplan)))) {
     warning("District identifiers were not continuous and were reordered")
   }
   
@@ -160,7 +163,7 @@ createRandomPlan<-function(basemap,ndists) {
 }
 
 createRandomPopPlan<-function(basemap,ndists,
-  predvar="POP"  ) {
+  predvar="POP" ) {
   
   # syntactic sugar -- revert to create random plan
   if (is.null(predvar)) {
@@ -211,13 +214,8 @@ createRandomPopPlan<-function(basemap,ndists,
 ##################################
 
 createKmeansPlan<-function(basemap,ndists) {
-  dist.centroids=t(
-    sapply(basemap$polys,
-      function(x)c(attr(x,"centroid")))
-    )
-  if (sum(dist.centroids==NULL)>0) {
-    dist.centroids=get.Pcent(basemap$shape)
-  }
+  dist.centroids<-getBardCentroids(basemap)
+
   plan <-  kmeans(dist.centroids,ndists)$cluster
   attr(plan,"ndists")<-ndists
   basem(plan)<-basemap
@@ -303,6 +301,24 @@ createWeightedKmeansPlan<-function(basemap,ndists,centers=c(),weightVar=NULL,tri
   return(plan)
 }
 
+#########
+## sampleDistricts 
+##
+##
+## Convenience function
+##
+## Repeatedly calls districtonly district creation algorithm.
+##
+#################
+
+quickSampleDistricts<-function(ngenplans, basemap, ndists, distFUN=createContiguousDistrict, ...) {
+	
+	retval <- replicate(ngenplans,distFUN(basemap,ndists,...),simplify=FALSE)
+	class(retval)<-"bardDistSample"
+	return(retval)
+}
+
+
 
 #################################
 #
@@ -347,21 +363,48 @@ createWeightedKmeansPlan<-function(basemap,ndists,centers=c(),weightVar=NULL,tri
 #
 ##################################
 
+
+#
+# Convenience wrapper
+#
+
+createContiguousDistrict<-function( basemap,ndists, predvar="POP",
+  threshold = .05, ssize=20,
+  usebb=TRUE,
+  maxtries=(10/threshold),
+  neighborstarts=TRUE,
+fillholes=TRUE) {
+
+	return(createContiguousPlan(basemap=basemap,
+				    ndists=ndists,
+				    predvar=predvar,
+				    threshold=threshold,
+				    ssize=ssize,
+				    usebb=usebb,
+				    maxtries=maxtries,
+				    neighborstarts=neighborstarts,
+				    fillholes=fillholes,
+				    districtonly=TRUE))
+}
+
 createContiguousPlan<-function(basemap,ndists,
   predvar="POP",
   threshold = .05, ssize=20,
   usebb=TRUE,
   maxtries=(10/threshold),
   neighborstarts=TRUE,
-  fillholes=TRUE) {
+  fillholes=TRUE,
+  districtonly=FALSE) {
     DEBUG<-FALSE
     maxtries<-max(1,maxtries)
 
+    
     for (i in 1:maxtries) {
       result<-CDOInner(
            basemap=basemap,ndists=ndists,predvar="POP",
            threshold=threshold, DEBUG=DEBUG,ssize=ssize, usebb=usebb,
-           neighborstarts=neighborstarts,fillholes=fillholes)
+           neighborstarts=neighborstarts,fillholes=fillholes,
+           districtonly=districtonly)
 
       if (result$success) {
         break
@@ -371,7 +414,9 @@ createContiguousPlan<-function(basemap,ndists,
          flush.console()
       }
     }
-  
+    if(districtonly) {
+    	attr(result$plan,"districtonly")<-TRUE
+    }
     return(result$plan)
 }
 
@@ -382,17 +427,18 @@ CDOInner<-function(basemap,ndists,
   ssize,
   usebb,
   neighborstarts,
-  fillholes) {
+  fillholes,
+  districtonly) {
   
   # setup  for plan
   blocklist <- (1:length(basemap$polys)) * 0   # list of block ids in plan
   nblocks <- length(blocklist)                 # number of blocks
-  totpop <- sum(basemap$shape$att.data[[predvar]]) # total population
+  totpop <- sum(basemap$df[[predvar]]) # total population
   targetpop <- totpop/ndists
   targetlow <-  (1-threshold)*targetpop    #population targets
   targethigh <- (1+threshold)*targetpop
   MAXSTARTS <- max(8,(.1/threshold))            # Max restarts 
-  tmppop <- basemap$shape$att.data[[predvar]]  # vector of block populations
+  tmppop <- basemap$df[[predvar]]  # vector of block populations
   
   # plan object 
   attr(blocklist,"ndists")<-ndists
@@ -400,7 +446,10 @@ CDOInner<-function(basemap,ndists,
   class(blocklist)<-"bardPlan"
      
   # iterate over districts     '
-  if (fillholes) {
+  if (districtonly) {
+     ndistcount<-1
+     innertargetpop <- targetpop
+  } else if (fillholes) {
     ndistcount <- ndists
     innertargetpop <- (1-threshold/ndists)*targetpop
   } else {
@@ -427,16 +476,17 @@ CDOInner<-function(basemap,ndists,
       
       # set initial tracking params
       curpop <- tmppop[tmpstart]
-      curbbox <- attr(basemap$polys[[tmpstart]],"bbox")
+      curbbox <- unlist(getBbox(basemap,tmpstart))
       curnb <- neighbors(basemap$nb,tmpstart)     #neighbors list
       curnb <- curnb[which(blocklist[curnb]==0)]
       
-      # CORE LOOP: add neighbors at random to current districs
+      # CORE LOOP: add neighbors at random to current districts
+      
       while ( (curpop < innertargetpop) && (length(curnb)>0))  {
 
-           if (DEBUG) { 
-             #print(paste("dist",i,"curpop",curpop))
-             #flush.console()
+           if (DEBUG>1) { 
+             print(paste("dist",i,"curpop",curpop))
+             flush.console()
            }
 
            # select a block from neighbors
@@ -445,7 +495,7 @@ CDOInner<-function(basemap,ndists,
            if (usebb) {
              # check blocks to see if they fall in the bounding box
              tmpbblist <- 
-             as.data.frame(sapply(basemap$polys[curnb],function(x)attr(x,"bbox")))
+             	sapply(curnb,function(x)unlist(getBbox(basemap,x)))
              bbcurnb <- curnb[
               which(sapply(tmpbblist,function(x)(x[1]>=curbbox[1] & x[2]>=curbbox[2] 
                & x[3]<=curbbox[3] & x[4]<=curbbox[4])))]
@@ -475,7 +525,7 @@ CDOInner<-function(basemap,ndists,
            # dynamic update of pop, bbox, neighborhood
            curpop <- curpop + tmppop[newblock]
           if (usebb) {
-              tmpbb <- attr(basemap$polys[[newblock]],"bbox")
+              tmpbb <- unlist(getBbox(basemap,newblock))
               curbbox[1] <- min(curbbox[1],tmpbb[1]); curbbox[2] <- min(curbbox[2],tmpbb[2])
               curbbox[3] <- max(curbbox[3],tmpbb[3]); curbbox[4] <- max(curbbox[4],tmpbb[4])
            }
@@ -493,7 +543,9 @@ CDOInner<-function(basemap,ndists,
             print("MAXSTARTS EXCEEDED")
             flush.console()
         } 
+        if (DEBUG>1) {
             plot(blocklist)
+        }
             curnbn <- neighbors(basemap$nb,which(blocklist==i))
             curnbn <- curnbn[which(blocklist[curnbn]==0)]
             curpopn <- sum(tmppop[which(blocklist==i)])
@@ -509,11 +561,12 @@ CDOInner<-function(basemap,ndists,
                print (curnb)
                   print("check")
                print (curnbn)
-               stop("failed consistency check on dynamic neigghbor")
+               stop("failed consistency check on dynamic neighbor")
             }
             if (usebb) {
-              tmpBB<- sapply(basemap$polys[blocklist==i],function(x)attr(x,"bbox"))
-              curbboxn<-c(apply(tmpBB[1:2,,drop=F],1,min),apply(tmpBB[3:4,,drop=F],1,max))
+              #tmpBB<- #sapply(basemap$polys[blocklist==i],function(x)attr(x,"bbox"))
+              #curbboxn<-c(apply(tmpBB[1:2,,drop=F],1,min),apply(tmpBB[3:4,,drop=F],1,max))
+             curbboxn<-unlist(getBbox(basemap,blocklist))
              if (any(curbbox!=curbboxn)) {
                print("current")
                print (curbbox)
@@ -527,6 +580,9 @@ CDOInner<-function(basemap,ndists,
              print("NO NEIGHBORS")
            } 
            flush.console()
+           if (DEBUG>2) {
+           	Sys.sleep(2)
+           }
       } 
 
       if ((nstarts<MAXSTARTS) && ((curpop<targetlow) || (curpop>targethigh)) ) {
@@ -543,7 +599,9 @@ CDOInner<-function(basemap,ndists,
   }      # end district count
   
   # assign final district
-  if (fillholes) {
+  if (districtonly) {
+    blocklist[which(blocklist==0)] <- 2
+  } else if (fillholes) {
     is.na(blocklist[which(blocklist==0)])<-TRUE
     blocklist<-fillHolesPlan(blocklist,method="closest")
   } else {
@@ -555,21 +613,26 @@ CDOInner<-function(basemap,ndists,
            plot(blocklist)
            Sys.sleep(5)
   }
-  if (i<ndists ) {
+  if (i<ndists && !districtonly ) {
           if (DEBUG) {
             print("PLAN INCOMPLETE")
             flush.console()
          }
     success<-FALSE
   } else  { 
-     if (!fillholes && calcContiguityScoreD(blocklist,distid=5)!=0) {
+     if (!districtonly && !fillholes && calcContiguityScoreD(blocklist,distid=5)!=0) {
        if (DEBUG) {
             print("LAST DISTRICT NOT CONTIGUOUS")
             flush.console()
          }
         success<-FALSE
     } else {  
-       distpops <- sapply(1:ndists, function(x)sum(tmppop[blocklist==x]))
+       if (districtonly) {
+       	distpops <- sum(tmppop[blocklist==1])
+       	} else {
+       	distpops <- sapply(1:ndists, function(x)sum(tmppop[blocklist==x]))
+       }
+       
        if (any(distpops<targetlow | distpops>targethigh)) {
          if (DEBUG) {
             print("FINAL DISTRICTS OUT OF POPULATION TARGET RANGE")
@@ -597,7 +660,11 @@ CDOInner<-function(basemap,ndists,
 ###
 
 summary.bardPlan<-function(object,...) {
-  retval<-table(object,dnn="Number of blocks in each district")
+  tmpplan<-object
+  if (is.districtonly(object)) {
+  	tmpplan<-factor(tmpplan,labels=c("district","unassigned"))
+  }
+  retval<-table(tmpplan,dnn=list("Number of blocks in each district"))
   class(retval)<-"bardPlan.summary"
   return(retval)
 }
@@ -609,6 +676,11 @@ print.bardPlan.summary<-function(x,...) {
 
 print.bardPlan<-function(x,...) {
   ndists<-attr(x,"ndists")
+  if (is.districtonly(x)) {
+  	ndists<-1
+  	cat("Single-district  -- only first district analyzed\n\n")
+  }
+  
   for (i in 1:ndists) {
     cat("\n\nBlocks in district ",i,":\n\n",...)
     print(which(x==i),...)
@@ -642,8 +714,9 @@ plot.bardPlan.summary<-function(x,...) {
 #
 #################################
 "plot.bardPlan" <-
-function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,...) {
+function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,col=NULL,...) {
   if(is.null(basemap)) {
+ 
     basemap<-basem(x)
   }
   if (is.null(basemap) || is.na(basemap) ) {
@@ -657,18 +730,14 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,...) {
   if (is.null(ndists)) {
       ndists <- length(unique(x))
   }
-  	arglist<-list(...)
-	if (!is.null(arglist$col)) {
-		colors <- arglist$col
+	if (is.null(col)) {
+		colors<-topo.colors(ndists)
 	} else {
-	     colors<-topo.colors(ndists);
+		colors <- col
+
         }
 	if (newPlot) {
-    ow<-options("warn"=-1)   # annoying warning from plot.polylist about
-                             #change in defaults, even though explicitly settin
-                             # forcefill
-                plot(mappolys, col="white",  forcefill=T,...)
-                options(ow)
+                plot(basemap$shape, col="white", ...)
         }
         for (i in 1:ndists) {
                 if (is.null(changed)) {
@@ -680,11 +749,9 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,...) {
                 }
 
                 if (length(which(tmp)) > 0 ) {
-			ow<-options("warn"=-1)
-                        submap <- subset(mappolys, tmp);
-                        plot(submap, add=T, col=colors[i],forcefill=T,...)
-                        options(ow)
-    }
+                        submap <- basemap$shape[which(tmp),]           	
+                       plot (submap, add=T, col=colors[i])
+                }
         }
  return(invisible(TRUE))
 }
@@ -732,6 +799,15 @@ checkPlans<-function(plans) {
     retval<-TRUE
     checkclass<-
       sapply(plans,function(x)inherits(x,"bardPlan"))
+      
+    checkdistrictonly<-
+    sapply(plans,function(x)is.districtonly(x)==is.districtonly(plans[[1]])) 
+    
+    if (!all(checkdistrictonly)) {
+      warning("Plans and districts cannot be mixed")
+      retval<-FALSE
+    }
+  
     if (!all(checkclass)) {
       warning("Plans must have class bardPlan")
       retval<-FALSE
@@ -764,9 +840,13 @@ getBardCentroids<-function(x,i=NULL) {
 	basemap<-x
   }
   if (is.null(i)) i<-1:length(basemap$polys)
-  dist.centroids<-t(
-    sapply(basemap$polys[i],
-      function(x)c(attr(x,"centroid"),recursive=TRUE))
-    )
+  dist.centroids<-coordinates(basemap$shape[i,])
   return(dist.centroids)
 }
+
+is.districtonly<-function(plan) {
+  districtonly<-attr(plan,"districtonly")
+  retval<-(!is.null(districtonly) && (districtonly))
+  return(retval)
+ }
+	

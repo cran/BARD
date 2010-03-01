@@ -159,9 +159,6 @@ The file contains the coordinates of the outlines of all geographical units (the
 > suffolk.map <- importBardShape(file.path(system.file("shapefiles", 
 +     package = "BARD"), "suffolk_tracts"))
 \end{Sinput}
-\begin{Soutput}
-Shapefile type: Polygon, (5), # of Shapes: 320
-\end{Soutput}
 \end{Schunk}
 
 These commands illustrate are several \pkg{BARD} functions that create ``random'' redistricting plans:
@@ -222,19 +219,19 @@ Furthermore, \pkg{BARD} generates reports for plans based on built-in or user-su
 \begin{Soutput}
 Plan Scores
 
-       Plan DistrictID RecodedID Contiguity Holes LW Compact     Reock
-1    kmeans          1         1  0.0000000    NA 0.37793995 0.6615332
-2    kmeans          2         2  0.0000000    NA 0.12453986 0.5118740
-3    kmeans          3         3  0.0000000    NA 0.01301973 0.3701414
-4    kmeans          4         4  0.0000000    NA 0.51839856 0.6363930
-5    kmeans          5         5  0.0000000    NA 0.54778739 0.6458771
-6    kmeans      Total     Total  0.0000000     0 1.58168548 2.8258188
-7  random 1          1         3  0.9722222    NA 0.61087731 0.9211987
-8  random 1          2         5  0.9677419    NA 0.62101415 0.9182824
-9  random 1          3         1  0.9677419    NA 0.53261043 0.9458906
-10 random 1          4         2  0.9642857    NA 0.54302639 0.8866687
-11 random 1          5         4  0.9642857    NA 0.72932019 0.9507240
-12 random 1      Total     Total  4.8362775     0 3.03684847 4.6227644
+       Plan DistrictID OriginalID Contiguity Holes LW Compact     Reock
+1    kmeans          1          1  0.0000000    NA 0.08745115 0.3883830
+2    kmeans          2          2  0.0000000    NA 0.15240584 0.5042317
+3    kmeans          3          3  0.0000000    NA 0.07392494 0.5432474
+4    kmeans          4          4  0.0000000    NA 0.37793995 0.6615332
+5    kmeans          5          5  0.0000000    NA 0.13276734 0.6475287
+6    kmeans      Total      Total  0.0000000     0 0.82448922 2.7449241
+7  random 1          1          1  0.9565217    NA 0.61584506 0.8946269
+8  random 1          2          5  0.9696970    NA 0.68795750 0.9422938
+9  random 1          3          2  0.9629630    NA 0.59101998 0.9314261
+10 random 1          4          3  0.9714286    NA 0.63216985 0.9531170
+11 random 1          5          4  0.9583333    NA 0.57862408 0.8976216
+12 random 1      Total      Total  4.8189436     0 3.10561647 4.6190855
 
 
 Plan Differences
@@ -242,13 +239,20 @@ Plan Differences
 
 Comparing plan kmeans with plan random 1 :
 
-      Dist ID New ID # of original blocks # Blocks Removed #  Added % Shared
-1           1      3                   21               16       65     5.81
-2           2      5                   92               67       41    18.80
-3           3      1                   26               17       60    10.50
-4           4      2                  103               82       39    14.80
-5           5      4                   78               61       38    14.70
-Holes      NA     NA                    0                0        0       NA
+      Dist ID Original ID # of original blocks # Blocks Removed #  Added
+1           1           1                   93               67       37
+2           2           5                   64               50       47
+3           3           2                  103               78       45
+4           4           3                   21               14       51
+5           5           4                   39               30       59
+Holes      NA          NA                    0                0        0
+      % Shared
+1        20.00
+2        12.60
+3        16.90
+4         9.72
+5         9.18
+Holes       NA
 \end{Soutput}
 \end{Schunk}
 }

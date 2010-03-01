@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  30 OCT 2009 00:00
+This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  7 JAN 2010 23:59
 entering extended mode
  %&-line parsing enabled.
 **bardJSS
@@ -460,20 +460,20 @@ LaTeX Font Info:    Try loading font information for T1+aett on input line 149.
 (/usr/local/texlive/2008/texmf-dist/tex/latex/ae/t1aett.fd
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
 )
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 166.
+
+
+(/Library/Frameworks/R.framework/Resources/share/texmf/omsaer.fd
+File: omsaer.fd 1999/12/27
+)
+LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 166.
+
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 6 []
  []
 
-[6]
-LaTeX Font Info:    Try loading font information for OMS+aer on input line 169.
-
- (/Library/Frameworks/R.framework/Resources/share/texmf/omsaer.fd
-File: omsaer.fd 1999/12/27
-)
-LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 169.
-
-<bardJSS-plot1a.pdf, id=581, 505.89pt x 433.62pt>
+[6] <bardJSS-plot1a.pdf, id=581, 505.89pt x 433.62pt>
 File: bardJSS-plot1a.pdf Graphic file (type pdf)
  <use bardJSS-plot1a.pdf>
 
@@ -505,7 +505,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [9 <./edit_map.pdf>]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Overfull \vbox (76.80348pt too high) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -516,7 +516,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 File: bardJSS-plot2a.pdf Graphic file (type pdf)
 
 <use bardJSS-plot2a.pdf>
-Underfull \vbox (badness 3590) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -539,6 +539,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
+Underfull \vbox (badness 1184) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 15
  []
@@ -554,6 +557,9 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [17]
+Underfull \vbox (badness 3449) has occurred while \output is active []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 18 []
  []
@@ -577,14 +583,14 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21]
-Underfull \vbox (badness 5288) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 22 []
  []
 
-[22] <bardJSS-plot3a.pdf, id=834, 505.89pt x 433.62pt>
+[22] <bardJSS-plot3a.pdf, id=832, 505.89pt x 433.62pt>
 File: bardJSS-plot3a.pdf Graphic file (type pdf)
 
 <use bardJSS-plot3a.pdf>
@@ -681,12 +687,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [35]
-Underfull \hbox (badness 10000) in paragraph at lines 1110--1110
+Underfull \hbox (badness 10000) in paragraph at lines 1114--1114
 
  []
 
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1110.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1114.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -728,9 +734,9 @@ onts/type1/bluesky/cm/cmti8.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1
 /bluesky/cm/cmti9.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/c
 m/cmtt10.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmtt9.p
 fb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on bardJSS.pdf (36 pages, 9237445 bytes).
+Output written on bardJSS.pdf (36 pages, 9184340 bytes).
 PDF statistics:
- 1058 PDF objects out of 1200 (max. 8388607)
+ 1056 PDF objects out of 1200 (max. 8388607)
  150 named destinations out of 1000 (max. 131072)
  195 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -21,6 +21,7 @@
   These functions read and write parts of the .GlobalEnv.  
 }
 
+\note{ \code{readBardCheckpoint} is not guaranteed to work with checkpoints saved in previous versions of BARD. Use \code{\link{exportBardShape}} in the previous version  \code{\link{importBardShape}} to migrate. }
 \value{
   Write return logical success invisibly. 
   Read returns logical success invisibly, and restores selected .GlobalEnv state. 

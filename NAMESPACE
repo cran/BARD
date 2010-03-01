@@ -12,11 +12,12 @@ export( basem, "basem<-", "basem.default", "basem<-.default" )
 
 # score functions
 export ( calcGroupScore, calcContiguityScore, calcLWCompactScore, calcPopScore, 
-  calcRangeScore, calcHolesScore,calcReockScore, calcMomentScore, combineDynamicScores  )
+  calcRangeScore, calcHolesScore,calcReockScore, calcMomentScore, calcPACompactScore, combineDynamicScores, calcUnassignedScore,calcSpatialHolesScore  )
 
 # plan generation
 export ( createKmeansPlan, createRandomPlan, createContiguousPlan, 
-  createAssignedPlan, createRandomPopPlan, createWeightedKmeansPlan )
+  createAssignedPlan, createRandomPopPlan, createWeightedKmeansPlan,
+  createContiguousDistrict )
 
 # plan fixup
 export (fillHolesPlan)
@@ -25,7 +26,7 @@ export (fillHolesPlan)
 export ( refineGreedyPlan, refineAnnealPlan, refineNelderPlan, refineGenoudPlan, refineGRASPPlan, refineTabuPlan )
 
 # profiling functions
-export(samplePlans, profilePlans)
+export(samplePlans, quickSampleDistricts, profilePlans)
 
 # plan comparison
 export(reportPlans,scorePlans)

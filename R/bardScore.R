@@ -70,8 +70,13 @@
 # 
 #########################################################################
 
+
 calcHolesScore<-function(plan,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
+  
+  if(is.districtonly(plan)) {
+  	return(NA)
+  }
 
   nholes<-sum(is.na(plan))
   if(standardize) {
@@ -81,6 +86,8 @@ calcHolesScore<-function(plan,
   }
   return(score)
 }
+
+calcUnassignedScore<-calcHolesScore
 
 #########################################################################
 #
@@ -102,14 +109,10 @@ calcHolesScore<-function(plan,
 calcContiguityScore<-function(plan,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
 
-  if(is.null(lastscore)) {
-    ndists<-attr(plan,"ndists")
-    distids <- 1:ndists
-    score <- numeric(ndists)
-  } else {
-    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
-    score <- lastscore
-  }
+  setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+
   
   score[distids]<- 
     sapply(distids,function(x)calcContiguityScoreD(plan,x,standardize))
@@ -136,14 +139,10 @@ calcContiguityScore<-function(plan,
 calcLWCompactScore<-function(plan,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
 
-  if(is.null(lastscore)) {
-    ndists<-attr(plan,"ndists")
-    distids <- 1:ndists
-    score <- numeric(ndists)
-  } else {
-    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
-    score <- lastscore
-  }
+  setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+  
     score[distids]<-sapply(distids,function(x)
       calcLWCompactScoreD(plan,x,standardize))
     return(score)
@@ -152,24 +151,46 @@ calcLWCompactScore<-function(plan,
 calcReockScore<-function(plan,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
 
-  if(is.null(lastscore)) {
-    ndists<-attr(plan,"ndists")
-    distids <- 1:ndists
-    score <- numeric(ndists)
-  } else {
-    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
-    score <- lastscore
-  }
+  
+    setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+  
     score[distids]<-sapply(distids,function(x)
       calcReockScoreD(plan,x,standardize))
     return(score)
 }
+
+calcPACompactScore<-function(plan,
+  lastscore=NULL, changelist=NULL, standardize=TRUE ) {
+
+  setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score  
+  
+    score[distids]<-sapply(distids,function(x)
+      calcPACompactScoreD(plan,x,standardize))
+    return(score)
+}
+
+calcSpatialHolesScore<-function(plan,
+  lastscore=NULL, changelist=NULL, standardize=TRUE ) {
+
+  setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score  
+  
+    score[distids]<-sapply(distids,function(x)
+      calcSpatialHolesScoreD(plan,x,standardize))
+    return(score)
+}
+
   
 #########################################################################
 #
 # calcPopScore
 # 
-# Returns a score based on teh population equality of the districts.
+# Returns a score based on the population equality of the districts.
 #
 # Arguments:
 #     As above.
@@ -189,7 +210,10 @@ calcPopScore<-function(plan, predvar="POP",
 
   basemap<-basem(plan)
   ndists<-attr(plan,"ndists")
-  if(is.null(lastscore) || is.null(attr(lastscore,"rawscore"))) { 
+  districtonly<-is.districtonly(plan)
+  if (districtonly) {
+  	rawscore<-calcUniScoreD(plan,1,varid=predvar)
+  } else   if(is.null(lastscore) || is.null(attr(lastscore,"rawscore"))) { 
     rawscore<-sapply(1:ndists,function(x)calcUniScoreD(plan,x,varid=predvar))
   } else {
     rawscore <- attr(lastscore,"rawscore")
@@ -205,8 +229,13 @@ calcPopScore<-function(plan, predvar="POP",
   }
   
   if (standardize) {
-      
-      score<- sqrt(abs((rawscore-sum(rawscore)/ndists))/sum(rawscore))
+  	
+  	if (districtonly) {
+  		totalv<-sum(basemap$df[predvar]) 
+  		} else {
+  		totalv<-sum(rawscore)
+  	}
+      score<-  sqrt(abs((rawscore-totalv/ndists))/sum(totalv))
   } else {
       score<-rawscore
   }
@@ -216,7 +245,7 @@ calcPopScore<-function(plan, predvar="POP",
 
 #########################################################################
 #
-# calcRangeScoree
+# calcRangeScore
 # 
 # Calculates disctricts compliance to a target range for a predictive variable.
 # Will penalize districts increasingly as sum(prevar1)/(sum(predvar1)+sumpredvar(2))
@@ -249,7 +278,10 @@ calcRangeScore<-function(plan, predvar="BLACK", predvar2="WHITE",
 
   ndists<-attr(plan,"ndists")
   basemap<-basem(plan)
-  if(is.null(lastscore) || is.null(attr(lastscore,"rawscore"))) { 
+  if (is.districtonly(plan)) {
+  	    rawscore1<-calcUniScoreD(plan,1,varid=predvar)
+  	    rawscore2<-calcUniScoreD(plan,1,varid=predvar2)
+  } else   if(is.null(lastscore) || is.null(attr(lastscore,"rawscore"))) { 
     rawscore1<-sapply(1:ndists,function(x)calcUniScoreD(plan,x,varid=predvar))
     rawscore2<-sapply(1:ndists,function(x)calcUniScoreD(plan,x,varid=predvar2))
   } else {
@@ -317,14 +349,11 @@ calcGroupScore<-function(plan,groups=list(),penalties=1,
   return(0)
  }
 
- if(is.null(lastscore)) {
-    ndists<-attr(plan,"ndists")
-    distids <- 1:ndists
-    score <- numeric(ndists)
-  } else {
-    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
-    score <- lastscore
-  }
+
+   setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+ 
     score[distids]<-sapply(distids,function(x)
       calcGroupScoreD(plan,x,groups,penalties))
     return(score)
@@ -351,14 +380,13 @@ calcGroupScore<-function(plan,groups=list(),penalties=1,
 calcMomentScore<-function(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2,
            lastscore=NULL, changelist=NULL ) { 
 
- if(is.null(lastscore)) {
-    ndists<-attr(plan,"ndists")
-    distids <- 1:ndists
-    score <- numeric(ndists)
-  } else {
-    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
-    score <- lastscore
-  }
+           
+  setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+  ndists<-attr(plan,"ndists")
+
+  
   
  if ((!is.null(centers)) &&length(centers)!=ndists) {
   warning("wrong number of centers specified")
@@ -488,27 +516,59 @@ calcLWCompactScoreD<-function(plan,distid, standardize=TRUE) {
     return(score)
 }
 
-
 #########################################################################
 #
-#  calcUniScoreD
+#  calcPACompactScoreD
 #
-# Returns a univariate function quantity for a district. Used as a building 
-# block for other score functions.
+# Returns the PA compactness as determined by the perimeter area ratio
 #
-# Additional arguments
-#   - varid - id of variable in basemap to evaluate
-#   - unifunc - function to use for evaluation
+#  See calcLWCompactScore
 #
 #########################################################################
 
-calcUniScoreD<-function(plan,distid,varid,unifunc=sum) {
+CIRCRATIO<-sqrt(pi)/(2*pi)
+calcPACompactScoreD<-function(plan,distid, standardize=TRUE) {
     blocks<-which(plan==distid)
     if (length(blocks)==0) {
-      return(0)
+      return(1)
     }
-   basemap<-basem(plan)
-    return(unifunc(basemap$df[[varid]][blocks]))
+    basemap<-basem(plan)
+
+    
+    tmpinfo<-getDistrictShapeInfo(basemap,blocks)
+    score<-sqrt(tmpinfo$area)/tmpinfo$perim
+    if (standardize) {
+    	score<-score/CIRCRATIO
+    }
+    score<-1-score
+    return(score)
+}
+
+
+#########################################################################
+#
+#  calcSpatialHolesScoreD
+#
+# Returns score based on number of holes (topological complexity -- donut districts)
+#
+#  See calcSpatialHoleScore
+#
+#########################################################################
+
+calcSpatialHolesScoreD<-function(plan,distid, standardize=TRUE) {
+    blocks<-which(plan==distid)
+    if (length(blocks)==0) {
+      return(1)
+    }
+    basemap<-basem(plan)
+
+    
+    tmpinfo<-getDistrictShapeInfo(basemap,blocks)
+    score <- tmpinfo$numholes
+    if (standardize) {
+    	score<- (1- (1/(score+1)))
+    }
+    return(score)
 }
 
 
@@ -556,11 +616,13 @@ calcGroupScoreD<-function(plan,distid,groups=list(),penalties=1) {
   }
   basemap<-basem(plan)
   polys<-basemap$polys[blocks]
-  distArea <- 
-    sum(sapply(polys,function(x)attr(x,"area")))
+  distArea <-sum(unlist(sapply(polys, 
+  function(x)sapply(x@Polygons,function(x)x@area))))
     
-  xs<-unlist(sapply(polys,function(x)x[,1]))
-  ys<-unlist(sapply(polys,function(x)x[,2]))
+  xs<-unlist(sapply(polys, 
+  function(x)sapply(x@Polygons,function(x)x@coords[,1])))
+  ys<-unlist(sapply(polys, 
+  function(x)sapply(x@Polygons,function(x)x@coords[,2])))
   circleArea <- miniball(cbind(xs,ys))$sqradius*pi
   score <- distArea/circleArea
   if (standardize) {
@@ -616,6 +678,29 @@ calcMomentScoreD<-function(plan,distid,standardize,
 	return(score)
 }
 
+#########################################################################
+#
+#  calcUniScoreD
+#
+# Returns a univariate function quantity for a district. Used as a building 
+# block for other score functions.
+#
+# Additional arguments
+#   - varid - id of variable in basemap to evaluate
+#   - unifunc - function to use for evaluation
+#
+#########################################################################
+
+calcUniScoreD<-function(plan,distid,varid,unifunc=sum) {
+    blocks<-which(plan==distid)
+    if (length(blocks)==0) {
+      return(0)
+    }
+   basemap<-basem(plan)
+    return(unifunc(basemap$df[[varid]][blocks]))
+}
+
+
 #
 # getBbox
 #
@@ -623,16 +708,72 @@ calcMomentScoreD<-function(plan,distid,standardize,
 #
 
 
-getBbox<-function(basemap,blocks) {
-	tmpBB<- sapply(basemap$polys[blocks],function(x)attr(x,"bbox"))
-    boxMax<- apply(tmpBB[3:4,,drop=FALSE],1,max)
-    boxMin<- apply(tmpBB[1:2,,drop=FALSE],1,min)
+getBbox<-function(basemap,blocks=integer(0)) {
 	retval<-list()
-	retval$boxMin<-boxMin
-	retval$boxMax<-boxMax
+	if(length(blocks)==0) {
+		blocks<-1:length(basemap$polys)
+	}
+	
+	bboxg<-basemap$bboxs
+	
+	
+	# still too slow
+	#tbox<-bbox(basemap$shape[blocks,])
+	#rownames(tbox)<-NULL
+	#bMin<-tbox[,1]
+	#bMax<-tbox[,2]
+	
+	# This is MUCH slower. Could save memory... check later.
+	#tbs<-sapply(blocks,function(x)basemap$shape[x,]@bbox)
+	#bMin<-c(min(tbs[1,]),min(tbs[2,]))
+	#bMax<-c(max(tbs[3,]),max(tbs[4,]))
+	
+	bMin<-apply(bboxg[1:2,blocks,drop=F],1,min)
+	bMax<-apply(bboxg[3:4,blocks,drop=F],1,max)
+	retval$boxMin<-bMin
+	retval$boxMax<-bMax
 	return(retval)
 }
 
+
+getDistrictShapeInfo<-function(basemap,blocks=integer(0)) {
+	if(length(blocks)==0) {
+		blocks<-1:length(basemap$polys)
+	}
+	   
+	usub<-unionSpatialPolygons(basemap$shape[blocks,],replicate(length(blocks),1))
+
+	tperim<-sum(sapply(usub@polygons, 
+	function(x)sapply(x@Polygons,function(x)LineLength(x@coords))))
+	tarea<-sum(unlist(sapply(usub@polygons, 
+	function(x)sapply(x@Polygons,function(x)x@area))))
+	tcent<-coordinates(usub)
+	
+	# spatial holes
+	npolys<-checkPolygonsHoles(usub@polygons[[1]])
+	numholes<-sum(sapply(npolys@Polygons,function(x) slot(x, "hole")))	
+
+	retval<-list( bbox=usub@bbox, area=tarea,centroid=tcent, perim=tperim, shape=usub, numholes=numholes) 
+	return(retval)
+}
+
+dynamicScoreSetup<-function(plan,lastscore,changelist) {
+  if(is.districtonly(plan)) {
+  	distids<-1
+  	score<-0
+  } else if(is.null(lastscore)) {
+    ndists<-attr(plan,"ndists")
+    distids <- 1:ndists
+    score <- numeric(ndists)
+  } else {
+    distids <- setdiff(unique(c(changelist[,2],plan[changelist[,1]])),NA)
+    score <- lastscore
+  }
+  retval<-list()
+  retval$distids<-distids
+  retval$score<-score
+  return(retval)
+}
 
 ##############################################################################
 #          Testing Functions

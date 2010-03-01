@@ -1,6 +1,7 @@
 \name{profilePlans}
 \alias{profilePlans}
 \alias{samplePlans}
+\alias{quickSampleDistricts}
 \title{Profile or pseudo-sample redistricting plans based on score criteria.}
 \description{
 These functions creates sets of redistricting plans to show how redistricting criteria affect plan outcoumes
@@ -19,6 +20,9 @@ samplePlans(seedplans, score.fun = calcContiguityScore,
 	ngenplans = 24, gen.fun = "createRandomPlan", gen.args = list(),
                  refine.fun = "refineAnnealPlan", refine.args = list(),
                  tracelevel = 1,usecluster=TRUE)
+                 
+quickSampleDistricts(ngenplans, basemap, ndists, distFUN=createContiguousDistrict, ...)
+
 }
 
 
@@ -36,14 +40,20 @@ samplePlans(seedplans, score.fun = calcContiguityScore,
 \item{numevals}{number of evaluations per plan at each point}
 \item{tracelevel}{indicates desired level of printed tracing of optimization, 0 = no printing, higher levels give more detail. Nine is maximum}
 \item{usecluster}{use the bard cluster for computations if available}
+ \item{basemap}{Bard basemap from which to create plan}
+ \item{ndists}{number of districts to create} 
+ \item{distFUN}{district generating function to use}
+ \item{\dots}{arguments to pass to distFUN}
 }
 
 \details{
 \code{samplePlans} generates a set of plans, adds these to the seed plans given, and refines them based on the score function, to create a pseudo-sample of plans optimizing a particular score.\code{profilePlans} generates a set of plans pseudo-sampled using a two-part score function, where the weight of the second part is repeatedly.
+
+\code{quickSampleDistricts} is a quick-and-dirty way of sampling a contiguous, equipopulous district (which may or may not be part of a plan containing only contigous districts) These sample districts may be scored using the scoring functions, but may not be used with plan refinement functions at present. 
 }
 
 \note{
-  These functions can be very compute intensive. If a compute cluster is configured, these functions will automtically distribute the computing load across the cluster. See \code{startBardCluster}.
+	\code{samplePlans} and \code{profilePlans}  can be very compute intensive. If a compute cluster is configured, these functions will automtically distribute the computing load across the cluster. See \code{startBardCluster}.
 }
 
 \value{
@@ -82,6 +92,16 @@ Cluster computing: \code{\link{startBardCluster}}
   )
  
   numberdists <- 5
+  
+  # district sampling - quick
+  
+  randomDists<-quickSampleDistricts(10,suffolk.map,numberdists)
+      distscores<- scorePlans(randomDists,scoreFUNs=list("LWCompact"=calcLWCompactScore,"PACompact"=calcPACompactScore,"PopScore"=calcPopScore ))
+    plot(distscores[2:3])
+
+  
+  # plan sampling and refinement -- compute intensive
+  
   kplan <- createKmeansPlan(suffolk.map,numberdists)
   rplan <- createRandomPlan(suffolk.map,numberdists)
   rplan2 <- createRandomPopPlan(suffolk.map,numberdists)
@@ -94,6 +114,10 @@ Cluster computing: \code{\link{startBardCluster}}
 
 
 profplans<-profilePlans(  list(kplan,rplan), score.fun=calcContiguityScore, addscore.fun=calcPopScore, numevals=2, weight=c(0,.5,1), refine.fun="refineNelderPlan",refine.args=list(maxit=200,dynamicscoring=TRUE) )
+
+
+
+
  
 summary(samples)
 plot(summary(samples))

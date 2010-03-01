@@ -1,4 +1,4 @@
-After 1.0:
+Todo:
  - Rgenoud cluster tuning
  - Miniball upgrade
  - ASA port
@@ -10,11 +10,17 @@ After 1.0:
  - tune annealing initial params
  - re-annealing
  - tune genoud operators, generations, population size
- - tune TABU search -- tabulist based on single/bidirectional
+ - tune TABU search -- tabulist based on single/bidirectional, full list
  - dynamic score tuning in Tabu
  - option for flat areas in greedy search
  - profiling cluster optimizations across samples
- - perim/area using union, PBMsmap, spatialDF objects
  - allow double exchanges
  - block-level incremental moment scores
  - kmeans balanced population
+ - CRS projections
+ -  Compare plans w/differnt districts
+ - createContigPlans --> performance drops as ndists increase
+ - cache list of exchangeable blocks in Greedy
+ - total score in siimulated annealing, keep best plan, temperature
+ - Repair contiguity option
+ - create arealist, perimeter, joint perimeter list for performance

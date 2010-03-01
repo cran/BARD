@@ -27,9 +27,17 @@ diff.bardPlan<-function(x,plan2,domatch=TRUE,...) {
   if (!checkPlans(list(plan1,plan2))) {
     return(NULL)
   }
+  districtonly<-is.districtonly(x)
+  if (districtonly) {
+  	domatch<-FALSE
+  }
   
   #recoding to match plan IDorder
-  planIDs<-sort(unique(c(unique(plan1),unique(plan2))))
+  if (districtonly) {
+  	planIDs<-1
+  	} else {
+  	planIDs<-sort(unique(c(unique(plan1),unique(plan2))))
+  }
   if (domatch) {
     matchID<-matchPlanID(plan1,plan2)
   } else {
@@ -57,7 +65,8 @@ diff.bardPlan<-function(x,plan2,domatch=TRUE,...) {
   attr(retval,"plan1")<-plan1
   attr(retval,"plan2")<-plan2
   attr(retval,"plan2recode")<-plan2recode
-  attr(retval,"matchID")<-matchID  
+  attr(retval,"matchID")<-matchID 
+  attr(retval,"districtonly")<-districtonly
   class(retval)<-"bardPlanDiff"
   return(retval)
 }
@@ -79,26 +88,26 @@ scorePlans<-function(plans, scoreFUNs, domatch=TRUE) {
     if (!is.list(plans)) {
       plans <- list(plans)
     }
-  checklengths <- 
-      sapply(plans,function(x){attr(x,"ndists")==attr(plans[[1]],"ndists")})
-    if (!all(checklengths)) {
-      stop("Plans must have same number of districts")
-    }
-    checkbase <- 
-      sapply(plans,function(x){basem(x)==basem(plans[[1]])})
-    if (!all(checkbase)) {
-      warning("Plans do not have the same basemap")
+   if (!checkPlans(plans)) {
+    return(NULL)
+  }
+    districtonly<-is.districtonly(plans[[1]])
+    if (districtonly) {
+    	domatch<-FALSE
     }
   # simplifies applying one score
-  scorePlan<-function(scoreFUN,plan) {
-    tmpScores <-scoreFUN(plan)
-    if (length(tmpScores) == 1) {
-      retval<-c(replicate(ndists,NA),tmpScores)
-    } else {
-      retval<-c(tmpScores,sum(tmpScores))
+    scorePlan <- function(scoreFUN, plan) {
+        retval<-tmpScores <- scoreFUN(plan)
+        
+        if (!districtonly) {
+        	if (length(tmpScores) == 1) {
+               retval <- c(replicate(ndists, NA), tmpScores)
+            } else {
+            	retval <- c(tmpScores, sum(tmpScores))
+        	}
+        }
+        return(retval)
     }
-    return(retval)
-  }
   
   # build score data frame
   ndists <- attr(plans[[1]],"ndists")
@@ -112,20 +121,32 @@ scorePlans<-function(plans, scoreFUNs, domatch=TRUE) {
           matchID<-1:ndists 
           tmpplan <- plans[[i]]
     }
-    tmpscore<-sapply(scoreFUNs,scorePlan,tmpplan)
-    tmpscore<-cbind(rep(i,ndists+1),c((1:ndists),0),c(matchID,0),tmpscore)
+    tmpscore<-sapply(scoreFUNs,scorePlan,tmpplan) 
+    if (districtonly) {
+    	tmpscore<-c(i,tmpscore)
+    } else {
+        tmpscore<-cbind(rep(i,ndists+1),c((1:ndists),0),c(match(c(1:ndists),matchID),0),tmpscore)
+    }
     retval<-rbind(retval,tmpscore)
   }
   
   # names processing
   retval<-as.data.frame(retval)
   scorenames<-makeNames(scoreFUNs,"score")
-  names(retval)<-c("Plan","DistrictID","RecodedID",scorenames)
   plannames<-makeNames(plans)
+  rownames(retval)<-NULL
+
+
+  if (districtonly) {
+  	 names(retval)<-c("Plan",scorenames)
+  } else {
+  	names(retval)<-c("Plan","DistrictID","OriginalID",scorenames)
+  	distnames<-c("Total",1:ndists)
+  	retval[["DistrictID"]]<-factor(retval[["DistrictID"]],levels=0:ndists,labels=distnames)
+  	retval[["OriginalID"]]<-factor(retval[["OriginalID"]],levels=0:ndists,labels=distnames)
+  }
   retval[["Plan"]]<-factor(retval[["Plan"]],labels=plannames)
-   distnames<-c("Total",1:ndists)
-  retval[["DistrictID"]]<-factor(retval[["DistrictID"]],levels=0:ndists,labels=distnames)
-  retval[["RecodedID"]]<-factor(retval[["RecodedID"]],levels=0:ndists,labels=distnames)
+
   return(retval)
 }
 
@@ -337,7 +358,12 @@ summary.bardPlanDiff<-function(object,...) {
     pdiffs = x
     plan1 <- attr(x,"plan1")
     matchID <- attr(x,"matchID")
-    if (is.null(matchID)) {
+    districtonly<-attr(x,"districtonly")
+
+
+    if (districtonly) {
+    	matchID<-1
+    } else if (is.null(matchID)) {
         matchID<-1:attr(plan1,"ndists")
     }
     
@@ -351,10 +377,10 @@ summary.bardPlanDiff<-function(object,...) {
     
     distTable <- t(sapply(pdiffs,shared))
     
-    distTable <- as.data.frame(cbind(1:length(matchID),matchID,distTable))
+    distTable <- as.data.frame(cbind(1:length(matchID),match(1:length(matchID),matchID),distTable))
     distTable <- rbind( distTable, c(NA,NA,shared(attr(object,"holes"))) )
     
-    names(distTable) = c("Dist ID","New ID","# of original blocks","# Blocks Removed",
+    names(distTable) = c("Dist ID","Original ID","# of original blocks","# Blocks Removed",
       "#  Added", "% Shared")
     rownames(distTable)[dim(distTable)[1]]<-"Holes"
     class(distTable)<- c("bardPlanDiff.summary","data.frame")
@@ -389,7 +415,12 @@ print.bardPlanDiff<-function(x,...) {
     }
 
       for ( i in 1:length(pdiffs)) {
-           cat(paste("Original District ID: ", i, "\n\n")) 
+           cat(paste("Plan 1 District ID: ", i, "\n\n"))
+           if (!is.null(matchID)) {
+           	cat(paste("Plan 2 Matched Original ID: ", match(i,matchID), "\n\n")) 
+           	
+           }
+
            printDiff(pdiffs[[i]])
       }
     cat(paste("Holes \n\n"))
@@ -397,23 +428,53 @@ print.bardPlanDiff<-function(x,...) {
     invisible()
 }
 
-plot.bardPlanDiff<-function(x,plotall=F, horizontal=T, ...) {
+plot.bardPlanDiff<-function(x,plotall=F, horizontal=T,col=NULL, ...) {
   plan1<-attr(x,"plan1")
   plan2<-attr(x,"plan2recode")
+  districtonly<-attr(x,"districtonly")
   op<-NULL
+  
+  if (districtonly) {
+  	colors<-heat.colors(3)
+  } else {
+  	colors<-col
+  }
+  
   if (plotall) {
+    tp1<-plan1
+    tp2<-plan2
     if (horizontal) {
-	    op<-par(mfcol=c(1,3))
+	    op<-par(mfcol=c(1,3), mfcol=c(3,1),mar=c(.1,.1,.1,.1),mai=c(.1,.1,.1,.1))
 	    } else {
-	   op<-par(mfcol=c(3,1))
+	   op<-par(mfcol=c(3,1), mfcol=c(3,1),mar=c(.1,.1,.1,.1),mai=c(.1,.1,.1,.1))
 	 }
 
-    plot(plan1,main="plan 1",...)
-    plot(plan2,main="plan 2",...)
+     if (districtonly) {
+	 	is.na(tp1)<-(plan1!=1)
+	 	tp1[plan1==1]<-2
+	 	is.na(tp2)<-(plan2!=1)
+	 	tp2[plan2==1]<-3	
+    }
+    plot(tp1,main="plan 1",col=colors,...)
+    plot(tp2,main="plan 2",col=colors,...)
+	 	
+  
   }
   dplan<-plan1
-  is.na(dplan)<-(plan1!=plan2)
-  plot(dplan,main="Plan Overlap",...)
+  if (districtonly) {
+   	is.na(dplan)<-TRUE
+   	dplan[plan2==1]<-3
+   	dplan[plan1==1]<-2
+   	dplan[(plan1==1) & (plan2==1)]<-1
+   	
+   	plot(dplan,main="District Overlap",col=colors,...)
+
+  } else {
+  	is.na(dplan)<-(plan1!=plan2)
+  	plot(dplan,main="Plan Overlap",col=colors,...)
+
+  }
+  	 
   par(op)
   invisible()
 }

@@ -4,7 +4,7 @@
 \alias{createKmeansPlan}
 \alias{createAssignedPlan}
 \alias{createContiguousPlan}
-\alias{createWeightedContiguousPlan}
+\alias{createContiguousDistrict}
 \alias{createWeightedKmeansPlan}
 \title{Create an initial plan for later refinement}
 \description{
@@ -19,6 +19,9 @@ createKmeansPlan(basemap,ndists)
 createWeightedKmeansPlan( basemap, ndists, centers = c(), weightVar = NULL,
                  trimfactor = 2.5, smallBlock = c("cap", "closest"))
 createContiguousPlan(basemap, ndists, predvar = "POP", threshold = 0.05,
+                 ssize = 20, usebb = TRUE, maxtries = (10/threshold),
+                 neighborstarts = TRUE, fillholes = TRUE, districtonly=FALSE)
+createContiguousDistrict(basemap, ndists, predvar = "POP", threshold = 0.05,
                  ssize = 20, usebb = TRUE, maxtries = (10/threshold),
                  neighborstarts = TRUE, fillholes = TRUE)
 }
@@ -37,6 +40,7 @@ createContiguousPlan(basemap, ndists, predvar = "POP", threshold = 0.05,
   \item{weightVar}{name of weighting variable in basemap, for weighting}
   \item{trimfactor}{rescales and trims weights, see below }
   \item{smallBlock}{how weighted kmeans handles blocks that are weighted to 0: caps minimimum weights at 1; closest post-assigns zero-weighted blocks to the nearest district}
+  \item{districtonly}{whether to generate a single district of the plan only}
 }
 
 \details{
@@ -69,6 +73,11 @@ from among those that touch one of the completed districts.''
 
 (Note that ssize was not included as an option, originally) 
 
+The \code{districtonly} option will cause a single district only to be created, which is a quick-and-dirty way of pseudo-sampling districts. 
+
+The resulting plan object is flagged as a `single-district' plan and score functions will return the score for that district, not the plan as a whole. 
+
+\code{createContiguousDistrict} is a wrapper for \code{createContiguousPlan} with the districtonly option set. 
 
 \code{createWeightedKmeansPlan} weights kmeans by a particular variable, most often used with population. This is implemented through block replication, so to limit memory use, the weights are rescaled so that minimum and maximum weights span approximately \code{trimfactor} orders of magnitude. Zero-weight blocks can either be capped at 1 an incorporated in the kmeans calculation, or left out and assigned to the closest district, based on the value of \code{smallblock}.
 
@@ -129,9 +138,15 @@ Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAn
   	cplan <- createContiguousPlan(suffolk.map,ndists)
   }
   
+ 
   plot(kplan)
   summary(kplan)
   plot(summary(rplan))
+  
+  c1plan<-createContiguousDistrict(suffolk.map,ndists)
+  c1plan
+  plot(c1plan)
+  summary(c1plan)
 }
 
 \keyword{IO}

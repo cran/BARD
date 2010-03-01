@@ -1,5 +1,8 @@
 \name{calcLWCompactScore}
 \alias{calcLWCompactScore}
+\alias{calcPACompactScore}
+\alias{calcUnassignedScore}
+\alias{calcSpatialHolesScore}
 \alias{calcPopScore}
 \alias{calcRangeScore}
 \alias{calcGroupScore}
@@ -16,10 +19,15 @@ calcRangeScore(plan, predvar="BLACK", predvar2="WHITE", targrange=c(.65,.70),
   lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcGroupScore(plan,groups=list(),penalties=1,lastscore=NULL, changelist=NULL, standardize=TRUE)
 calcPopScore(plan, predvar="POP",lastscore=NULL, changelist=NULL, standardize=TRUE )
+calcPACompactScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcLWCompactScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcReockScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcContiguityScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
+calcUnassignedScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
+
 calcHolesScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
+calcSpatialHolesScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
+
 calcMomentScore(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2, lastscore=NULL, changelist=NULL ) 
 }
 
@@ -53,7 +61,12 @@ calcRangeScore -  Calculates disctricts compliance to a target range for a predi
 calcGroupScore -  Calculates plans compliance with keeping designated groups. Use for 
 designated "nesting" districts, or known communities of interest. Returns proportion of group split by a district (if a group is split across multiple districts, all districts are penalized).
 
-calcHolesScores - Penalizes plans for having unassigned blocks
+calcUnassignedScore - Penalizes plans for having unassigned blocks
+calcHolesScore - alias for calcUnassignedScore
+
+calcSpatialHolesScore - penalizes plans for number of spatial (donut) holes (i.e. topological genus) in contiguous portions of the plan. (Completely separate portions of plans are not considered to have holes -- but are counted by calcContiguityScore. 
+
+calcPACompactScore - calculates plan compactness as a perimeter/ration area (where a Circle has a perfect score of 0)
 
 calcMomentScore - calculates moment of inertia compactness score of the district, the sum or squared distance of the block centroids (weighted by are of the block) to the district centroids. Options allow changing the penalty exponent (e.g. penaltyExp=1 will sum distances), assign a weightVar which will be used instead of area (e.g. population, for population moment of inertia), or specify fixed district centers to use as a substitute for district centroid (e.g. to use for warehouse allocation problems) 
 }
@@ -67,11 +80,12 @@ Incremental updating is not required of user-supplied score functions. Bard func
 }
 
 \value{
-All current plan score functions return a vector of score value, representing the score for each district, with the plan score being the sum of this vector. (User-written score functions MAY return a single number as a plan score instead, all bard utilities will handle this case correctly.)
+All current plan score functions, except calcUnassignedScorel return a vector of score value, representing the score for each district, with the plan score being the sum of this vector.
+
+CalcUnassignedScore returns a single score for the plan. User-written score functions MAY also return a single number as a plan score instead, all bard utilities will handle this case correctly.
 
 If the the "standardize" option is true. Each of these values should be       
-standardized to  [0,1], with 0  representing  the "best" score and 1 the worst score
-Otherwise,   score values MAY return values in other scalar  ranges, and even invert the ranking. It is recommended that standardized scored be used except for testing.
+standardized to  [0,1], with 0  representing  the "best" score and 1 the worst score Otherwise,   score values MAY return values in other scalar  ranges, and even invert the ranking. It is recommended that standardized scored be used except for testing.
 
 Note that in order to support dynamic recalculation, the score vector returned may have additional attached attributes.
 }
@@ -123,9 +137,13 @@ Combining dynamic scores \code{\link{combineDynamicScores}}.
   
   calcPopScore(kplan)
   calcPopScore(rplan)
-  calcLWCompactScore(kplan)
   calcLWCompactScore(rplan)
   calcLWCompactScore(kplan)
+  calcPACompactScore(rplan)
+  calcPACompactScore(kplan)
+  calcUnassignedScore(kplan)
+  calcUnassignedScore(rplan)
+  calcSpatialHolesScore(kplan)
   calcContiguityScore(rplan)
   calcContiguityScore(kplan)
   calcRangeScore(kplan)

@@ -27,18 +27,22 @@ Bard supports several areas of functionality:
   2. Initial plan generation. Quick heuristics for generating random plans, or plans based on a fixed set of criteria.
   (\link{createRandomPlan}, \link{createRandomPopPlan}, \link{createContiguousPlan}, \link{createKmeansPlan}, \link{createWeightedKmeansPlan},\link{fillHolesPlan})
   
+  As a quick method for exploration, single districts can be pseudo-sampled.
+  (\link{createContiguousDistrict},\link{quickSampleDistricts})
+  
   3. Interactive plan editing. Adjust plans interactively, using a mouse.
   (\link{editPlanInteractive})
 
   4. Plan scoring. Scoring functions for use in plan refinement, profiling, and comparison.
-  (\link{calcContiguityScore}, \link{calcReockScore}, \link{calcLWCompactScore}, \link{calcGroupScore}, \link{calcPopScore}, \link{calcHolesScore}, \link{calcRangeScore}, \link{calcMomentScore})
+  (\link{calcContiguityScore}, \link{calcReockScore}, 
+  \link{calcPACompactScore}, \link{calcLWCompactScore}, \link{calcGroupScore}, \link{calcPopScore}, \link{calcSpatialHolesScore}, \link{calcUnassignedScore}, \link{calcRangeScore}, \link{calcMomentScore})
   
   5. Plan refinement. Multi-criteria optimization heuristics for refining plans to meet specified goals.
   (\link{refineGreedyPlan}, \link{refineAnnealPlan}, \link{refineGenoudPlan}, \link{refineNelderPlan}, \link{refineGRASPPlan},\link{startBardCluster} ,\link{refineTabuPlan})
   
-  6. Plan profiling and exploration. Generate profiles of plans to explore tradeoffs among redistricting criteria. This can be used in conjunction with \emph{snow} to distribute plan generation across a computing cluster
+  6. Plan sampling, profiling and exploration. Generate profiles of plans to explore tradeoffs among redistricting criteria. This can be used in conjunction with \emph{snow} to distribute plan generation across a computing cluster
   
-  (\link{samplePlans}, \link{profilePlans}, \link{startBardCluster} )
+  (\link{samplePlans}, \link{quickSampleDistricts}, \link{profilePlans}, \link{startBardCluster} )
   
   8. Plan comparison and analysis. Plot, score, and compare plans.
   (\link{reportPlans}, \link{scorePlans}, \link{diff.bardPlan})
@@ -74,7 +78,7 @@ C. Cirincione , T.A. Darling, and T.G. O'Rourke. 2000. ``Assessing South Carolin
 \seealso{
 
    \code{\link[spdep]{spdep}} , 
-   \code{\link[maptools]{maptools}} ,
+   \code{\link[maptools]{readShapePoly}} ,
    \code{\link[rgenoud]{genoud}} 
 }
 \examples{
@@ -98,6 +102,12 @@ reportPlans(plans=list("kmeans"=kplan,"random 1"=rplan,"random pop"=rplan2), dop
    }
    }
 
+     # district sampling - quick
+  
+  randomDists<-quickSampleDistricts(10,suffolk.map,numberdists)
+      distscores<- scorePlans(randomDists,scoreFUNs=list("LWCompact"=calcLWCompactScore,"PACompact"=calcPACompactScore,"PopScore"=calcPopScore ))
+    plot(distscores[2:3])
+   
   myScore<-function(plan,...)  {
     return(calcContiguityScore(plan,...))
   }      
