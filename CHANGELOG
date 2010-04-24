@@ -85,6 +85,9 @@ Changelog
  -- bugfix in editPlanInteractive
  -- added display mode for createGreedyContiguousPlan and createContiguousPlan
  -- choropleth mapping of plans
- 
-  
-  
+ 1.10
+ -- workaround for spdep changing use of unionSpatialPolygon
+ -- integrated patches into spdep's nb2poly for ~10x speedup on generating contiguity list
+ -- detect map projections and offer guidance, convert if rgdal installed
+ -- pre-index perimeter's greatly accelerating perimeter based calculations 
+ -- built and checked under R 2.11

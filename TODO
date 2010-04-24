@@ -19,11 +19,10 @@ Todo:
  - CRS projections
  -  Compare plans w/differnt districts
  - as.data.frame <- data frame update methods
-- create arealist, perimeter, joint perimeter list for performance
  - total score in simulated annealing, keep best plan, temperature
  - checkpoint during plan profiling
  - performance: contiguous plan in N
  - memory leak in greedy? in C?
  - createContiguousPlan --> performance drops as ndists increase, profile, include bbox time
  - profile greedy
-
+ - Add HTML reports

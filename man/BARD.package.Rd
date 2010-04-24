@@ -15,8 +15,8 @@ BARD supports heuristic exploration of plans, in order to show trade-offs among 
 \tabular{ll}{
 Package: \tab BARD\cr
 Type: \tab Package\cr
-Version: \tab 1.07 \cr
-Date: \tab 2010-1-8 \cr
+Version: \tab 1.10 \cr
+Date: \tab 2010-4-24 \cr
 License: \tab AGPL 3.0 \cr
 }
 

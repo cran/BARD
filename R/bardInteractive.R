@@ -94,7 +94,7 @@
         print(as.numeric(choice))
         #plan[iset.selected()]<-as.numeric(choice)
         #deal with holes
-    	selected<-unique(as.numeric(m2$names[iset.selected()]))
+    	selected<-unique(as.numeric(pmap$names[iset.selected()]))
     	plan[selected]<-as.numeric(choice)
 
         

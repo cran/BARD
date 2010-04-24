@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  25 JAN 2010 21:37
+This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  24 APR 2010 14:14
 entering extended mode
  %&-line parsing enabled.
 **bardJSS
@@ -460,20 +460,20 @@ LaTeX Font Info:    Try loading font information for T1+aett on input line 149.
 (/usr/local/texlive/2008/texmf-dist/tex/latex/ae/t1aett.fd
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
 )
-LaTeX Font Info:    Try loading font information for OMS+aer on input line 166.
-
-
-(/Library/Frameworks/R.framework/Resources/share/texmf/omsaer.fd
-File: omsaer.fd 1999/12/27
-)
-LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 166.
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 6 []
  []
 
-[6] <bardJSS-plot1a.pdf, id=581, 505.89pt x 433.62pt>
+[6]
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 173.
+
+ (/Library/Frameworks/R.framework/Resources/share/texmf/omsaer.fd
+File: omsaer.fd 1999/12/27
+)
+LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 173.
+
+<bardJSS-plot1a.pdf, id=581, 505.89pt x 433.62pt>
 File: bardJSS-plot1a.pdf Graphic file (type pdf)
  <use bardJSS-plot1a.pdf>
 
@@ -512,7 +512,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 10 []
  []
 
-[10] <bardJSS-plot2a.pdf, id=609, 505.89pt x 433.62pt>
+[10] <bardJSS-plot2a.pdf, id=610, 505.89pt x 433.62pt>
 File: bardJSS-plot2a.pdf Graphic file (type pdf)
 
 <use bardJSS-plot2a.pdf>
@@ -590,7 +590,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 22 []
  []
 
-[22] <bardJSS-plot3a.pdf, id=832, 505.89pt x 433.62pt>
+[22] <bardJSS-plot3a.pdf, id=834, 505.89pt x 433.62pt>
 File: bardJSS-plot3a.pdf Graphic file (type pdf)
 
 <use bardJSS-plot3a.pdf>
@@ -687,12 +687,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [35]
-Underfull \hbox (badness 10000) in paragraph at lines 1114--1114
+Underfull \hbox (badness 10000) in paragraph at lines 1121--1121
 
  []
 
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1114.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1121.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -734,9 +734,9 @@ onts/type1/bluesky/cm/cmti8.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1
 /bluesky/cm/cmti9.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/c
 m/cmtt10.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmtt9.p
 fb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on bardJSS.pdf (36 pages, 9251601 bytes).
+Output written on bardJSS.pdf (36 pages, 9241850 bytes).
 PDF statistics:
- 1056 PDF objects out of 1200 (max. 8388607)
+ 1059 PDF objects out of 1200 (max. 8388607)
  150 named destinations out of 1000 (max. 131072)
  195 words of extra memory for PDF output out of 10000 (max. 10000000)
 

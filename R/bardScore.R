@@ -566,7 +566,7 @@ calcSpatialHolesScoreD<-function(plan,distid, standardize=TRUE) {
     basemap<-basem(plan)
 
     
-    tmpinfo<-getDistrictShapeInfo(basemap,blocks)
+    tmpinfo<-getDistrictShapeInfo(basemap,blocks,needShape=TRUE)
     score <- tmpinfo$numholes
     if (standardize) {
     	score<- (1- (1/(score+1)))
@@ -739,24 +739,40 @@ getBbox<-function(basemap,blocks=integer(0)) {
 }
 
 
-getDistrictShapeInfo<-function(basemap,blocks=integer(0)) {
+getDistrictShapeInfo<-function(basemap,blocks=integer(0), needShape=F) {
 	if(length(blocks)==0) {
 		blocks<-1:length(basemap$polys)
 	}
-	   
-	usub<-unionSpatialPolygons(basemap$shape[blocks,],replicate(length(blocks),1))
-
-	tperim<-sum(sapply(usub@polygons, 
-	function(x)sapply(x@Polygons,function(x)LineLength(x@coords))))
-	tarea<-sum(unlist(sapply(usub@polygons, 
-	function(x)sapply(x@Polygons,function(x)x@area))))
-	tcent<-coordinates(usub)
 	
-	# spatial holes
-	npolys<-checkPolygonsHoles(usub@polygons[[1]])
-	numholes<-sum(sapply(npolys@Polygons,function(x) slot(x, "hole")))	
+	tmpsub <- basemap$shape[blocks,]
+	bbox<-tmpsub@bbox
+	
+	tarea<-sum(basemap$areas[blocks])
+	tperim<-sum(basemap$perims[blocks])
+	for (i in blocks) {
+		for (j in seq(1,length.out=length(basemap$nb[[i]]))) {
+			if (basemap$nb[[i]][j]<i) {next}
+			
+			if (any(blocks %in% basemap$nb[[i]][j])) {
+				tperim<-tperim - basemap$sharedPerims[[i]][j]
+			}
+		}
+	}
 
-	retval<-list( bbox=usub@bbox, area=tarea,centroid=tcent, perim=tperim, shape=usub, numholes=numholes) 
+	if (needShape) {
+		usub<-unionSpatialPolygons(tmpsub,replicate(length(blocks),1))
+		tcent<-coordinates(usub)
+		npolys<-checkPolygonsHoles(usub@polygons[[1]])
+		numholes<-sum(sapply(npolys@Polygons,function(x) slot(x, "hole")))
+		shape<-usub
+	} else {
+		numholes <- NA
+		tcent<-c(NA,NA)
+		shape<-NA
+	}
+	
+
+	retval<-list( bbox=bbox, area=tarea,centroid=tcent, perim=tperim, shape=shape, numholes=numholes) 
 	return(retval)
 }
 
