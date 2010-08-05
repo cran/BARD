@@ -114,7 +114,9 @@ return(retval)
 
 # Portions modified from the spdep library, Copyright 2001-6 by Roger S. Bivand.  
 
-myPoly2nb <- function(pl, row.names=NULL, snap=sqrt(.Machine$double.eps),
+
+
+myPoly2nb.internal <- function(pl, row.names=NULL, snap=sqrt(.Machine$double.eps),
 queen=TRUE) {
 	if (!inherits(pl, "polylist")) {
 		if (extends(class(pl), "SpatialPolygons"))
@@ -261,3 +263,5 @@ queen=TRUE) {
 
 
 
+#myPoly2nb <- spdep::poly2nb 
+myPoly2nb <- myPoly2nb.internal

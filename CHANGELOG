@@ -91,3 +91,7 @@ Changelog
  -- detect map projections and offer guidance, convert if rgdal installed
  -- pre-index perimeter's greatly accelerating perimeter based calculations 
  -- built and checked under R 2.11
+1.11
+-- remove custom poly2b now integrated into spdep
+-- fix C++ file naming and Solaris issues
+-- add suffol map as data() to reduce example timings 

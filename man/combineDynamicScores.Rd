@@ -57,9 +57,9 @@ C. Cirincione , T.A. Darling, and T.G. O'Rourke. 2000. ``Assessing South Carolin
  
 \examples{
   # read in a shapefile with demographic data
-  suffolk.map <- importBardShape(
-    system.file("shapefiles/suffolk_tracts.shp", package="BARD"))
+  data(suffolk.map)
   ndists<-5
+
   
   # create some initial plans
   kplan <- createKmeansPlan(suffolk.map,ndists)

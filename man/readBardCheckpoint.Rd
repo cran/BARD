@@ -40,8 +40,7 @@
 
 \examples{
   # read in a shapefile with demographic data
-  suffolk.map <- importBardShape(
-    system.file("shapefiles/suffolk_tracts.shp", package="BARD"))
+  suffolk.map <- importBardShape(system.file("shapefiles/suffolk_tracts.shp", package="BARD"))
     
   # choose number of districts
   ndists <- 5

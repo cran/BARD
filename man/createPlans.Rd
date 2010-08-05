@@ -133,9 +133,7 @@ Plan fixups \code{\link{fixUnassignedPlan}} , \code{\link{fixContiguityPlan}}
  
 \examples{
   # read in a shapefile with demographic data
-    suffolk.map <- importBardShape(
-      file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts")
-  )
+  data(suffolk.map)
     
     
   # choose number of districts

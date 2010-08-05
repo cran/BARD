@@ -36,7 +36,14 @@
     #include <list>
 #endif
 
-    #include "miniball_wrapped_array.h"
+#if defined __sun
+       #include<cstdlib>
+       inline void random_seed (unsigned int seed) {std::srand(seed);}
+       inline double random_double () {return double(std::rand())/RAND_MAX;}
+#elif !defined(__sgi) && !defined(__GNUC__)             // assume Visual C++
+       #include<cstdlib>
+#endif
+#include "miniball_wrapped_array.h"
 
     template <int d> class Miniball;
     template <int d> class Basis;

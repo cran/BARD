@@ -87,9 +87,7 @@ Cluster computing: \code{\link{startBardCluster}}
  }
  
 \examples{
-  suffolk.map <- importBardShape(
-      file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts")
-  )
+ data(suffolk.map)
  
   numberdists <- 5
   

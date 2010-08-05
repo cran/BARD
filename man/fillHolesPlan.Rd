@@ -53,9 +53,7 @@ fixContiguityPlan(plan,scoreFUN=NULL,...,display=FALSE)
  }
  
 \examples{
-  suffolk.map <- importBardShape(
-      file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts")
-  )
+  data(suffolk.map)
   kplan <- createKmeansPlan(suffolk.map,5)
   kplan2<-kplan
   is.na(kplan2[c(1,10,20,100)])<-TRUE

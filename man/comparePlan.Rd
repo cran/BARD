@@ -70,8 +70,7 @@ This is the externally visible routine for comparing a list of plans. If multipl
 }
  
 \examples{
-  suffolk.map <- importBardShape(
-    system.file("shapefiles/suffolk_tracts.shp", package="BARD"))
+  data(suffolk.map)
     
   # choose number of districts
   ndists <- 5

@@ -25,9 +25,7 @@ scorePlans(plans, scoreFUNs, domatch = TRUE)
 	diff returns a difference lists
 }
 \examples{
-  suffolk.map <- importBardShape(
-      file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts")
-  )
+  data(suffolk.map)
   numberdists <- 5
   kplan <- createKmeansPlan(suffolk.map,numberdists)
   rplan <- createRandomPlan(suffolk.map,numberdists)

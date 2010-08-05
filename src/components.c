@@ -128,5 +128,22 @@ SEXP BARDoverlap(SEXP bbbi, SEXP bbbj) {
 }
 
 
-
+void BARDfindInBox (int rbxv[], int rbyv[], int mxbv[], int mybv[],
+					int selected[], int *len ) {
+	
+	int i;
+	/*tmp[[1]] <- sp$rbxv[sp$mbxv[i]:(n * 2)]
+	tmp[[1]] <- tmp[[1]][which(tmp[[1]] > n)] - n
+	tmp[[2]] <- sp$rbyv[sp$mbyv[i]:(n * 2)]
+	tmp[[2]] <- tmp[[2]][which(tmp[[2]] > n)] - n
+	tmp[[3]] <- sp$rbxv[1:sp$mbxv[i + n]]
+	tmp[[3]] <- tmp[[3]][which(tmp[[3]] <= n)]
+	tmp[[4]] <- sp$rbyv[1:sp$mbyv[i + n]]
+	tmp[[4]] <- tmp[[4]][which(tmp[[4]] <= n)]*/
+	
+	for (i = 0; i < *len; i++) {
+		
+	}
+	
+}
 

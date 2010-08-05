@@ -96,7 +96,7 @@ Scoring functions: \code{\link{calcContiguityScore}}
 \examples{
 
 
-suffolk.map <- importBardShape( file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts"))
+data(suffolk.map)
 numberdists <- 5
 rplan <- createRandomPlan(suffolk.map,numberdists)
 myScore<-function(plan,...){calcContiguityScore(plan,standardize=FALSE)}

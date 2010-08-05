@@ -33,7 +33,7 @@ basem.default(object, ...)
 \examples{
 
   # read in a shapefile with demographic data
-  suffolk.map <- importBardShape(file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts"))
+  data(suffolk.map)
   kplan<-createRandomPlan(suffolk.map,5)
   copy.of.suffolk.map<-basem(kplan)
   copy.of.suffolk.map==suffolk.map

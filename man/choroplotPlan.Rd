@@ -52,8 +52,7 @@ Plots a shaded thematic map on a plan, based on a set of schore
 }
  
 \examples{
-  suffolk.map <- importBardShape(
-    system.file("shapefiles/suffolk_tracts.shp", package="BARD"))
+  data(suffolk.map)
     
   # choose number of districts
   ndists <- 5

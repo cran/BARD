@@ -1,4 +1,4 @@
 CC=gcc-mp-4.3
 CXX=g++-mp-4.3
 PKG_CFLAGS = -DLDOUBLE
-PKG_CXXFLAGS =-DLDOUBLE   -Wno-deprecated
+PKG_CXXFLAGS =-DLDOUBLE   

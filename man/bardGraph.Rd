@@ -48,7 +48,7 @@ n.comp.exclude is analogous to \code{n.comp.nb} in that it returns the number of
  }
  
 \examples{
-  suffolk.map <- importBardShape(file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts"))
+  data(suffolk.map)
   snb<-suffolk.map$nb
   neighbors(snb,c(1,2,3))
   kplan <- createKmeansPlan(suffolk.map,5)
