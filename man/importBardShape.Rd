@@ -10,7 +10,7 @@ For a faster method to store these in native form see \code{readBardImage}
 \usage{
 exportBardShape(plan, filen, id = "BARDPlanID", gal = paste(filen, ".GAL", sep = ""))
 importBardShape(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE, projection =
-                 as.character(NA),...) 
+                 as.character(NA),queen=TRUE,...) 
 }
 
 \arguments{
@@ -20,6 +20,7 @@ importBardShape(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan
   \item{wantplan}{whether to extract embedded BARD plan from shapefile}
   \item{projection}{map projection}
   \item{gal}{GAL style contiguity list. Contiguity list will be regenerated if not supplied, but this is slow.}
+  \item{queen}{Whether to use queen contiguity in poly2nb}
   \item{\ldots}{additional arguments to pass to readShapePoly}
 }
 
@@ -38,7 +39,8 @@ importBardShape(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan
 \note{
   - Using \code{createAssignedPlan} with an imported plan is generally more memory efficient than using \code{wantplan=TRUE}.
   
-  - Creating a contiguity list has been dramatically sped up in version 1.10, however it remains slow for large files (> 20000 units). Using GEODA or another program to generate GAL files is much faster for large maps.
+
+  - Creating a contiguity list has been dramatically sped up ,however it can be somewhat slow for very large files (> 100000 units) unless \code{rgeo} is installed. Using GEODA or another program to generate GAL files is much faster for huge maps.
   
   - A reasonable map projection should be used. If the map is unprojected,  area calculations are potentially inaccurate. If rgdal is available BARD will attempt to reproject an unprojected map for increased accuracy.
 }
@@ -52,7 +54,8 @@ importBardShape(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan
 
 \seealso{ 
 Other methods for \code{\link{readBardCheckpoint}},  \code{\link{writeBardCheckpoint}}, 
-  \code{\link{readBardImage}}, \code{\link{writeBardImage}}
+\code{\link{readBardImage}}, \code{\link{writeBardImage}},
+  \code{\link{readBardMap}}, \code{\link{writeBardMap} }
  }
  
 \examples{

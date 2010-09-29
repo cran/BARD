@@ -85,8 +85,11 @@ diff.bardPlan<-function(x,plan2,domatch=TRUE,...) {
 
 scorePlans<-function(plans, scoreFUNs, domatch=TRUE) {
   # wrap raw plan object
-    if (!is.list(plans)) {
+    if (class(plans)=="bardPlan") {
       plans <- list(plans)
+    }
+    if (!is.list(scoreFUNs)) {
+    	    scoreFUNs=list(scoreFUNs)
     }
    if (!checkPlans(plans)) {
     return(NULL)
@@ -141,9 +144,16 @@ scorePlans<-function(plans, scoreFUNs, domatch=TRUE) {
   	 names(retval)<-c("Plan",scorenames)
   } else {
   	names(retval)<-c("Plan","DistrictID","OriginalID",scorenames)
-  	distnames<-c("Total",1:ndists)
+  	if (is.null(levels(plans[[1]]))) {
+  		distnames<-c("Total",1:ndists)
+  		distids<-distnames
+  	} else {
+  		distnames<-c("Total",paste(1:ndists," (",levels(plans[[1]]),")",sep=""))
+  		  distids<-c("Total",1:ndists)
+
+  	}
   	retval[["DistrictID"]]<-factor(retval[["DistrictID"]],levels=0:ndists,labels=distnames)
-  	retval[["OriginalID"]]<-factor(retval[["OriginalID"]],levels=0:ndists,labels=distnames)
+  	retval[["OriginalID"]]<-factor(retval[["OriginalID"]],levels=0:ndists,labels=distids)
   }
   retval[["Plan"]]<-factor(retval[["Plan"]],labels=plannames)
 
@@ -184,9 +194,33 @@ reportPlans<-function(
   dodiff=TRUE,
   dodetails=FALSE,
   doprofileextras=TRUE,
-  plotOpts=NULL
+  plotOpts=NULL,
+  useHTML=FALSE,
+  completeHTML=FALSE,
+  ...
   ) {
    
+  if (useHTML) {
+	htmlArgs<-list(...)
+	print<-function(...)hprint(...,htmlArgs=htmlArgs)
+	cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+	plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+  } else {
+	htmlArgs<-NULL
+	completeHTML<-FALSE
+
+  }
+ 
+  
+  if (completeHTML) {
+  	targetDIR<- file.path(tempdir(),"R2HTML")
+	dir.create(targetDIR)
+	copyR2HTMLfiles(targetDIR)
+	target <- HTMLInitFile(targetDIR,filename="sample", BackGroundColor="#BBBBEE", Title="BARD Web Output")
+	HTML.title("Redistricting Analysis", HR=2,file=target)
+	HTML("<p>Summary of Redistricting Plans</p>",file=target)  
+  }
+  
 
        
   # input processing  & setup
@@ -209,7 +243,7 @@ reportPlans<-function(
 
     names(plans)<-makeNames(plans)
     nplans<-length(plans)
-    if (doplot && interactive()) {
+    if (doplot && interactive() && dev.interactive()) {
        op<-par(ask=TRUE)
        on.exit(par(op))
     }
@@ -219,7 +253,9 @@ reportPlans<-function(
       if (inherits(plans,"bardSample")) {
         plot(plans)
       } else {
-        plotGrid(plans)
+      	tmp <- plans
+      	class(tmp)<-"bardSample"
+        plot(tmp,ordered=FALSE)
       }
     }
     
@@ -245,8 +281,13 @@ reportPlans<-function(
      }
     }
    }
-
- invisible()
+   if(completeHTML) {
+   	   HTMLEndFile()
+   	   retval<-target
+   } else {
+   	   retval<-NULL
+   }
+ invisible(retval)
 }
 
 
@@ -388,6 +429,24 @@ summary.bardPlanDiff<-function(object,...) {
 }
 
 print.bardPlanDiff<-function(x,...) {
+    inner.print.bardPlanDiff(x,...)
+}
+
+HTML.bardPlanDiff<-function(x,...) {
+    inner.print.bardPlanDiff(x,..., useHTML=TRUE)
+}
+
+inner.print.bardPlanDiff<-function(x,...,useHTML=FALSE) {
+   if (useHTML) {
+	htmlArgs<-list(...)
+	print<-function(...)hprint(...,htmlArgs=htmlArgs)
+	cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+	plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+  } else {
+	htmlArgs<-NULL
+
+  }
+  
     pdiffs = x
     plan1 <- attr(x,"plan1")
     matchID <- attr(x,"matchID")
@@ -486,6 +545,8 @@ plot.bardPlanDiff<-function(x,plotall=F, horizontal=T,col=NULL, ...) {
 choroplotPlan<-function(plan,scores,numlevels=5,
 	method=c("quant","equal","absolute"),
 	main="choropleth map", absmin=0,absmax=1,ramplow="blue",ramphigh="red",...) {
+	
+	
 	methchoice<-match.arg(method)
 	switch(methchoice,
 	   absolute = {
@@ -510,6 +571,19 @@ choroplotPlan<-function(plan,scores,numlevels=5,
 	choro.col<-cr(numlevels)
 	
 	lindex<-sapply(scores,function(x)min(which(x<=levels)))
+
+	res <- list(lindex=lindex, choro.col=choro.col, levels<-levels,main=main,plan=plan)
+	class(res)<-"bardChoroplot"
+	return(res)
+	
+}
+
+print.bardChoroplot<-function(x,...) {
+	lindex<-x$lindex
+	choro.col<-x$choro.col
+	levels<-x$levels
+	main<-x$main
+	plan<-x$plan
 	plot(plan,col=choro.col[lindex],...)
 	if (!is.null(names(levels))) {
 		legnames<-names(levels)
@@ -519,6 +593,247 @@ choroplotPlan<-function(plan,scores,numlevels=5,
 	legnames<-paste("<=",legnames)
 	legend("bottomright", legend=legnames,fill=choro.col)
 	title(main=main)
-	
+	invisible()
 }
 
+plot.bardChoroplot<-function(x,...) {
+	print(x,...)
+	invisible()
+}
+
+PMPreport<-function(
+	bardMap,
+	blockAssignmentID="BARDPlanID",
+	popVar=NULL,
+	popVarExtra=NULL,
+	ratioVars=NULL,
+	splitVars = NULL,
+	blockLabelVar=NULL,
+	repCompactness=TRUE,
+	repCompactnessExtra=FALSE,
+	repSpatial=TRUE,
+	repSpatialExtra=FALSE,
+	useHTML=TRUE,
+	districtPolys=NULL,
+	...)  {
+
+	#	
+	# setup HTML functions
+	#
+	
+	if (useHTML) {
+		htmlArgs<-list(...)
+		print<-function(...)hprint(...,htmlArgs=htmlArgs)
+		cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+		plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+	} else {
+		htmlArgs<-NULL
+	}
+	
+	
+	#
+	# Setup Plan
+	# 
+	
+	if (class(bardMap)=="bardPlan") {
+		tmpPlan <- bardMap
+		bardMap <-basem(bardMap)
+	} else {
+		ow<-options(warn=-1)
+		tmpPlan <-createAssignedPlan(bardMap,blockAssignmentID)
+		options(ow)
+	}
+	ndists<-attr(tmpPlan,"ndists")
+	dnames<-levels(tmpPlan)
+	if (is.null(dnames)) {
+		dnames<-1:ndists	
+	}
+	
+	#
+	# helper
+	# 
+	
+	# massage score df for single plan
+	adjScoreMatrix<-function(sp,avg=T) {
+		sp<-sp[c(-1,-3)]
+		tlevels <- levels (sp[[1]])
+		if (avg) {
+			tlevels[which(tlevels=="Total")]<-"Average"
+			levels(sp[[1]])=tlevels
+			tmeans<- apply(sp[1:dim(sp)[1]-1,-1,drop=F],2,mean)
+			sp[dim(sp)[1],-1]<-tmeans
+		}
+		return(sp)
+	}
+
+	
+	#
+	# Main Scoring Report
+	#
+	
+	if(!is.null(districtPolys)) {
+		
+		#printTitle("District Map",useHTML=useHTML,htmlArgs=htmlArgs)
+		#plot(districtPolys)
+	}
+	
+	
+	# popVar - Equal Population
+	if (!is.null(popVar)) {
+		printTitle("Total Population",useHTML=useHTML,htmlArgs=htmlArgs)
+		
+		scoreFUN=list("Population"=function(x)calcPopScore(x,predvar=popVar[[1]],standardize=FALSE))
+		names(scoreFUN)[1]<-names(popVar)[1]
+		
+		scores <- scorePlans(tmpPlan, scoreFUN=scoreFUN)
+		scores<-adjScoreMatrix(scores)
+		scores<-scores[1:dim(scores)[1]-1,]
+		
+		ptarget <-sum(bardMap$df[popVar[[1]]])/ndists
+		target<-abs((scores[,2]-ptarget)/ptarget)<popVar[[2]]
+		scores[3]<-target
+		names(scores)[3]<-"Within target range"
+		print(scores)
+	}
+	
+	
+	# popVarExtra - demographics
+	if (!is.null(popVarExtra)) {
+		for (i in 1:length(popVarExtra)) {
+			printTitle(names(popVarExtra)[i],useHTML=useHTML,htmlArgs=htmlArgs)
+			scoreFUN=list("Population"=function(x)calcPopScore(x,predvar=popVarExtra[[i]],standardize=FALSE))
+			names(scoreFUN)[1]<-names(popVarExtra)[i]
+		
+			scores <- scorePlans(tmpPlan, scoreFUN=scoreFUN)
+			scores<-adjScoreMatrix(scores)
+			gini<-calcIneqScore(tmpPlan,popVarExtra[[i]])
+			gini<-c(gini,mean(gini))
+			scores[3]<-gini
+			names(scores)[3]<-"District Homogeneity"
+			print(scores)
+		}
+	}
+	
+	# ratioVars
+	if (!is.null(ratioVars)) {
+	   for (i in 1:length(ratioVars)) {
+	   	varset=ratioVars[[i]]
+		denominator<-varset$denominator
+		printTitle(names(ratioVars)[i],useHTML=useHTML,htmlArgs=htmlArgs)
+		if(is.null(denominator)) {
+			denominator<-popVar[1]
+		}
+		threshold<-varset$threshold
+		for (j in 1:length(varset$numerators))  {
+			
+			ratscore<-calcRangeScore(tmpPlan,predvar=varset$numerators[[j]],
+				predvar2=denominator[[1]],standardize=F,sumdenom=F)
+			ratscoredf<-cbind(as.data.frame(dnames),
+				attr(ratscore,"rawscore1"),
+				ratscore,
+				ratscore>=threshold
+				)
+			names(ratscoredf)<-c("District",names(varset$numerators)[j],
+			paste("Proportion of ",names(denominator),sep=""), 
+			paste(">= ",threshold,sep="") )
+		
+			print(ratscoredf)
+		}
+	   }
+	}
+	
+	# splitVars
+
+	if(!is.null(splitVars)) {					
+		printTitle("District Splits",useHTML=useHTML,htmlArgs=htmlArgs)
+		
+		splitscore<-sapply(splitVars,function(x)calcSplitScore(tmpPlan,splitvar=x,standardize=F))
+		colnames(splitscore)<-names(splitVars)
+		splitdf<-cbind("District"=dnames,as.data.frame(splitscore))
+		print(splitdf)
+		
+	}
+		
+	
+	
+	# compactness
+	# compactness extras
+	
+	if (repCompactness) {
+		if (!repCompactnessExtra) {
+			sFUN<-list("Length-Width Compactness"=calcLWCompactScore)
+		} else { 
+			sFUN<-list("Length-Width Compactness"=calcLWCompactScore,
+			"Bounding Circle Compactness"=function(x)calcReockScore
+				(x,usebb=TRUE))
+		}
+		printTitle("Compactness scores",useHTML=useHTML,htmlArgs=htmlArgs)
+		scores<- scorePlans(tmpPlan,scoreFUN=sFUN)
+		scores<- adjScoreMatrix(scores)
+		print(scores)
+	}
+	
+	
+	# spatial
+	# spatial extras
+	if (repSpatial) {
+		printTitle("Unassigned Geography",useHTML=useHTML,htmlArgs=htmlArgs)
+		holes<-which(is.na(tmpPlan))
+
+		if (length(holes)==0) {
+			print("No unassigned geography detected -- plan is complete.")
+		} else {
+			print("Plan is incomplete.")
+			if (!is.null(blockLabelVar)){
+			badBlocks<-
+			as.data.frame(bardMap)[[blockLabelVar]][holes]
+			} else {
+				badBlocks<-holes
+			}
+			print(paste("number of unassigned blocks",length(badBlocks)))
+
+			if (length(badBlocks<100)) {
+				print("Unassigned blocks...")
+				print(paste(badBlocks," "))
+
+			}
+		}
+	}
+	
+	if (repSpatialExtra) {
+		printTitle("Plan Contiguity",useHTML=useHTML,htmlArgs=htmlArgs)
+		
+		cscores<-scorePlans(tmpPlan,list("Number of Discontigous Areas" = function(x){calcContiguityScore(tmpPlan,standardize=F)-1}))
+		cscores<-adjScoreMatrix(cscores,avg=F)
+
+		if (sum(cscores[,2])==0) {
+			print("Plan is contiguous")
+		} else {
+			print("Plan is not contiguous")
+			print(cscores)
+			
+		}
+		
+		# need to optimize with supplied aggregated polys
+		DOHOLES<-F
+		if (DOHOLES) {
+		  printTitle("Districts with Donut Holes",useHTML=useHTML,htmlArgs=htmlArgs)
+		  hscores<- calcSpatialHolesScore(tmpPlan,standardize=F)
+		
+		
+		  hscores<-scorePlans(tmpPlan,list("Number of holes" = function(x){calcSpatialHolesScore(tmpPlan,standardize=F)}))
+		  hscores<-adjScoreMatrix(hscores,avg=F)
+
+		
+		  if (sum(hscores[,2])==0) {
+			print("No holes found.")
+		  } else {
+			print("Some donut holes (areas owned by other districs)...")
+			print(hscores)
+			
+		  }
+		}
+
+	}
+
+}

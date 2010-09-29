@@ -161,10 +161,6 @@ The file contains the coordinates of the outlines of all geographical units (the
 \end{Sinput}
 \begin{Soutput}
 [1] "Note: you have not specified a map projection. Please ensure that the projection you use provides reasonable representation of area, perimeter, and shape at district scale."
-[1] "2010-05-08 18:03:13 EDT"
-[1] "Building indices which will save a lot of time in perimeter calculations later ... ( estimated  0.27  minutes)"
-[1] "Starting 2010-05-08 18:03:13"
-[1] "Ending 2010-05-08 18:03:29"
 \end{Soutput}
 \end{Schunk}
 
@@ -227,18 +223,18 @@ Furthermore, \pkg{BARD} generates reports for plans based on built-in or user-su
 Plan Scores
 
        Plan DistrictID OriginalID Contiguity Holes LW Compact     Reock
-1    kmeans          1          1  0.0000000    NA 0.37793995 0.6615332
-2    kmeans          2          2  0.0000000    NA 0.15240584 0.5042317
-3    kmeans          3          3  0.0000000    NA 0.07392494 0.5432474
-4    kmeans          4          4  0.0000000    NA 0.13276734 0.6475287
-5    kmeans          5          5  0.0000000    NA 0.08745115 0.3883830
-6    kmeans      Total      Total  0.0000000     0 0.82448922 2.7449241
-7  random 1          1          3  0.9677419    NA 0.61449561 0.9053407
-8  random 1          2          4  0.9655172    NA 0.51141693 0.9316238
-9  random 1          3          1  0.9642857    NA 0.59313429 0.9488005
-10 random 1          4          2  0.9677419    NA 0.59594794 0.9048086
-11 random 1          5          5  0.9629630    NA 0.60411386 0.9302276
-12 random 1      Total      Total  4.8282498     0 2.91910864 4.6208012
+1    kmeans          1          1  0.0000000    NA 0.51839856 0.6542731
+2    kmeans          2          2  0.0000000    NA 0.47893985 0.6303805
+3    kmeans          3          3  0.0000000    NA 0.37793995 0.6615332
+4    kmeans          4          4  0.0000000    NA 0.01301973 0.3701414
+5    kmeans          5          5  0.0000000    NA 0.12453986 0.5098915
+6    kmeans      Total      Total  0.0000000     0 1.51283794 2.8262197
+7  random 1          1          4  0.9736842    NA 0.69356865 0.9697848
+8  random 1          2          5  0.9729730    NA 0.55659602 0.9165607
+9  random 1          3          2  0.9677419    NA 0.61903997 0.9281639
+10 random 1          4          1  0.9705882    NA 0.66977140 0.9479138
+11 random 1          5          3  0.9655172    NA 0.52935966 0.8980604
+12 random 1      Total      Total  4.8505046     0 3.06833570 4.6604837
 
 
 Plan Differences
@@ -247,18 +243,18 @@ Plan Differences
 Comparing plan kmeans with plan random 1 :
 
       Dist ID Original ID # of original blocks # Blocks Removed #  Added
-1           1           3                   21               18       56
-2           2           4                   64               56       41
-3           3           1                  103               76       48
-4           4           2                   39               29       52
-5           5           5                   93               68       50
+1           1           4                   96               73       36
+2           2           5                   84               65       51
+3           3           2                   21               16       56
+4           4           1                   26               21       54
+5           5           3                   93               71       49
 Holes      NA          NA                    0                0        0
       % Shared
-1         3.90
-2         7.62
-3        17.90
-4        11.00
-5        17.50
+1        17.40
+2        14.10
+3         6.49
+4         6.25
+5        15.50
 Holes       NA
 \end{Soutput}
 \end{Schunk}

@@ -8,17 +8,17 @@ These functions configure a snow computing cluster to be used with bard profilin
 
 
 \usage{
-  startBardCluster(cl)
+  startBardCluster(cl=0)
   stopBardCluster()
 }
 
 
 \arguments{
-\item{cl}{either a cluster returned from \code{snow} or a vector of cluster systems names}
+\item{cl}{either 0, which attempts to use all cores, a specific number of cores to use, a cluster returned from \code{snow}, or a vector of cluster systems names}
 }
 
 \details{
-This function attempts to configure a computing cluster for bard. If given an existing \code{snow} cluster, it will use that. If given a vector of  machine names it will use \code{makeCluster} to start a socket-based cluster. (You will be required to enter your login password for these systems, if you have not set up an existing ssh key.)
+This function attempts to configure a computing cluster for bard. If given a single 0, \code{multicore} will be used with all cores, if a single number, a fixed number of cores will be uses. Otherwise if given an existing \code{snow} cluster, it will use that, or if given a vector of  machine names it will use \code{snow}s \code{makeCluster} to start a socket-based cluster. (You will be required to enter your login password for these systems, if you have not set up an existing ssh key.)
 
 Plan sampling and profiling, and some plan refinement will automatically use a cluster that has been initialized.
 
@@ -60,7 +60,10 @@ Cluster computing: \link[snow:makeCluster]{makeCluster}
   }         
 
 # here is where we try to start the cluster!
-	startBardCluster(c("localhost","localhost")) 
+# snow cluster
+#	startBardCluster(c("localhost","localhost")) 
+# multicore cluster
+startBardCluster()
 
 # this will use the cluster automagically
 samples<-samplePlans(kplan, score.fun=myScore, ngenplans=4, gen.fun = "createRandomPlan", refine.fun="refineNelderPlan",refine.args=list(maxit=200,dynamicscoring=TRUE))

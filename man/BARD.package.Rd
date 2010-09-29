@@ -22,7 +22,7 @@ License: \tab AGPL 3.0 \cr
 
 Bard supports several areas of functionality: 
   1. Plan input output. Reading and writing plans in various formats.
-  ( \link{readBardImage}, \link{writeBardImage}, \link{readBardCheckpoint}, \link{writeBardCheckpoint},\link{importBardShape}, \link{exportBardShape} )
+  ( \link{readBardImage}, \link{writeBardImage}, \link{readBardCheckpoint}, \link{writeBardCheckpoint},\link{importBardShape}, \link{exportBardShape},\link{readBardMap},\link{writeBardMap} )
   
   2. Initial plan generation. 
   
@@ -40,17 +40,17 @@ Bard supports several areas of functionality:
 
   4. Plan scoring. Scoring functions for use in plan refinement, profiling, and comparison.
   (\link{calcContiguityScore}, \link{calcReockScore}, 
-  \link{calcPACompactScore}, \link{calcLWCompactScore}, \link{calcGroupScore}, \link{calcPopScore}, \link{calcSpatialHolesScore}, \link{calcUnassignedScore}, \link{calcRangeScore}, \link{calcMomentScore})
+  \link{calcPACompactScore}, \link{calcLWCompactScore}, \link{calcGroupScore}, \link{calcPopScore}, \link{calcSpatialHolesScore}, \link{calcUnassignedScore}, \link{calcRangeScore}, \link{calcMomentScore}, \link{calcBBCompactScore}, \link{combineDynamicScores},\link{calcSplitScore},\link{calcIneqScore})
   
   5. Plan refinement. Multi-criteria optimization heuristics for refining plans to meet specified goals.
   (\link{refineGreedyPlan}, \link{refineAnnealPlan}, \link{refineGenoudPlan}, \link{refineNelderPlan}, \link{refineGRASPPlan},\link{startBardCluster} ,\link{refineTabuPlan})
   
-  6. Plan sampling, profiling and exploration. Generate profiles of plans to explore tradeoffs among redistricting criteria. This can be used in conjunction with \emph{snow} to distribute plan generation across a computing cluster
+  6. Plan sampling, profiling and exploration. Generate profiles of plans to explore tradeoffs among redistricting criteria. This can be used in conjunction with \emph{snow} to distribute plan generation across a computing cluster, or with \emph{multicore} to run in parallel across multiple cores on a single system.
   
   (\link{samplePlans}, \link{quickSampleDistricts}, \link{profilePlans}, \link{startBardCluster} )
   
-  8. Plan comparison and analysis. Plot, score, and compare plans.
-  (\link{reportPlans}, \link{scorePlans}, \link{diff.bardPlan}, \link{choroplotPlan})
+  8. Plan comparison and analysis. Plot, score, and compare plans. Create HTML reports.
+  (\link{reportPlans}, \link{scorePlans}, \link{diff.bardPlan}, \link{choroplotPlan},\link{PMPreport})
 
 }
 

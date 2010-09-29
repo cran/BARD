@@ -206,7 +206,7 @@ createGreedyContiguousPlan<-function( basemap, ndists, predvar="POP", scoreFUN =
 #
 # Arguments
 #   basemap 
-#   id.var                                c
+#   id.var                                
 #
 # Returns
 #   plan assignment vector
@@ -215,21 +215,22 @@ createGreedyContiguousPlan<-function( basemap, ndists, predvar="POP", scoreFUN =
 ##################################
 
 createAssignedPlan<-function(basemap,predvar="BARDPlanID") {
-  nblocks<-length(basemap$polys)
+  nblocks<-dim(basemap)[1]
+  planlevels<-NULL
    if ((length(predvar)==1) &&  is.character(predvar)) {
       tmpplan<-basemap$df[[predvar]]
       if (is.null(tmpplan)) {
           warning(paste("No variable in basemap with name", predvar))
           return(NULL)
       }
-   } else {
-     tmpplan <- integer(nblocks)+predvar
-  }
+   }
+       
+  tmpplan <- integer(nblocks)+as.integer(predvar)
     
   # convert to continuous ordered integers
-  plan<-as.numeric(factor(tmpplan,levels=sort(unique(tmpplan))))
-  
-  if (!identical(as.numeric(sort(unique(plan))), sort(unique(tmpplan)))) {
+  plan<-as.integer(factor(tmpplan,levels=sort(unique(tmpplan))))
+    
+  if (!identical(as.integer(sort(unique(plan))), as.integer(sort(unique(tmpplan))))) {
     warning("District identifiers were not continuous and were reordered")
   }
   
@@ -237,12 +238,12 @@ createAssignedPlan<-function(basemap,predvar="BARDPlanID") {
     
   if (sum(is.na(plan))>0) {
     warning("Some blocks are not assigned. Use fillHolesPlan.")
-    ndists<- ndists-1
   }
  
   attr(plan,"ndists")<-ndists
   basem(plan)<-basemap
   class(plan)<-"bardPlan"
+  levels(plan)<-levels(predvar)
   return(plan)
 }
                                     
@@ -266,7 +267,7 @@ createAssignedPlan<-function(basemap,predvar="BARDPlanID") {
 ##################################
 
 createRandomPlan<-function(basemap,ndists) {
-  nblocks<-length(basemap$polys)
+  nblocks<-dim(basemap)[1]
   plan<-ceiling(runif(nblocks)*ndists)
   attr(plan,"ndists")<-ndists
   basem(plan)<-basemap
@@ -286,17 +287,17 @@ createRandomPopPlan<-function(basemap,ndists,
   maxPop <- (totPop/ndists) 
   popDist <- integer(ndists)
   
-  plan <- integer(length(basemap$polys))
+  plan <- integer(dim(basemap)[1])
   is.na(plan)<-TRUE
   
   while (length(blocksleft<-which(is.na(plan)))>0) {
-    choice<-resample(blocksleft,1)
+    choice<-BARD:::resample(blocksleft,1)
     blockpop<-basemap$df[[predvar]][choice]
     canDist <- which((popDist+blockpop) <maxPop)
     if (length(canDist)==0) {
-      canDist <- 1:ndists
+      canDist <- which.min(popDist)
     }
-    distid<-resample(canDist,1)
+    distid<-BARD:::resample(canDist,1)
     plan[choice]<-distid
     popDist[distid]<-popDist[distid] + blockpop
   }
@@ -326,7 +327,7 @@ createRandomPopPlan<-function(basemap,ndists,
 ##################################
 
 createKmeansPlan<-function(basemap,ndists) {
-  dist.centroids<-getBardCentroids(basemap)
+  dist.centroids<-getBardCentroids(basemap,1:dim(basemap)[1])
 
   plan <-  kmeans(dist.centroids,ndists)$cluster
   attr(plan,"ndists")<-ndists
@@ -387,7 +388,7 @@ createWeightedKmeansPlan<-function(basemap,ndists,centers=c(),weightVar=NULL,tri
 	tw[which(tw==0)] <- 1
   }
   
-  dist.centroids<-getBardCentroids(basemap)
+  dist.centroids<-getBardCentroids(basemap,1:dim(baseShape(basemap))[1])
   if (length(centers)==0) {
 	kmcenters<-ndists
   } else if(length(centers)!=ndists) {
@@ -548,7 +549,7 @@ CDOInner<-function(basemap,ndists,
   districtonly) {
   
   # setup  for plan
-  blocklist <- (1:length(basemap$polys)) * 0   # list of block ids in plan
+  blocklist <- (1:dim(basemap)[1]) * 0   # list of block ids in plan
   nblocks <- length(blocklist)                 # number of blocks
   totpop <- sum(basemap$df[[predvar]]) # total population
   targetpop <- totpop/ndists
@@ -796,28 +797,73 @@ CDOInner<-function(basemap,ndists,
 
 summary.bardPlan<-function(object,...) {
   tmpplan<-object
+  ndists<-attr(object,"ndists")
+   if (is.null(levels(object))) {
+  	printlevels=1:ndists
+  } else {
+  	printlevels<-paste(1:ndists," (",levels(object),")",sep="")
+  }
   if (is.districtonly(object)) {
   	tmpplan<-factor(tmpplan,labels=c("district","unassigned"))
+  } else {
+  	tmpplan<-factor(tmpplan,labels=printlevels)
   }
   retval<-table(tmpplan,dnn=list("Number of blocks in each district"))
   class(retval)<-"bardPlan.summary"
   return(retval)
 }
 
-print.bardPlan.summary<-function(x,...) {
+internal.print.bardPlan.summary<-function(x,...,useHTML=FALSE) {
+  if (useHTML) {
+	htmlArgs<-list(...)
+	print<-function(...)hprint(...,htmlArgs=htmlArgs)
+	cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+	plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+  } else {
+	htmlArgs<-NULL
+
+  }
   class(x)<-"table"
   print(x,...)
 }
 
+print.bardPlan.summary<-function(x,...) {
+	internal.print.bardPlan.summary(x,...)
+}
+
+HTML.bardPlan.summary<-function(x,...) {
+	internal.print.bardPlan.summary(x,...,useHTML=TRUE)
+}
 print.bardPlan<-function(x,...) {
+	internal.print.bardPlan(x,...)
+}
+HTML.bardPlan<-function(x,...) {
+	internal.print.bardPlan(x,...,useHTML=TRUE)
+}
+
+internal.print.bardPlan<-function(x,...,useHTML=FALSE) {
+if (useHTML) {
+	htmlArgs<-list(...)
+	print<-function(...)hprint(...,htmlArgs=htmlArgs)
+	cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+	plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+  } else {
+	htmlArgs<-NULL
+
+  }
   ndists<-attr(x,"ndists")
+  if (is.null(levels(x))) {
+  	printlevels=1:ndists
+  } else {
+  	printlevels<-paste(1:ndists," (",levels(x),")",sep="")
+  }
   if (is.districtonly(x)) {
   	ndists<-1
   	cat("Single-district  -- only first district analyzed\n\n")
   }
   
   for (i in 1:ndists) {
-    cat("\n\nBlocks in district ",i,":\n\n",...)
+    cat("\n\nBlocks in district ",printlevels[i],"\n\n",...)
     print(which(x==i),...)
   }
   if (sum(is.na(x))>0) {
@@ -858,7 +904,7 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,col=NULL,...) {
     plot(matrix(x), ... )
     return(invisible(TRUE))
   }
-  mappolys <- basemap$polys
+  mappolys <- basePolys(basemap)
   if (is.null(ndists)) {
       ndists <- attr(x,"ndists")
   }
@@ -872,7 +918,7 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,col=NULL,...) {
 
         }
 	if (newPlot) {
-                plot(basemap$shape, col="white", ...)
+                plot(baseShape(basemap), col="white", ...)
         }
         for (i in 1:ndists) {
                 if (is.null(changed)) {
@@ -884,7 +930,7 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,col=NULL,...) {
                 }
 
                 if (length(which(tmp)) > 0 ) {
-                        submap <- basemap$shape[which(tmp),]           	
+                        submap <- baseShape(basemap)[which(tmp),1]           	
                        plot (submap, add=T, col=colors[i])
                 }
         }
@@ -907,7 +953,8 @@ function(x,basemap=NULL,ndists=NULL, changed=NULL, newPlot=TRUE,col=NULL,...) {
 
 basem <- function(object,...) UseMethod("basem")
 basem.default <- function(object,...) {
-  return(get("content",envir=attr(object,"basemap")))
+ return(get("self",envir=attr(object,"basemap")))
+
 }
 
 "basem<-"<-function(object,...,value) UseMethod("basem<-")
@@ -915,9 +962,15 @@ basem.default <- function(object,...) {
       if (!is.null(value) && !inherits(value,"bardBasemap")) {
         warning("Supplied basemap is of the wrong class")
       }
-      attr(object,"basemap")<-new.env()
-      assign("content",value,envir=attr(object, "basemap"))
+      attr(object,"basemap")<-value$myenv
       return(object) 
+}
+
+baseShape<-function(x) {
+   return(get("shape",envir=x$myenv))
+}
+basePolys<-function(x) {
+   return(baseShape(x)@polygons)
 }
 
 #
@@ -968,14 +1021,17 @@ checkPlans<-function(plans) {
 # helper function to extract centroids
 #
 
-getBardCentroids<-function(x,i=NULL) {
+getBardCentroids<-function(x,i=integer(0)) {
+  if (length(i)==0) {
+  	return(integer(0))
+  }
   if (class(x)=="bardPlan") {
 	basemap<-basem(x)
   } else {
 	basemap<-x
   }
-  if (is.null(i)) i<-1:length(basemap$polys)
-  dist.centroids<-coordinates(basemap$shape[i,])
+  dist.centroids<-t(basemap$centroids[,i])
+  	
   return(dist.centroids)
 }
 
@@ -985,3 +1041,31 @@ is.districtonly<-function(plan) {
   return(retval)
  }
 	
+ 
+#
+# Helper functions for factor and levels support
+#
+
+"levels<-.bardPlan"<-function(x,value) {
+	if (is.null(value)) {
+		return(x)
+	}
+	tvalue <-as.character(value)
+	if (length(tvalue)!=attr(x,"ndists")) {
+		warning("Wrong number of levels -- must match number of districts")
+		} else {
+		attr(x,"levels")<-tvalue
+	}
+	return(x)
+}
+
+fact2int<-function(x) {
+	res<-x
+	if (is.factor(x)) {
+		res<-res[, drop=TRUE]
+		tlevels<-levels(res)
+		res<-as.integer(x)
+		levels(res)<-tlevels
+	}
+	return(res) 	
+}

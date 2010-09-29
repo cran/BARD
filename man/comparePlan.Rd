@@ -20,7 +20,10 @@ This function evaluates scores, and differences among a set of plans.
   dodiff=TRUE,
   dodetails=FALSE,
   doprofileextras=TRUE,
-  plotOpts=NULL
+  plotOpts=NULL,
+  useHTML=FALSE,
+  completeHTML=FALSE,
+  ...
   )
 }
 
@@ -35,6 +38,9 @@ This function evaluates scores, and differences among a set of plans.
 \item{dodiff}{Logical. Report differences between pairs of plans}
 \item{doprofileextras}{Logical. Report profile summaries for bardSample results}
 \item{plotOpts}{List of plotting options to send to plan plotting command}
+\item{useHTML}{use html formatting for reports}
+\item{completeHTML}{produce a complete HTML file -- note the path is returned}
+\item{\ldots}{arguments passed on to \code{print} and \code{HTML}}
 }
 
 \details{
@@ -42,7 +48,8 @@ This is the externally visible routine for comparing a list of plans. If multipl
 }
 
 \value{
-  Nothing. The function is used for printing and plotting effect.
+  Nothing. The function is used for printing and plotting effect.... unless the completeHTML option is used, in which case returns the path the the HTML file, invisibly.
+
 }
 
 \note{Note the following limitation: all plans being compared must have the same number of districts and basemap} 

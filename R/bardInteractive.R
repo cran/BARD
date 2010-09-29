@@ -45,9 +45,9 @@
   ndists<-attr(plan,"ndists")
   #interactive setup
 
-  
-  if(!checkIplots()) {
-    warning("Sorry, this requires the iplots package. Please install it.")
+  icheck<-checkIplots()
+  if((icheck!=TRUE)) {
+    warning(icheck)
     return(plan)
   }
 
@@ -74,7 +74,7 @@
     return(plan)
   }
     
-  pmap<-Polygons2map(basemap$polys)
+  pmap<-Polygons2map(basePolys(basemap))
   choice<-0
   im<-imap(pmap)
   on.exit(iplot.off(im))
@@ -90,10 +90,7 @@
     if (is.na(as.numeric(choice))) {
         choice<-"DONE"
     } else {
-        print(iset.selected())
-        print(as.numeric(choice))
-        #plan[iset.selected()]<-as.numeric(choice)
-        #deal with holes
+ 
     	selected<-unique(as.numeric(pmap$names[iset.selected()]))
     	plan[selected]<-as.numeric(choice)
 
@@ -131,7 +128,7 @@
 
 createPlanInteractive<-function(basemap,ndists,reportFUN=NULL,...) {
   # plan setup
-  nblocks<-length(basemap$polys)
+  nblocks<-dim(basemap)[1]
   plan<-integer(nblocks)
   plan[which(plan==0)]<-1
   attr(plan,"ndists")<-ndists
@@ -189,8 +186,23 @@ polys2map<-function(polys){
 # for newer list of Polygons S4 class
 
 Polygons2map<-function(polys){
-  mapx<-unlist(sapply(polys,function(x)sapply(x@Polygons,function(x)c(x@coords[,1],Inf))))
-  mapy<-unlist(sapply(polys,function(x)sapply(x@Polygons,function(x)c(x@coords[,2],Inf))))
+  Polygon2shape<-function(p,d) {
+  	retval<-NULL
+  	if (!p@hole) {
+  		retval<-p@coords[,d]
+  		} else {
+  		
+  		#retval<-rev(p@coords[,d])
+  	}
+  	#if (!p@hole) {
+  	#	retval<-c(retval,Inf)
+  	#}
+  	
+  	return(retval)
+  }
+  
+  mapx<-unlist(sapply(polys,function(x)c(sapply(x@Polygons,function(x)Polygon2shape(x,1)),Inf)))
+  mapy<-unlist(sapply(polys,function(x)c(sapply(x@Polygons,function(x)Polygon2shape(x,2)),Inf)))
   missx<-which(is.na(mapx))
   missy<-which(is.na(mapy))
   missxy<-unique(c(missx,missy))
@@ -224,25 +236,25 @@ Polygons2map<-function(polys){
 
 checkIplots<-function() {
    # special OSX
+   if (!mrequire("rJava", quietly = TRUE, warn.conflicts=FALSE)) {
+  	return("rJava must be installed")
+   }
    if (length(grep("^darwin",R.version$os))) {
-	success <- FALSE
+   	success<-TRUE
 	try ( silent = TRUE, {
-  		mrequire("rJava", quietly = TRUE, warn.conflicts=FALSE)
 		.jinit()
-		 if (any(.jcall("java/lang/System","S","getProperty","main.class")=="org.rosuda.JGR.JGR")) {
-			.jpackage("iplots")
-			success<-TRUE	
-		 } else {
-			cat("Iplots on MacOS must be run under JGR. Please install and launch JGR and try again.\n")
+		 if (!any(.jcall("java/lang/System","S","getProperty","main.class")=="org.rosuda.JGR.JGR")) {
+			
+		 	success<-("Iplots on MacOS must be run under JGR. Please install and launch JGR and try again.")
 		}
 
 	})
-	return(success)
+	if (!is.logical(success)) return(success)
    }
 
   # normal ...
   if(!mrequire("iplots", quietly = TRUE, warn.conflicts=FALSE)) {
-	return(FALSE)
+	return("iplots is not installed")
   }
   return(TRUE)
 }

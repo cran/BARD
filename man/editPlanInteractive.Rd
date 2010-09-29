@@ -22,7 +22,7 @@ createPlanInteractive(basemap, ndists, reportFUN = NULL, ...)
 	returns a bard plan
 }
 
-\section{warning}{This depends on the iplots package. This package is still beta-quality. You may see occasional glitches. }
+\section{warning}{This depends on the iplots package. This package is still beta-quality. You may see occasional glitches. And on Macintosh systems, iplots must be run under JGR }
 \author{ 
   Micah Altman
   \email{Micah\_Altman@harvard.edu}

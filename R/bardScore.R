@@ -109,15 +109,18 @@ calcUnassignedScore<-calcHolesScore
 calcContiguityScore<-function(plan,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
 
-  setup<-dynamicScoreSetup(plan,lastscore,changelist)
-  distids<-setup$distids
-  score<-setup$score
-
-  
-  score[distids]<- 
-    sapply(distids,function(x)calcContiguityScoreD(plan,x,standardize))
-  return(score)
+   setup <- dynamicScoreSetup(plan, lastscore, changelist)
+    score <- setup$score
+    if (!is.null(changelist)) {
+	    distids<-sameNeighbors(plan,lastscore,changelist)
+    } else {
+    	distids<-setup$distids
+    }    	
+    score[distids] <- unlist(sapply(distids, function(x) calcContiguityScoreD(plan, 
+        x, standardize)))
+    return(score)
 }
+
 
 #########################################################################
 #
@@ -148,7 +151,7 @@ calcLWCompactScore<-function(plan,
     return(score)
 }
 
-calcReockScore<-function(plan,
+calcReockScore<-function(plan, usebb=FALSE,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
 
   
@@ -157,7 +160,7 @@ calcReockScore<-function(plan,
   score<-setup$score
   
     score[distids]<-sapply(distids,function(x)
-      calcReockScoreD(plan,x,standardize))
+      calcReockScoreD(plan,x,usebb=usebb,standardize=standardize))
     return(score)
 }
 
@@ -185,7 +188,63 @@ calcSpatialHolesScore<-function(plan,
     return(score)
 }
 
+calcBBCompactScore<-function(plan,
+  lastscore=NULL, changelist=NULL, standardize=TRUE ) {
+
+  setup<-BARD:::dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+  basemap<-basem(plan)
+
   
+  for (i in distids) {
+    blocks<-which(plan==i)
+    if (length(blocks)==0) {
+      score[i]<-1
+    } else {
+      bb<-BARD:::getBbox(basemap,blocks)
+      bb <- (bb$boxMax[1]-bb$boxMin[1])*(bb$boxMax[2]-bb$boxMin[2])
+      tarea<-sum(basemap$areas[blocks])
+      score[i]<- 1-(tarea/bb)
+    }
+  }
+    return(score)
+}
+
+calcSplitScore<-function(plan,splitvar,
+  lastscore=NULL, changelist=NULL, standardize=TRUE ) {
+  
+  ndists<-attr(plan,"ndists")
+  if (length(splitvar)==1) {
+    	    splitvar<-basem(plan)$df[[splitvar]]
+  }   
+  
+  xt<- xtabs(~splitvar+plan)
+  splitnames<-names(xt[,1])
+  splitl <- (apply((xt>0),1,sum)>1)
+  
+  if (standardize) {
+  	  # percentage of ID's split
+  	  score <- sum(splitl)/length(splitnames)
+  } else {
+  	  score <- numeric(ndists)
+  	  dnames<-names(xt[1,])
+  	  # district by district scores
+  	  for (i in 1:ndists) {
+  	  	ic<-as.character(i)
+  	  	if (!ic %in% dnames) {
+  	  		score[i]<-0
+  	  	} else {
+  	  		score[i]<- sum(xt[,ic]>0 & splitl)
+  	  	}
+  	  }
+  	  	
+  	 
+  }
+  return(score)
+
+}
+
 #########################################################################
 #
 # calcPopScore
@@ -264,11 +323,11 @@ calcPopScore<-function(plan, predvar="POP",
 #     Standardized, as above.
 # 
 #    SEE R HELP FILES FOR COMPLETE DOCS
-# 
+#                  
 #########################################################################
 
 calcRangeScore<-function(plan, predvar="BLACK", predvar2="WHITE", 
-  targrange=c(.65,.70),
+	targrange=c(.65,.70), sumdenom=TRUE,
   lastscore=NULL, changelist=NULL, standardize=TRUE ) {
   
   if ((length(targrange)!=2) || min(targrange<0) || max(targrange>1) || 
@@ -300,21 +359,76 @@ calcRangeScore<-function(plan, predvar="BLACK", predvar2="WHITE",
       }
     }
   }
-  
+  if (sumdenom) {
+        ratios<-(rawscore1/(rawscore1+rawscore2))
+        } else {
+        ratios<-(rawscore1/rawscore2)
+  }
   if (standardize) {
-      # penalty function for being outside range  
-      ratios<-(rawscore1/(rawscore1+rawscore2))
+      # penalty function for being outside range 
+       
       score<-pmin(abs(ratios - targrange[2]),abs(ratios-targrange[1]))
       score[ratios >= targrange[1] & ratios <=targrange[2]]<-0
       score[which(is.nan(ratios))]<-1
   } else {
       #report range
-      score<-rawscore1/(rawscore1+rawscore2)
+      score<-ratios
   }
   attr(score,"rawscore1")<-rawscore1
    attr(score,"rawscore2")<-rawscore2
   return(score)
 }
+
+#########################################################################
+#
+# calcIneqScore
+# 
+# Calculates plans distributional (in)equality using the ineq package
+#
+# Arguments:
+#     As above.
+#
+#     Additionally -
+#           - eqvar - name of variable to be used for inequality measure
+#	    - weightVar - weight variable
+#	    - type - type of inequality score, per ineq
+#	    - parameter - parameter for inequality score
+#
+# Returns:
+#     Standardized, as above.
+# 
+#    SEE R HELP FILES FOR COMPLETE DOCS
+# 
+#########################################################################
+
+calcIneqScore<-function(plan,eqvar,weightVar=NULL,parameter=NULL,  type = c("Gini", "RS", "Atkinson", "Theil", "Kolm", "var", "square.var", "entropy"),
+           lastscore=NULL, changelist=NULL, standardize=TRUE) { 
+
+  if (length(type)>1) {
+  	type<-type[1]
+  }
+  setup<-dynamicScoreSetup(plan,lastscore,changelist)
+  distids<-setup$distids
+  score<-setup$score
+  
+  if(!mrequire("ineq",quietly=TRUE,warn.conflicts=FALSE) && (type!="var")) {
+  	warning("Ineq package not installed. Returning coef of variation.")
+  	type<-"var"
+  }
+  
+ 
+  score[distids]<-sapply(distids,function(x)
+      calcIneqScoreD(plan,x,eqvar=eqvar,weightVar=weightVar,parameter=parameter,type=type))
+      
+      if (standardize && (type %in% c("Kolm","Theil","entropy","var","square.var"))) {
+      	      	score <- 1-1/(score+1)
+
+      }
+   
+  return(score)
+}
+
+
 
 #########################################################################
 #
@@ -377,8 +491,7 @@ calcGroupScore<-function(plan,groups=list(),penalties=1,
 # 
 #########################################################################
 
-calcMomentScore<-function(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2,
-           lastscore=NULL, changelist=NULL ) { 
+calcMomentScore<-function(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2, 	normalize=TRUE,lastscore=NULL, changelist=NULL ) { 
 
            
   setup<-dynamicScoreSetup(plan,lastscore,changelist)
@@ -397,7 +510,7 @@ calcMomentScore<-function(plan,standardize=TRUE,centers=NULL,weightVar=NULL,pena
 	  return(NA)
  }
     score[distids]<-sapply(distids,function(x)
-      calcMomentScoreD(plan,x,standardize,centers,weightVar,penaltyExp))
+      calcMomentScoreD(plan,x,standardize,centers,weightVar,penaltyExp,normalize=normalize))
     return(score)
 }
 
@@ -498,8 +611,7 @@ calcContiguityScoreD<-function(plan,distid,standardize=TRUE) {
 #
 # Returns the LW compactness as determined bycalculating the minimum and maximum
 # x and y coordinates.  Then a bounding box is constructed and the area is
-# calculated with the total areas added together and returned by the
-# function.
+# calculated/
 #
 #  See calcLWCompactScore
 #
@@ -577,6 +689,40 @@ calcSpatialHolesScoreD<-function(plan,distid, standardize=TRUE) {
 
 #########################################################################
 #
+#  calcIneqScoreD
+#
+# Returns inequality of variable
+#
+#########################################################################
+
+calcIneqScoreD<-function(plan,distid,eqvar,weightVar=NULL,type="Gini",parameter=NULL,...) {
+    blocks<-which(plan==distid) 
+    if (length(blocks)==0) {
+      return(1)
+    }
+    
+    df<-basem(plan)$df
+    
+    # don't send in ints -- these overflow
+    # type - var
+    
+    tvec<-as.numeric(df[[eqvar]][blocks])
+    if (!is.null(weightVar)) {
+    	tvec<-tvec*df[[weightVar]][blocks]
+    }
+    
+    if (type=="var") {
+    	n<-length(tvec)
+    	score<-(n-1/n)*sd(tvec)/mean(tvec)
+    } else {
+    	score<-ineq::ineq(tvec,parameter=parameter,type=type)
+    }
+    	
+    return(score)
+}
+
+#########################################################################
+#
 #  calcGroupScore
 #
 # Returns number of groups split by a district. See calcGroupScore
@@ -611,21 +757,36 @@ calcGroupScoreD<-function(plan,distid,groups=list(),penalties=1) {
 #
 #########################################################################
 
-"calcReockScoreD"<-function(plan,distid,standardize=TRUE) {
+"calcReockScoreD"<-function(plan,distid,usebb=FALSE, standardize=TRUE) {
 
   blocks<-which(plan==distid)
   if (length(blocks)==0) {
       return(1)
   }
   basemap<-basem(plan)
-  polys<-basemap$polys[blocks]
+  polys<-BARD:::basePolys(basemap)[blocks]
   distArea <-sum(unlist(sapply(polys, 
   function(x)sapply(x@Polygons,function(x)x@area))))
-    
-  xs<-unlist(sapply(polys, 
-  function(x)sapply(x@Polygons,function(x)x@coords[,1])))
-  ys<-unlist(sapply(polys, 
-  function(x)sapply(x@Polygons,function(x)x@coords[,2])))
+  
+  if (usebb) {
+  	 bb<-basemap$bboxs[,blocks]
+  	 xs <- c(bb[1,],bb[3,])
+  	 ys <- c(bb[2,],bb[4,])
+   
+  } else {
+     ch1<-sapply(polys,
+     function(x)sapply(x@Polygons,function(x)x@coords[chull(x@coords),],simplify=FALSE),simplify=FALSE)
+     xs<-unlist(sapply(ch1,function(x)sapply(x,function(x)x[,1])))
+     ys<-unlist(sapply(ch1,function(x)sapply(x,function(x)x[,2])))
+  
+  }
+  chi2<-chull(xs,ys)
+
+  xs<-xs[chi2]
+  ys<-ys[chi2]
+
+  
+  
   circleArea <- miniball(cbind(xs,ys))$sqradius*pi
   score <- distArea/circleArea
   if (standardize) {
@@ -644,7 +805,7 @@ calcGroupScoreD<-function(plan,distid,groups=list(),penalties=1) {
 #########################################################################
 
 calcMomentScoreD<-function(plan,distid,standardize,
-		centers=NULL,weightVar=NULL,penaltyExp=2) {
+		centers=NULL,weightVar=NULL,penaltyExp=2,normalize=TRUE) {
     blocks<-which(plan==distid) 
     if (length(blocks)==0) {
       return(1)
@@ -656,29 +817,30 @@ calcMomentScoreD<-function(plan,distid,standardize,
 	
 	# use district centroid if not specified
 	if (is.null(centers)) {
-		distarea<-sapply(basem(plan)$polys[blocks],function(x)attr(x,"area"))
+		distarea<-sapply(basePolys(basem(plan))[blocks],function(x)attr(x,"area"))
 		centerXY<-apply(blockCenters,2,function(x)weighted.mean(x,distarea))
 	} else {
-		centerXY<-getBardCentroids(plan,centers[distid])
+		centerXY<-getBardCentroids(plan,centers[plan==distid])
 	}
 
     distance <- sqrt(rowSums(t(t(blockCenters)-as.vector(centerXY))^2))
 	
     
     if (is.null(weightVar)) { 
-    	tweights<-1
-	} else {
+    	tweights<-replicate(length(distance),1)
+    } else {
 		tweights<-basem(plan)$df[[weightVar]][blocks]
     }
-	if (standardize) {
-		tweights<-tweights/sum(tweights)*length(tweights)
-	}
 
-    score <- sum((distance*tweights)^penaltyExp)
+    score <- sum(tweights*(distance)^penaltyExp)
+    if (normalize) {
+    	    normweight <- sum(tweights) * sum(distance)^penaltyExp
+    	    score<-score/normweight
+    }
     if (standardize) {
-		score = 1-1/(score+1)
-	}
-	return(score)
+		score <- 1-1/(score+1)
+    }
+    return(score)
 }
 
 #########################################################################
@@ -714,22 +876,10 @@ calcUniScoreD<-function(plan,distid,varid,unifunc=sum) {
 getBbox<-function(basemap,blocks=integer(0)) {
 	retval<-list()
 	if(length(blocks)==0) {
-		blocks<-1:length(basemap$polys)
+		blocks<-1:dim(basemap)[1]
 	}
 	
 	bboxg<-basemap$bboxs
-	
-	
-	# still too slow
-	#tbox<-bbox(basemap$shape[blocks,])
-	#rownames(tbox)<-NULL
-	#bMin<-tbox[,1]
-	#bMax<-tbox[,2]
-	
-	# This is MUCH slower. Could save memory... check later.
-	#tbs<-sapply(blocks,function(x)basemap$shape[x,]@bbox)
-	#bMin<-c(min(tbs[1,]),min(tbs[2,]))
-	#bMax<-c(max(tbs[3,]),max(tbs[4,]))
 	
 	bMin<-apply(bboxg[1:2,blocks,drop=F],1,min)
 	bMax<-apply(bboxg[3:4,blocks,drop=F],1,max)
@@ -741,15 +891,18 @@ getBbox<-function(basemap,blocks=integer(0)) {
 
 getDistrictShapeInfo<-function(basemap,blocks=integer(0), needShape=F) {
 	if(length(blocks)==0) {
-		blocks<-1:length(basemap$polys)
+		blocks<-dim(basemap)[1]
 	}
 	
-	tmpsub <- basemap$shape[blocks,]
+	tmpsub <- baseShape(basemap)[blocks,1]
 	bbox<-tmpsub@bbox
 	
 	tarea<-sum(basemap$areas[blocks])
-	tperim<-sum(basemap$perims[blocks])
-	for (i in blocks) {
+	tperim<-NULL
+	
+	if (!is.null(basemap$sharedPerims)) {
+	  tperim<-sum(basemap$perims[blocks])
+	  for (i in blocks) {
 		for (j in seq(1,length.out=length(basemap$nb[[i]]))) {
 			if (basemap$nb[[i]][j]<i) {next}
 			
@@ -757,14 +910,15 @@ getDistrictShapeInfo<-function(basemap,blocks=integer(0), needShape=F) {
 				tperim<-tperim - basemap$sharedPerims[[i]][j]
 			}
 		}
+	  }
 	}
-
-	if (needShape) {
-		usub<-unionSpatialPolygons(tmpsub,replicate(length(blocks),1))
+	  
+	if (needShape || is.null(tperim)) {
+		usub<-myUnionSpatialPolygons(tmpsub,replicate(length(blocks),1))
 		tcent<-coordinates(usub)
-		npolys<-checkPolygonsHoles(usub@polygons[[1]])
-		numholes<-sum(sapply(npolys@Polygons,function(x) slot(x, "hole")))
+		numholes<-sum(sapply(usub@polygons[[1]]@Polygons,function(x) slot(x, "hole")))
 		shape<-usub
+		tperim<-genPerim(usub@polygons,longlat=basemap$longlat)
 	} else {
 		numholes <- NA
 		tcent<-c(NA,NA)
@@ -779,7 +933,11 @@ getDistrictShapeInfo<-function(basemap,blocks=integer(0), needShape=F) {
 dynamicScoreSetup<-function(plan,lastscore,changelist) {
   if(is.districtonly(plan)) {
   	distids<-1
-  	score<-0
+  	if (is.null(lastscore)) {
+  		score <-0 
+  	} else {
+  		score<-lastscore
+  	}
   } else if(is.null(lastscore)) {
     ndists<-attr(plan,"ndists")
     distids <- 1:ndists
@@ -793,6 +951,51 @@ dynamicScoreSetup<-function(plan,lastscore,changelist) {
   retval$score<-score
   return(retval)
 }
+
+sameNeighbors<-function(plan,lastscore,changelist) {
+  ndists<-attr(plan,"ndists")
+  nb<-basem(plan)$nb  
+  changedb<-changelist[,1]
+  
+  checkDists<-integer(0)
+  
+  #blocks that were next to others dis/reconnected
+  for (i in seq(from=1,length.out=dim(changelist)[1])) {
+  		x<-changelist[i,1]
+  		vx<-plan[x]
+  		ov<-changelist[i,2]
+  		nl<-neighbors(nb,x)
+	  	if (any(plan[nl]==vx) != any(plan[nl]==ov)) {
+	  		checkDists<-c(checkDists,vx)
+	  		checkDists<-c(checkDists,ov)
+	  	}
+  }
+  
+  distids<-setdiff(unique(c(plan[changelist[,1]],changelist[,2])),checkDists)
+
+  if (length(distids)>0) {	
+    nn <-setdiff(neighbors(nb,distids),changedb)
+    nn2 <-setdiff(neighbors(nb,nn),changedb)
+    nnv <- plan[nn2]
+    
+    # neighbors still connected?
+    checkn<-sapply(distids,function(x){
+  	  i <- (nnv==x)
+  	  if (length(i)==0) { return(0)} 
+  	ivec <- logical(length(plan))
+  	ivec[nn2[i]]<-TRUE
+  	n.comp.include(nb,ivec)$nc>1
+  	})
+  	checkDists<-c(checkDists,distids[checkn])
+  }
+  # check for single
+  if(is.districtonly(plan)) {
+  		checkDists<-intersect(1,checkDists)
+  }
+  return(checkDists)
+}
+
+
 
 ##############################################################################
 #          Testing Functions

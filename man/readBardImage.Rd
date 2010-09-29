@@ -27,7 +27,13 @@ writeBardImage(filen, basemaps=NULL, plans=NULL)
   Write method returns logical success, invisibly.
 }
 
-\note{ \code{readBardImage} attempts to detect and convert images created by previous versions of BARD, however it may fail to convert them due to limits in the underlying R libraries it depends. Use \code{\link{exportBardShape}} in the previous version  \code{\link{importBardShape}} to migrate if automatic conversion is unsuccessful. }
+\note{ 
+
+- \code{readBardImage} attempts to detect and convert images created by previous versions of BARD, however it may fail to convert them due to limits in the underlying R libraries it depends. Use \code{\link{exportBardShape}} in the previous version  \code{\link{importBardShape}} to migrate if automatic conversion is unsuccessful. 
+
+- Note that because of limitations in R \code{load} memory use grows when restoring multiple plans. The most memory efficient approach is to save the plans as vectors using \code{as.numeric}, save maps with \code{writeBardMap} and recreate the plan with \code{createAssignedPlan}.
+
+}
 
 \author{
   Micah Altman

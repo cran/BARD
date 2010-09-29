@@ -36,6 +36,7 @@
 #   - cl <- either:
 #       - cluster object produced by makeCluster() or makeXXXXCluster() in snow
 #       - character vector of machine names
+#	- number of cores
 #                          
 # Returns
 #    - returns logical indicating whether cluster was successfully initialized
@@ -44,10 +45,48 @@
 # 
 ##################################
 
-startBardCluster<-function(cl) {
+startBardCluster<-function(cl=0) {
 
+
+   #
+   # multicore case
+   #
+
+   if ((length(cl)==1) && is.numeric(cl)) {
+       if (!mrequire("multicore",quietly=TRUE)) {
+          warning("multicore is not available. Cannot run in parallel")
+          return(FALSE)
+        }
+	if (cl==0) {
+		cat("auto-determining number of cores...")
+		cl<-multicore:::detectCores(all.tests=TRUE)
+		if (is.na(cl)) {
+			warning("Could not determine number of cores, defaulting to 2\n") 
+			cl<-2
+		} else {
+			cat (paste("found ",cl," cores\n",sep=""))
+		}	
+	}
+   	setBardCluster(newcl=cl)
+	return(TRUE)
+   }	
+
+   if (length(cl)<2) {
+      warning("Snow cluster size should be >= 2")
+      return(FALSE)
+   }
+
+   #
+   #snow case
+   #
+
+   if (!mrequire("snow",quietly=TRUE)) {
+      warning("Snow is not available. Cannot cluster")
+      return(FALSE)
+   }
+  # may be starting the cluster on a new node
   bardInstall<-function(bardRepos="http://cran.r-project.org") {
-    if (require("BARD",quietly=TRUE)) {
+    if (mrequire("BARD",quietly=TRUE)) {
       return(TRUE)
     }
     repos<-getOption("repos")[1]
@@ -55,18 +94,10 @@ startBardCluster<-function(cl) {
       repos <- bardRepos
     }
     install.packages("BARD",repos=repos,dependencies=c("Imports","Depends"))
-      if (require("BARD",quietly=TRUE)) {
+      if (mrequire("BARD",quietly=TRUE)) {
       return(TRUE)
     }
-  }
-   if (length(cl)<2) {
-      warning("Cluster size should be >= 2")
-      return(FALSE)
-   }
-   if (!mrequire("snow",quietly=TRUE)) {
-      warning("Snow is not available. Cannot cluster")
-      return(FALSE)
-   }
+  }  
    if (!is.null(setBardCluster())) {
     warning("Cluster already initialized. Need to stopBardCluster before initializing a new one")
     return(FALSE)
@@ -79,7 +110,7 @@ startBardCluster<-function(cl) {
    z<-try(parLapply(cl,replicate(length(cl),"http://cran.r-project.org"),bardInstall)
     ,silent=T)
    if (inherits(try(sum(unlist(z))),"try-error")) {
-    warning("Cluster initizialization failed -- can't load BARD on cluster nodes")
+    warning("Cluster initialization failed -- can't load BARD on cluster nodes")
     return(FALSE)
    }
    
@@ -106,7 +137,9 @@ startBardCluster<-function(cl) {
 
 stopBardCluster<-function() {
   cl<-setBardCluster()
-  if (is.null(cl)) {
+  if (is.null(cl) || (length(cl)==1)) {
+	# if no cluster or multicore cluster
+    setBardCluster(NULL)
     return();
   }
   cat("*** Shutting down bard cluster ..\n\n")
@@ -163,6 +196,30 @@ lapplyBardCluster<-function(X,FUN,...,LB=TRUE,maxRetries=3) {
     return(retval)
   }
   
+  if (length(cl)>1) {
+	return (lapplyBardCluster.snow(X,FUN,...,LB=LB,maxRetries=maxRetries))
+  } else {
+	return (lapplyBardCluster.multicore(X,FUN,...,LB=LB))
+  }
+}
+
+
+lapplyBardCluster.multicore<-function(X,FUN,...,LB=TRUE) {
+  cl<-setBardCluster()
+	mclapplySafer<- function(X,FUN,...){
+		newFUN<-function(X,...){
+			if(multicore:::isChild()) 	{multicore:::closeAll()}
+			FUN(X,...)
+		}
+ 		mclapply(X,newFUN,...)
+	}
+	return(mclapplySafer(X,FUN,...,mc.cores=cl,mc.silent=FALSE,mc.preschedule=!LB))
+}
+
+lapplyBardCluster.snow<-function(X,FUN,...,LB=TRUE,maxRetries=3) {
+
+  cl<-setBardCluster()
+  # snow logic...
   if (LB) {
     clusterFun <- clusterApplyLB
   } else {
@@ -246,7 +303,12 @@ setBardCluster<-local ({
 bardClusterExport<-function(list) {
     cl<-setBardCluster()
     if (is.null(cl)) {
-	invisible()
+	return(invisible())
+    }
+   
+    if (length(cl)==1) {
+	#multicore cluster, export is a no-op
+	return(invisible())
     }
     gets <- function(n, v) {
         assign(n, v, env = .GlobalEnv)

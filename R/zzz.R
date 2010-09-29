@@ -20,7 +20,8 @@
 	ow <- options(warn=-1)
   }
   retval<-mrequire("spdep")
-   
+  # workaround for maptools not detecting rgeostatus
+  rgeostatus() 
  if (length(grep("^darwin",R.version$os))) {
 	options(ow)
   } 

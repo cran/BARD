@@ -69,7 +69,7 @@ profilePlans<-function(
   cl<-setBardCluster()
   if (!is.null(cl) && usecluster) {
 	if (tracelevel>0) {
-		print("Will use SNOW cluster for sampling, suppressing graphics, some tracing unavailable")
+		print("Will use cluster for sampling, suppressing graphics, some tracing unavailable")
 		flush.console()
 	}
 	refine.args$displaycount<-NULL
@@ -79,7 +79,7 @@ profilePlans<-function(
 
    
  mygenplan<-function(x) {
-  if (usingcluster) {
+  if (usingcluster && !is.numeric(setBardCluster)) {
 	genbasemap<-get(".bardBasemapTMP",envir=.GlobalEnv)
   } else {
 	genbasemap <- basemap
@@ -152,7 +152,7 @@ profilePlans<-function(
   }
  
  score1<-matrix(sapply(retval,function(x)sum(score.fun(x))))
- score2<-matrix(sapply(retval,function(x)sum(score.fun(x))))
+ score2<-matrix(sapply(retval,function(x)sum(addscore.fun(x))))
  scores<-cbind(score1,score2)
  colnames(scores)<-c(as.character(match.call()$score.fun)[1],as.character(match.call()$addscore.fun)[1]) 
  rownames(scores)<-paste("p",(1:dim(scores)[1]),sep="")
@@ -219,7 +219,7 @@ samplePlans<-function( seedplans,
   if (!is.null(cl) && usecluster) {
   	usingcluster<-TRUE
 	if (tracelevel>0) {
-		print("Will use SNOW cluster for sampling. Note that graphics, and most tracing unavailable")
+		print("Will use cluster for sampling. Note that graphics, and most tracing unavailable")
 		flush.console()
 	}
 	refine.args$displaycount<-NULL
@@ -231,7 +231,7 @@ samplePlans<-function( seedplans,
  # args or in plans
  
  mygenplan<-function(x) {
-  if (usingcluster) {
+  if (usingcluster && !is.numeric(setBardCluster())) {
 	genbasemap<-get(".bardBasemapTMP",envir=.GlobalEnv)
   } else {
 	genbasemap <- basemap
@@ -244,7 +244,7 @@ samplePlans<-function( seedplans,
   return(retval)
  }
  
- if (usingcluster) {
+if (usingcluster && !is.numeric(setBardCluster())) {
 	assign(".bardBasemapTMP",basemap,envir=.GlobalEnv)
         on.exit(rm(list=".bardBasemapTMP",envir=.GlobalEnv))
 	bardClusterExport(".bardBasemapTMP")
@@ -253,7 +253,7 @@ samplePlans<-function( seedplans,
  genplans<-lapplyBardCluster(seq(length.out=ngenplans), mygenplan)
     
  myrefplan<-function(iplan){ 
-      if (usingcluster) {
+   if (usingcluster && !is.numeric(setBardCluster())) {
 	basem(iplan)<-get(".bardBasemapTMP",envir=.GlobalEnv)
       }
       if (tracelevel>0) {
@@ -264,14 +264,14 @@ samplePlans<-function( seedplans,
       myargs$plan<-as.name("iplan")
       myargs$score.fun<-as.name("score.fun")
       retval<-do.call(refine.fun,myargs)
-      if (usingcluster) {
+    if (usingcluster && !is.numeric(setBardCluster())) {
          basem(retval)<-NULL
       }      
       return(retval)
     }
  
  combinedplans<-cs(seedplans,genplans)
- if (usingcluster) {
+ if (usingcluster && !is.numeric(setBardCluster())) {
 	for (i in seq(1,length=length(combinedplans))) {
 		basem(combinedplans[[i]])<-NULL 
         } 
@@ -281,7 +281,7 @@ samplePlans<-function( seedplans,
 		print("Starting refinement phase")
         }
  refinedplans<-lapplyBardCluster(combinedplans,myrefplan)
- if (usingcluster) {
+if (usingcluster && !is.numeric(setBardCluster())) {
 	for (i in seq(1,length=length(refinedplans))) {
 		basem(refinedplans[[i]])<-basemap
         } 
@@ -346,19 +346,48 @@ summary.bardSample<-function(object,...) {
 }
 
 print.bardSample.summary<-function(x,...) {
+	inner.print.bardSample.summary(x,...)
+}
+
+print.bardSample<-function(x,...) {
+	inner.print.bardSample(x,...) 
+}
+HTML.bardSample.summary<-function(x,...) {
+	inner.print.bardSample.summary(x,...,useHTML=TRUE)
+}
+
+HTML.bardSample<-function(x,...) {
+	inner.print.bardSample(x,...,useHTML=TRUE) 
+}
+
+inner.print.bardSample.summary<-function(x,...,useHTML=FALSE) {
+	if (useHTML) {
+		print<-function(x)HTML(x,...)
+		cat<-print
+		plot<-hplot
+	}
   cat("Distribution of Scores\n\n")
   print(summary(x),...)
   cat("\n\nNumber of samples",dim(x)[1],"\n")
 }
 
-print.bardSample<-function(x,...) {
+inner.print.bardSample<-function(x,...,useHTML=FALSE) {
+	if (useHTML) {
+		print<-function(x)HTML(x,...)
+		cat<function(...)
+		plot<-hplot
+	}
   print(attr(x,"scores"),...)
 }
 
-plot.bardSample<-function(x,...) {
+plot.bardSample<-function(x,ordered=TRUE,...) {
     class(x)<-"list"
     scores<-attr(x,"scores")
-    plotGrid(x[order(scores)])
+    if (ordered) {
+   	 plotGrid(x[order(scores)])
+    } else {
+   	 plotGrid(x)
+    }
 }
 
 plot.bardSample.summary<-function(x,single=F,...) {
@@ -373,14 +402,12 @@ plot.bardSample.summary<-function(x,single=F,...) {
     if (dim(x)[2]==1) {
          plotSingle(1)
     } else {
-      op <- par(no.readonly=TRUE)
-      on.exit(par(op))
       par(bg="white")
       pairs(unclass(x))
+      if (interactive() && dev.interactive()) {
+      	par(ask=TRUE)
+      }
       if (!single) {
-         if (interactive()) {
-          par(ask=T)
-         }
          sapply(seq(1,length=dim(x)[2]), plotSingle)
       }
     }

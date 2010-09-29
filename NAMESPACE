@@ -1,7 +1,7 @@
 # district utility functions
 export( importBardShape, exportBardShape,
         readBardImage, writeBardImage,
-        readBardCheckpoint, writeBardCheckpoint )
+        readBardCheckpoint, writeBardCheckpoint , spatialDataFrame2bardBasemap, spatialDataFrame2bardPlan)
 
 # general utility functions
 export( miniball )
@@ -12,7 +12,7 @@ export( basem, "basem<-", "basem.default", "basem<-.default" )
 
 # score functions
 export ( calcGroupScore, calcContiguityScore, calcLWCompactScore, calcPopScore, 
-  calcRangeScore, calcHolesScore,calcReockScore, calcMomentScore, calcPACompactScore, combineDynamicScores, calcUnassignedScore,calcSpatialHolesScore  )
+  calcRangeScore, calcHolesScore,calcReockScore, calcMomentScore, calcPACompactScore, combineDynamicScores, calcUnassignedScore,calcSpatialHolesScore,calcBBCompactScore, calcSplitScore, calcIneqScore  )
 
 # plan generation
 export ( createKmeansPlan, createRandomPlan, createContiguousPlan, 
@@ -28,6 +28,9 @@ export ( refineGreedyPlan, refineAnnealPlan, refineNelderPlan, refineGenoudPlan,
 # profiling functions
 export(samplePlans, quickSampleDistricts, profilePlans)
 
+# conversion
+export(bardBasemap2spatialDataFrame,spatialDataFrame2bardPlan,spatialDataFrame2bardBasemap,bardPlan2spatialDataFrame)
+
 # plan comparison
 export(reportPlans,scorePlans,choroplotPlan)
 S3method(diff,bardPlan)
@@ -35,18 +38,21 @@ S3method(plot, bardPlanDiff)
 S3method(summary, bardPlanDiff)
 S3method(print, bardPlanDiff)
 
-
 #cluster setup
 export(startBardCluster,stopBardCluster)
 
 # interactive plans
 export(editPlanInteractive,createPlanInteractive)
 
+# public mapping project
+export(PMPreport,writeBardMap,readBardMap)
+
 #  plotting and summary methods
 S3method(plot, bardBasemap)
 S3method(summary, bardBasemap)
 S3method(print, bardBasemap)
 S3method(print, bardBasemap.summary)
+S3method("levels<-", bardPlan)
 S3method(plot, bardPlan)
 S3method(plot,bardPlan.summary)
 S3method(summary, bardPlan)
@@ -60,8 +66,20 @@ S3method("==",bardBasemap)
 S3method("!=",bardBasemap)
 S3method(dim,bardBasemap)
 S3method(as.data.frame,bardBasemap)
+S3method(plot,bardChoroplot)
+S3method(print,bardChoroplot)
 
-
+# HTML methods
+S3method(HTML, bardPlanDiff)
+S3method(HTML, bardBasemap)
+S3method(HTML, bardBasemap.summary)
+S3method(HTML,bardPlan)
+S3method(HTML, bardPlan.summary)
+S3method(HTML, bardSample.summary)
+S3method(hplot,default)
+S3method(plot,grob)
+export(copyR2HTMLfiles)
+export(hplot)
 
 # include Compiled C library
 useDynLib("BARD")

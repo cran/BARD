@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  8 MAY 2010 18:03
+This is pdfTeXk, Version 3.1415926-1.40.9 (Web2C 7.5.7) (format=pdflatex 2008.12.28)  29 SEP 2010 00:15
 entering extended mode
  %&-line parsing enabled.
 **bardJSS
@@ -465,13 +465,13 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [6]
-LaTeX Font Info:    Try loading font information for OMS+aer on input line 173.
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 169.
 
  (/Library/Frameworks/R.framework/Resources/share/texmf/omsaer.fd
 File: omsaer.fd 1999/12/27
 )
 LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 173.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 169.
 
 <bardJSS-plot1a.pdf, id=581, 505.89pt x 433.62pt>
 File: bardJSS-plot1a.pdf Graphic file (type pdf)
@@ -687,12 +687,12 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [35]
-Underfull \hbox (badness 10000) in paragraph at lines 1121--1121
+Underfull \hbox (badness 10000) in paragraph at lines 1117--1117
 
  []
 
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1121.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1117.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -734,7 +734,7 @@ onts/type1/bluesky/cm/cmti8.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1
 /bluesky/cm/cmti9.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/c
 m/cmtt10.pfb></usr/local/texlive/2008/texmf-dist/fonts/type1/bluesky/cm/cmtt9.p
 fb></usr/local/texlive/2008/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on bardJSS.pdf (36 pages, 9146163 bytes).
+Output written on bardJSS.pdf (36 pages, 9279026 bytes).
 PDF statistics:
  1059 PDF objects out of 1200 (max. 8388607)
  150 named destinations out of 1000 (max. 131072)

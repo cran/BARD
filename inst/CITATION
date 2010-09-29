@@ -7,13 +7,13 @@ citEntry(entry="article",
                                 ),
 	 howpublished = "software",
          year         = "2010",
-         note         = "Software: R Package, BARD, (version 1.10) ",
+         note         = "Software: R Package, BARD, (version 1.18) ",
          journal  ="Journal of Statistical Software",
          volume="Forthcoming",
          url          ="http://bard.sf.net/",
 
          textVersion =
          paste("Altman, M., M.P. McDonald (2010)",
-              "BARD: Better Automated Redistricting (version 1.10), Journal of Statistical Software: Forthcoming."
+              "BARD: Better Automated Redistricting (version 1.18), Journal of Statistical Software: Forthcoming."
                )
 )

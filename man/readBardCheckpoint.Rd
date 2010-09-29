@@ -35,6 +35,7 @@
 }
 
 \seealso{Other methods for \code{\link{readBardImage}}, \code{\link{writeBardImage}},
+   \code{\link{readBardMap}}, \code{\link{writeBardMap}},
    \code{\link{exportBardShape}}, \code{\link{importBardShape}}
 }
 

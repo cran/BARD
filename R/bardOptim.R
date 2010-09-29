@@ -163,6 +163,10 @@ refineGenoudPlan <- function(plan, score.fun, displaycount=NULL,  historysize=0,
   }
   if (usecluster && !is.null(setBardCluster())) {
     genCluster <- setBardCluster()
+    if (is.numeric(genCluster)) {
+	# multicore cluster, can't be used
+	usecluster<-FALSE
+    }
     memMat <- TRUE
     displaycount<-0
   } else {
@@ -240,28 +244,12 @@ refineGenoudPlan <- function(plan, score.fun, displaycount=NULL,  historysize=0,
 refineAnnealPlan <- function(plan, score.fun, 
      displaycount=NULL, 
      historysize=0, dynamicscoring=FALSE,
-     tracelevel=1, greedyFinish=FALSE ) {
+     tracelevel=1, checkpointCount=0, resume=FALSE, greedyFinish=FALSE, doquench = FALSE, doReanneal=!doquench, ... ) {
                
   
   # get plan stuff
   ndists<-attr(plan,"ndists")
     basemap<-basem(plan)
-  
-  
-  # control param adjust
-  control<-list()
-  control$fnscale<-1
-  if (tracelevel>1) {
-    control$trace<-9
-  }
-
-  control$temp<-11   # 'These go to 11.' -- Nigel Tufnel
-  control$tmax<-min(500,max(10,ceiling(length(plan)/10)))
-  control$maxit<-2000*control$tmax
-  
-  if (tracelevel>0) {
-    print(paste("Starting Annealing for", control$maxit,"iterations"))
-  }
   
   canGen <- function(par) {
     legal <- convertPar2Plan(par,plan,boundCheck=F)
@@ -274,7 +262,7 @@ refineAnnealPlan <- function(plan, score.fun,
     ex1<-sample(candidateBlocks,1)
     
     nex <- neighbors(basemap$nb,ex1)
-    nex2 <- nex[which(par[nex]!=ex1)]
+    nex2 <- nex[which(par[nex]!=par[ex1])]
     ex2 <- sample(nex2,1)
     newpar[ex1]<-newpar[ex2]
     if (runif(1)>.5) {
@@ -282,12 +270,22 @@ refineAnnealPlan <- function(plan, score.fun,
     }
     return(newpar)
   }
+  
+
                                                             
   annealScoreFun <-  scoreWrapper(score.fun,plan,displaycount,historysize,dynamicscoring,
-        boundCheck=FALSE, tracelevel=tracelevel)
+        boundCheck=FALSE, tracelevel=max(0,tracelevel-2))
   
-  annealResult <- optim(plan,annealScoreFun, method="SANN", 
-      gr=canGen, control=control)
+        
+  control<-list(); control$fnscale<-1; control$trace<-tracelevel; control$REPORT<-50 
+ 
+  if (doquench) {
+  	  annealResult <-quench(plan,annealScoreFun,gr=canGen,control=control,checkpointCount=checkpointCount, resume=resume,...)
+  } else if (!doReanneal) {
+  	  annealResult <-reAnneal(plan,annealScoreFun,gr=canGen,control=control,reannealCount=0,checkpointCount=checkpointCount, resume=resume,...)
+  } else {
+  	  annealResult <-reAnneal(plan,annealScoreFun,gr=canGen,control=control,checkpointCount=checkpointCount, resume=resume,...)
+  } 
   retval <- convertPar2Plan(annealResult$par,plan,boundCheck=F)
 
   if (greedyFinish) {
@@ -798,36 +796,267 @@ convertPar2Plan <- function(candidatePar,plan,boundCheck=TRUE) {
 # 
 #################################
 
-locallyExchangeableBlocks<- function(plan) {
 
-  ndists <- attr(plan,"ndists")
-  
-  lebD<-function(plan,distid) {
-    blocks<-which(plan==distid)
-    if (length(blocks)==0) {
-      return(NULL)
-    }
-    
-    basemap<-basem(plan)
-    candidates<- neighbors(basemap$nb,blocks)
-    ret<-candidates[which(plan[candidates]!=distid)]
-    return(ret)
-  }
-  
-  retval<-
-  unique(c(sapply(1:(ndists-1), function(x)lebD(plan,x)),recursive=T))
-   
-   return(retval)
-   
-}
+locallyExchangeableBlocks<-local({	
+oldplan<-NULL
+oldcand<-NULL
+TS<-NULL
+lebInner<- function(plan) {
+	nb<-basem(plan)$nb
+
+	if(!is.null(TS) && (TS==basem(plan)$timestamp)) {
+		checkset <-which(plan!=oldplan)
+		if (length(checkset)>0) {
+			checkset<-unique(c(checkset,neighbors(nb,checkset)))
+		}
+		cand<-oldcand
+	} else {
+		oldplan<<-NULL
+	}
+
+	if (is.null(oldplan)) {
+		checkset<-1:length(plan)
+		cand<-logical(length(plan))
+		TS<<-basem(plan)$timestamp
+	}
+	
+	# filter unassigned blocks -- looking for neighbors of assigned blocks
+	checkset<-which(plan[checkset]>0)
+	
+	if (length(checkset)>0) {
+		checkval <- sapply(checkset,function(x){ nbb <- neighbors(nb,x); px<-plan[x]; any(plan[nbb]!=px)},simplify=TRUE)
+		if (length(checkval)>0) {
+			cand[checkset]<-checkval
+		}
+	}
+	oldcand<<-cand		
+	oldplan<<-plan
+
+	return(which(cand))
+}	
+})
+	
 
 ####################
 # Test functions - Used for development testing, not used in running production code.
 ####################
 
+quench<-function(par, fn, gr = NULL, ... , control=list(), maxTime = 3600) {
+	control$temp=0
+	reAnneal (par=par,fn=fn,gr=gr,...,control=control,maxTime=maxTime,
+			reannealCount=0, pmiss=.05 )
+}
 
-annealTempDecay<-function(temp,tmax,maxit) {
+reAnneal <-function( par, fn, gr = NULL, ... , control=list(),
+       maxTime = NULL, pmiss=.01, pgood=.001, maxOptFactor=1000,
+       minDeltaFactor = .01, minConvergenceTemp=MINSTARTTEMP/exp(3),
+       reannealCount=1,
+       checkpointCount=0, resume=F,
+       itblock = NULL,   MAXTEMP=10000,STARTTEMP=NULL,MINSTARTTEMP=2) 
+       {
+	
+	MINITER <- 5000; MAXITER<-10^7; PARITERSCALE<-10 ; TMAXMIN<-10
+	
+	if (is.null(maxTime)) {
+		maxTime<-3600
+	}
+	
+	if (reannealCount<1) {
+		reannealCount <- .Machine$integer.max
+	}
+		
+	# set up control parameters 
+	parscale <- control$parscale ; if(is.null(parscale))parscale <- replicate(length(par),1)
+	fnscale  <- control$fnscale ; if(is.null(fnscale))fnscale <-1
+	if(is.null(trace)){trace<-0} else {trace<-control$trace}
+	abstol <- control$abstol ; if(is.null(abstol))abstol<-sqrt(max(.Machine$double.eps,.Machine$double.neg.eps))
+	reltol <- control$reltol ; if(is.null(reltol))reltol<-(.Machine$double.eps)^(1/4)
+	maxitTotal <- control$maxit ; if (is.null(maxitTotal))maxitTotal<- max(min(MINITER,(round(PARITERSCALE*length(par))^2)),MAXITER)
+	tmax <-control$tmax ; if (is.null(tmax))tmax<-(max(TMAXMIN,round(length(par)^(1/3))))
+	if (trace > 1) {
+		basecontrol<-c(control[intersect(c("trace","REPORT") ,names(control))])
+	} else {
+		basecontrol<-list()
+	}
+	scalecontrol<-c(parscale=list(parscale),fnscale=list(fnscale),tmax=tmax )
+	
+	
+	# temp based on fnscale value
+	res <- optim(par=par,fn=fn,gr=gr,...,method="SANN",control=c(scalecontrol,maxit=0))
+	
+	# debugging
+			
+	if (!is.null(STARTTEMP)) {
+		startTemp<-STARTTEMP
+	} else if (!is.null(control$temp)) {
+		startTemp<-control$temp
+	} else {
+		#startTemp <- abs(fnscale * res$value * abs(reltol)^(1/2) /log(.1) * log(maxitTotal))
+		startTemp<-initialTemp(maxIterations=maxitTotal, minDelta = abs(res$value*fnscale*minDeltaFactor), maxPacceptance = .1)
+		startTemp<-max(MINSTARTTEMP,startTemp)
+	} 
+	maxTemp<-max(MAXTEMP,startTemp*10)
 
-    curtemp <-  temp / log(((maxit-1) %/% tmax)*tmax + exp(1))
+
+  
+
+
+	# reannealling loop
+	#
+	startTime<-Sys.time()
+	convergence <- 1
+	curit <- 0
+	itattemp<-0
+	convergenceCount<-0
+	if (is.null(itblock)) {
+		#itblock<-max(100,round(maxitTotal/1000))
+		itblock<-nsamples(pmiss=pmiss,pgood=pgood)
+	}
+	curtemp<-startTemp
+	lastGoodTemp<-startTemp
+	
+	if (trace) {
+		print(match.call()) 
+		print(control)
+		cat(paste("startTemp maxTemp itblock",startTemp,maxTemp,itblock,"\n"))
+	}
+	
+	### CHECKPOINT RESUME LOGIC   -- May Reset the settings above###
+	  if (resume) {
+	  	  checkpoint.env<-get("BardCheckPoint",envir=.GlobalEnv)
+	  	  lslist=setdiff(ls(checkpoint.env),c("checkpoint.env","resume","checkpointCount"))
+	  	  for (enitem in lslist) {
+	  	  	  assign(enitem,get(enitem,envir=checkpoint.env))
+	  	  }   
+	  }
+  
+	  if (checkpointCount>0 && !resume) {
+	  	  checkpoint.env<-new.env()
+	  	  assign("BardCheckPoint",checkpoint.env,envir=.GlobalEnv)
+	  }
+	
+	repeat {
+		# Save Checkpoint state
+		  if (checkpointCount>0) {  
+		  	  for (enitem in ls()) {
+		  	  	  assign(enitem,get(enitem),envir=checkpoint.env)
+			}
+		   }
+		
+		
+		#
+		# setup and run anealing
+		#
+		curtemp <- annealTempDecay(startTemp,tmax,itattemp+1)
+		if ((!(convergenceCount+1)%%reannealCount && (convergenceCount >0))) {
+			itattemp<-0
+			startTemp<- min(lastGoodTemp*exp(reannealCount+1), maxTemp)
+			if (trace) {
+				cat(paste("Reannealing... last, cur, new:",lastGoodTemp,curtemp,startTemp,"\n"))
+			}
+			lastGoodTemp<-startTemp
+		}
+
+		curtemp <- annealTempDecay(startTemp,tmax,itattemp+1)
+		if (trace) {
+			cat(paste( res$value," (",curit,",",itattemp,round(curtemp,digits=2),") -- value (iteration, iteration at curr temp, temperature)\n"))
+		}
+		lastRes<-res
+		newcontrol = c(basecontrol,scalecontrol,maxit=itblock,temp=curtemp)
+		res<-optim(par=lastRes$par,fn=fn,gr=gr,...,method="SANN",control=newcontrol)
+		curit <- curit + itblock
+		itattemp<-itattemp+itblock
+		
+		#
+		#  evaluate stopping & reannealing criteria
+		#
+		
+		convergedLast<-FALSE
+		if (abs(res$value - lastRes$value)<abstol) {
+			convergence <- 0
+			convergencemsg<-"abstol"
+			convergenceCount <-convergenceCount+1
+			if (trace) {
+				cat(paste("No improvement, convergence count: ",convergenceCount,"\n"))
+			}
+		} else if (abs(res$value/lastRes$value)<reltol) {
+			convergence <- 0
+			convergencemsg<-"reltol"
+			convergenceCount <- convergenceCount+1
+			if (trace) {
+				cat(paste("No improvement, convergence count: ",convergenceCount,"\n"))
+			}
+		}  else {
+			convergenceCount <- 0
+			lastGoodTemp<-curtemp
+		}
+		if ( (convergenceCount>0) && ((reannealCount==.Machine$integer.max) || (lastGoodTemp>=MAXTEMP))) {
+			break
+		}	
+		if (curit>maxitTotal) {
+			convergence <-1
+			convergencemsg<-"maxit"
+			break
+		}
+		if ((Sys.time()-startTime)>maxTime) {
+			convergence <-2
+			convergencemsg<-"maxtime"
+			break
+		}
+	}
+	
+	#
+	# return results
+	#
+	
+	result<-res
+	result$counts[1]<-curit
+	result$convergence<-convergence # true convergence code
+	result$convergencemsg<-convergencemsg
+	if (trace) {
+		cat(paste("reAnneal exiting: ",convergencemsg,"\n"))
+	}
+	return(result)
+}
+
+
+# Rationale for cooling schedule
+# 
+# At the end, the cooling temperature should be low enough that the
+# probability of accepting a relatively bad solution is low:
+#
+# Note that probAcceptance =exp(deltaCandidate/Temp)
+# so at end of iterations, temp must be:
+#
+# finalTemp = minDelta / log(maxPacceptance)
+#
+# Also note:
+# 
+# finalTemp = temp_0/log(iterations)
+# temp_0 = finalTemp * log(iterations)
+# --> temp_0 = minDelta/log(maxPacceptance)*log(maxIterations)
+
+
+initialTemp <- function(maxIterations=10^7, minDelta = sqrt(.Machine$double.eps), maxPacceptance = .1) {
+		
+	res <- abs(minDelta/log(maxPacceptance) * log (maxIterations))
+	return(res)
+}
+
+annealTempDecay<-function(temp,tmax,curit) {
+
+    curtemp <-  
+	temp / log(((curit-1) %/% tmax)*tmax + exp(1))
     return(curtemp)
+}
+
+
+
+# number of samples to draw for a probability of missing an improvement, where improvements are less than X% of the entire space
+
+nsamples<-function(pmiss=.01,pgood=.001) {
+	# pmiss = (1-pgood)^n
+	
+	res <- round(log(pmiss)/log(1-pgood))
+	return(res)
 }

@@ -8,7 +8,10 @@
 \alias{calcGroupScore}
 \alias{calcReockScore}
 \alias{calcHolesScore}
+\alias{calcBBCompactScore}
 \alias{calcMomentScore}
+\alias{calcSplitScore}
+\alias{calcIneqScore}
 \alias{calcContiguityScore}
 \title{Scoring functions for redistricting.}
 \description{
@@ -16,19 +19,32 @@ These functions evaluate redistricting plans.
 }
 \usage{
 calcRangeScore(plan, predvar="BLACK", predvar2="WHITE", targrange=c(.65,.70),
-  lastscore=NULL, changelist=NULL, standardize=TRUE )
+  sumdenom = TRUE,lastscore=NULL, changelist=NULL, standardize=TRUE )
+  
 calcGroupScore(plan,groups=list(),penalties=1,lastscore=NULL, changelist=NULL, standardize=TRUE)
+
 calcPopScore(plan, predvar="POP",lastscore=NULL, changelist=NULL, standardize=TRUE )
+
 calcPACompactScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
 calcLWCompactScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
-calcReockScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
+calcReockScore(plan, usebb=FALSE, lastscore=NULL, changelist=NULL, standardize=TRUE )
+
 calcContiguityScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
+
+calcBBCompactScore(plan, lastscore=NULL, changelist=NULL, standardize=TRUE )
+
 calcUnassignedScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
 
 calcHolesScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
 calcSpatialHolesScore(plan, lastscore = NULL, changelist = NULL, standardize = TRUE)
 
-calcMomentScore(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2, lastscore=NULL, changelist=NULL ) 
+calcMomentScore(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2,  normalize=TRUE, lastscore=NULL, changelist=NULL ) 
+
+calcSplitScore(plan, splitvar, lastscore = NULL, changelist = NULL, standardize = TRUE)
+
+calcIneqScore(plan, eqvar, weightVar = NULL, parameter = NULL, type =c("Gini", "RS", "Atkinson", "Theil", "Kolm", "var","square.var", "entropy"), lastscore = NULL, changelist = NULL, standardize = TRUE)
+
+
 }
 
 \arguments{
@@ -44,6 +60,14 @@ calcMomentScore(plan,standardize=TRUE,centers=NULL,weightVar=NULL,penaltyExp=2, 
   \item{penaltyExp}{a single number or vector of penalties for splitting each of the enumerated groups}
   \item{centers}{optional centers to use for calculating moment of inertia score, if absent, score is calculated using (weighted) district centroid (centroid of block centroids)}
   \item{weightVar}{name of variable in basemap to use for weighting}
+  \item{sumdenom}{For calcRangeScore, whether to use the sum of both variables as the denominator, or only use the second variable}
+  \item{usebb}{For \code{calcReockScore} use bounding boxes, instead of the entire polygon. This is a fast approximation, which is accurate where the polygons are much smaller than the district.}
+  \item{normalize}{Flag -- normalize moment of inertia score}
+  \item{splitvar}{Variable containing geographic id, such as county id}
+  \item{eqvar}{variable to be used for homogeneity score}
+  \item{type}{type of inequality measure -- see \code{ineq}}
+  \item{parameter}{parameter for inequality measuer -- see \code{ineq}}
+  
 }
 
 \details{
@@ -52,11 +76,13 @@ calcContiguityScore- returns a score based on the number of separate contiguous 
 
 calcLWCompactScore -- Returns a compactness score based on the ratio of the sides of the bounding rectangle for the district.
 
-calcReockScore - Returns a compactness score based on the ratio of area to area of a circle.
+calcReockScore - Returns a compactness score based on the ratio of area to area of a circle.The \code{usebb} option uses polygon bounding boxes, which is much faster, and  accurate if the polygons are small relative to the district.  
+
+calcBBCompactScore - Returns a compactness score based on the ratio of area to area of bounding box.Similar to Reock but much faster
 
 calcPopScore - Returns a score based on the deviation from population equality of the districts. 
 
-calcRangeScore -  Calculates disctricts compliance to a target range for a predictive variable. Will penalize districts increasingly as sum(prevar1)/(sum(predvar1)+sumpredvar(2)) falls outside the given target range. Use this for majority-minority districts, partisan districts, competitive districts
+calcRangeScore -  Calculates disctricts compliance to a target range for a predictive variable. Will penalize districts increasingly as sum(prevar1)/(sum(predvar1)+sum(predvar2)) (if sumdenom==TRUE) falls outside the given target range. Use this for majority-minority districts, partisan districts, competitive districts
 
 calcGroupScore -  Calculates plans compliance with keeping designated groups. Use for 
 designated "nesting" districts, or known communities of interest. Returns proportion of group split by a district (if a group is split across multiple districts, all districts are penalized).
@@ -68,7 +94,7 @@ calcSpatialHolesScore - penalizes plans for number of spatial (donut) holes (i.e
 
 calcPACompactScore - calculates plan compactness as a perimeter/ration area (where a Circle has a perfect score of 0)
 
-calcMomentScore - calculates moment of inertia compactness score of the district, the sum or squared distance of the block centroids (weighted by are of the block) to the district centroids. Options allow changing the penalty exponent (e.g. penaltyExp=1 will sum distances), assign a weightVar which will be used instead of area (e.g. population, for population moment of inertia), or specify fixed district centers to use as a substitute for district centroid (e.g. to use for warehouse allocation problems) 
+calcMomentScore - calculates moment of inertia compactness score of the district, the sum or squared distance of the block centroids (weighted by are of the block) to the district centroids. Options allow changing the penalty exponent (e.g. penaltyExp=1 will sum distances), assign a weightVar which will be used instead of area (e.g. population, for population moment of inertia), or specify fixed district centers to use as a substitute for district centroid (e.g. to use for warehouse allocation problems) . The normalization score gives the unitless, normalized version which is insensitive to scale (a default in version 1.17)
 }
 \note{
 
@@ -116,14 +142,21 @@ Doctoral Thesis, California Institute of Technology.
   
  }
 
+ \section{warning}{
+ 	 calcSpatialHoles score will produce correct results only where the underlying districting units do not have spatial holes that fully contain other units. This is usually true of census blocks but not census tracts.
+ }
+ 
+ 
 \seealso{ 
 Plan refinement algorithms \code{\link{refineGreedyPlan}},  \code{\link{refineAnnealPlan}}, \code{\link{refineGenoudPlan}},
 \code{\link{refineTabuPlan}},
-\code{\link{refineNelderPlan}}.
+\code{\link{refineNelderPlan},}.
 
 Combining dynamic scores \code{\link{combineDynamicScores}}.
- }
+
  
+ Inequality package \code{\link[ineq]{ineq}}
+} 
 \examples{
   # read in a shapefile with demographic data
 data(suffolk.map)

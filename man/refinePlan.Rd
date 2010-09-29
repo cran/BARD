@@ -18,7 +18,7 @@ refineGreedyPlan(plan, score.fun, displaycount=NULL, historysize=0, dynamicscori
 refineGenoudPlan(plan, score.fun, displaycount = NULL, historysize = 0,
                  dynamicscoring = FALSE, usecluster = TRUE, tracelevel=1)
 refineAnnealPlan(plan, score.fun, displaycount = NULL, historysize = 0,
-                 dynamicscoring = FALSE,  tracelevel=1, greedyFinish=FALSE)
+                 dynamicscoring = FALSE,  tracelevel=1, checkpointCount=0, resume=FALSE, greedyFinish=FALSE, doquench = FALSE, doReanneal = !doquench,  ... )
 refineNelderPlan( plan, score.fun, displaycount = NULL, maxit = NULL,
                  historysize = 0, dynamicscoring = FALSE,  tracelevel = 1)
 refineTabuPlan(  plan, score.fun, displaycount = NULL, historysize = 0,
@@ -31,7 +31,7 @@ refineGRASPPlan (plan, score.fun, samplesize = 50, predvar = NULL,
 \arguments{
   \item{plan}{plan to be refined, this can be randomly generated through the plan generation functions below, or can be an existing real plan}
   \item{score.fun}{a function that accepts a plan and returns a single score, or a vector of scores, which will be summed to produce the overall plan score. The score function should accept the arguments, plan, lastscore, and changelist. The last two are for incremental scores, and their values may be ignored if the score function does not support incremental score recalculation. See \code{calcPopScore} for an example of a score function.}
-  \item{usecluster}{whether to use the defined bard computing cluster, if available. Only refineGenoudPlan, and refineGRASPPlan implements cluster level paralellism at this time. Support for rgenoud clustering with BARD is experimental -- performance is likely to be very bad unless the connections are very fast. }
+  \item{usecluster}{whether to use the defined bard computing cluster, if available. Only refineGenoudPlan, and refineGRASPPlan implements cluster level paralellism at this time. Support for rgenoud clustering with BARD is experimental -- performance is likely to be very bad unless the connections are very fast, and only \code{snow} clusters are supported. }
  \item{displaycount}{This is primarily for demos. It updates a plot of the last plan to be scored (which may not be the current iteration's best scoring candidate) every N iterations}
 \item{tracelevel}{Provides a trace of the algorithms progress. For debugging. Currently the legal values are 0 (silence), 1 (minimal information), 2 (more information), 3 (maximum information) }
 \item{dynamicscoring}{Makes use of incremental score functions by tracking changes between candidate plans and scoring only the incremental changes. Not implemented for refineGenoudPlan, since multiple candidates are evaluated simulatneously.Use this only if score functions are expensive to compute.}
@@ -44,6 +44,9 @@ refineGRASPPlan (plan, score.fun, samplesize = 50, predvar = NULL,
 \item{tabusample}{Number of samples to take at each iteration }
 \item{checkpointCount}{Saves checkpoints to global \code{BardCheckPoint} variable, of internal state every Nth iteration, so that function can be resumed}
 \item{resume}{Resume interupted optimization, from checkpointed state}
+\item{doquench}{Fast quenching -- for a greedy solution}
+\item{doReanneal}{Attempt to reanneal when no progress is made -- for a more effective optimization}
+\item{\ldots}{parameters to send to interenal reAnneal command for debugging}
 }
 
 \details{

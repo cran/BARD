@@ -94,4 +94,39 @@ Changelog
 1.11
 -- remove custom poly2b now integrated into spdep
 -- fix C++ file naming and Solaris issues
--- add suffol map as data() to reduce example timings 
+-- add suffolk map as data() to reduce example timings 
+1.12
+-- really remove custom poly2nb
+-- R multicore cupport
+-- Speeded up greedy/tabu by x5
+1.13
+-- Improved the effectiveness of simulated annealing dramatically by implementing reannealing 
+-- Improved performance of annealing as well, and added a very fast "quench" option
+-- Improved performance of calcContiguityScore moderately
+-- Added calcBBoxCompactness
+-- Added HTML methods
+-- Added spatial data frame conversion methods
+-- Improvements to createRandomPopPlan
+1.14
+-- Fixed undocumented .Random.seed dataset
+-- Fix bug w/ refineNelder exiting on NULL score
+-- Clarify warning message on editPlanInteractive when dependencies not installed
+1.15
+-- Use ENHANCES in package description
+-- Fix bug in createAssignedPlan in detecting continuous id range
+1.16
+-- Automatically "repair" non-contiguous block geometry 
+-- Use RGEOS to speed up intial creation of spatial indices
+-- Allow levels() on bardplans for printing and reporting
+-- Reduce memory footprint of bardmap creation
+-- Reduce memory footprint of loaded bard plans
+1.17
+-- Normalize MI scores
+-- Add CalcSplitScore -- report on splits of counties/tracts etc.
+-- check for invalid rgeos geometries on load
+-- Add calcIneqScore -- report on inequality measure (gini, coef of var) for district income, etc.
+-- Automatically clean geometry invalid under GEOS (with rgeos installed)
+1.18
+-- fix bug in createAssignedDistrict in handling factors, missing blocks
+-- limit number of unassigned blocks reported in PMPreport
+-- workaround changes in Rgeos to poly_foundInBox createSPCcomment

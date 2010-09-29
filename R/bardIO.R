@@ -37,8 +37,7 @@
 ##############################################################################
 
 importBardShape <-
-function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE,  projection=as.character(NA),...) {
-  buildIndex<-TRUE
+function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE,  projection=as.character(NA),queen=TRUE,...) {
   filen<-sub("\\.shp$","",filen,ignore.case=TRUE)
   #migrate to spatial data frames
   tmp.shape<-try( readShapePoly(filen,proj4string=CRS(projection),...) )
@@ -47,20 +46,80 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE,
       return(NULL)
   }
 
-  #check projection and reproject if possible
-  canTransform<-function() {
-	mrequire<-require
-	retval <- mrequire("rgdal",quietly=TRUE)
-	return(retval)
+  # Note: poly2nb is slow (even after my patches were integrated) so read from a file if present
+
+    
+  nb <- try(read.gal(gal))
+  if (inherits(nb,"try-error")) {
+        print(paste("No gal file found:",gal))
+        nb<-NULL
   }
   
  if (length(grep("+proj=", projection, ignore.case = TRUE)) < 1) {
     	    print("Note: you have not specified a map projection. Please ensure that the projection you use provides reasonable representation of area, perimeter, and shape at district scale.")
-  }
+ }
+ 
+ if (wantplan) {
+ 	res<- spatialDataFrame2bardPlan(sdf=tmp.shape,nb=nb,id=id,queen=queen)
+ } else {
+ 	res<- spatialDataFrame2bardBasemap(sdf=tmp.shape,nb=nb,queen=queen)
+ }
+ return (res)
+}
 
+bardPlan2spatialDataFrame<-function(x,id="BARDPlanID"){
+	if (class(x)!="bardPlan") {
+		warning("not a bard plan object") 
+	}
+	retval<-baseShape(basem(x))
+	
+	# this awkward construction is a workaround for the lack of a [<- operator  in the target object
+	retval$TMPbardPlan2spatialDataFrame<-as.vector(x)
+	names(retval)[which(names(retval)=="TMPbardPlan2spatialDataFrame")]<-id
+	return(retval)
+}
+
+bardBasemap2spatialDataFrame<-function(x){
+	if (class(x)!="bardBasemap") {
+		warning("not a bard Basemap object") 
+	}
+	return(baseShape(x))
+}
+
+spatialDataFrame2bardPlan<-function(sdf,nb=NULL,queen=TRUE,id="BARDPlanID") {
+	res<-sdf2bard(sdf=sdf,nb=nb,id=id,queen=queen)
+	return(res$plan)
+}
+
+spatialDataFrame2bardBasemap<-function(sdf,nb=NULL,queen=TRUE) {
+	res<-sdf2bard(sdf=sdf,nb=nb,queen=queen)
+	return(res)
+}
+
+sdf2bard<-function(sdf,nb,id,queen) {
+  buildIndex<-FALSE # until RGEOS widely available
+  wantplan <- !missing(id)
+  tmp.shape<-sdf
+  tmp.nb<-nb
+  
+  if (class(sdf)!="SpatialPolygonsDataFrame") {
+  	  warning("sdf is not a spatial polygons data frame")
+  }
+  
+  
+  #check projection and reproject if possible
+  canTransform<-function() {
+  	ow<-options(warn=-1)
+	retval <- mrequire("rgdal",quietly=TRUE)
+	options(ow)
+	return(retval)
+  }
+  
   tmp.longlat<-FALSE
   if (length(grep("+proj=latlon",tmp.shape@proj4string@projargs,ignore.case=TRUE)>0) || length(grep("+proj=longlat",tmp.shape@proj4string@projargs,ignore.case=TRUE)>0)) {
-  	  if ( canTransform() ) {
+  	tmp.longlat<-TRUE
+  
+  	if ( canTransform() ) {
   	  	  print ("Projecting map using albers equal area projection. This may take some time...")
   	  	  print(Sys.time())
   	 
@@ -70,12 +129,15 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE,
   	  	tmp.shape2<-spTransform(tmp.shape, CRS(newprojstring))
   	  	if (inherits(tmp.shape2,"try-error")) {
   	  		warning("transformation failed")
-  	  		tmp.longlat<-TRUE
       		} else {
       			tmp.shape<-tmp.shape2
+			rm(tmp.shape2)
+      			tmp.longlat<-FALSE
+
       		}
   	  }
   } 
+ 
  
 
   if (tmp.longlat) {
@@ -83,8 +145,6 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE,
   }
 
   
-  tmp.polys <-tmp.shape@polygons
-
   tmp.df <- tmp.shape@data
   
   
@@ -94,52 +154,70 @@ function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE,
   } else if ("id" %in% names(tmp.df)) {
     mapid<-"id"
   }
-
-
-  # Note: poly2nb is slow (even after my patches were integrated) so read from a file if present
-
-    
-  tmp.nb <- try(read.gal(gal))
-  if (inherits(tmp.nb,"try-error")) {
-        print(paste("No gal file found:",gal))
-        gal <- NULL
+  
+    # clean shape file
+  tmp.cleaned<-NULL
+  if (rgeostatus()) {
+  	  tmp.shape<-RGEOSgeomCleaner(tmp.shape)
+  	  if (is.null(attr(tmp.shape,"cleaned"))) {
+  	  	  tmp.cleaned<-TRUE
+  	  } else {
+  	  	  tmp.cleaned<-attr(tmp.shape,"cleaned")
+  	  }
+  	  	  
   }
   
-  
   # not an else, since top condition may change
-  if (is.null(gal)) {
+  if (!is.null(tmp.nb)) {
+  	  if (length(zeroWeights.nb(tmp.nb))>0) {
+  	  	  warning("The neighborhood structure supplied is noncontigious,regenerating from the map")
+  	  	   tmp.nb<-NULL
+  	  }
+}
+  if (is.null(tmp.nb)) {
   	  
-    estmin <- round((length(tmp.polys)*.002)^2 / 60,2)
+    estmin <- round((dim(tmp.shape)[1]*.002)^2 / 60,2)
     
 
-    print(paste("Since no GAL file supplied, generating gal file, this may take a while  ... (estimated ",estmin," minutes)", sep=" "))
+    print(paste("Since no GAL file supplied, generating a neighborhood list, this may take a while  ... (estimated ",estmin," minutes)", sep=" "))
     print(paste("Starting", Sys.time(),sep=" "))
-    tmp.nb<-myPoly2nb(tmp.polys)    
+    tmp.nb<-myPoly2nb(tmp.shape,queen=queen)    
     print(paste("Ending", Sys.time(),sep=" "))
 
 
     
   }
-  
-  retval<-list(shape=tmp.shape,polys=tmp.polys,nb=tmp.nb,df=tmp.df)
 
+   retval<- list(myenv=new.env(),nb=tmp.nb,df=tmp.df,cleaned=tmp.cleaned)
+   assign("self",retval,envir=retval$myenv)
+   assign("shape",sdf,envir=retval$myenv)
+  
   if (buildIndex) {
-    estmin <- round((length(tmp.polys)*.05) / 60,2)
+    estmin <- round((dim(tmp.shape)[1]*.05) / 60,2)
     print(Sys.time())
     print(paste("Building indices which will save a lot of time in perimeter calculations later ... ( estimated ",estmin," minutes)", sep=" "))
     print(paste("Starting", Sys.time(),sep=" "))
 
   }
   # generate shape info
-  
+  class(retval)<-"bardBasemap"
+
   tmp.info<-genBlockShapeInfo(retval,buildIndex=buildIndex)
   
   if (buildIndex) {
   	      print(paste("Ending", Sys.time(),sep=" "))
   }
   retval<-c(retval,tmp.info)
-  
   class(retval)<-"bardBasemap"
+  # workaround to memory issue in save with nexted environments...
+  # also self has changed
+  retval$myenv<-NULL
+  retval$myenv<-new.env()
+  assign("self",retval,envir=retval$myenv)
+  assign("shape",sdf,envir=retval$myenv)
+
+
+  
   if (wantplan) {
     tmp.plan <- NULL
     if (!is.null(tmp.df[[id]])) {
@@ -185,9 +263,10 @@ function(plan,filen,id="BARDPlanID",gal=paste(filen,".GAL",sep="")) {
   filen<-sub("\\.shp$","",filen,ignore.case=TRUE)
     basemap<-basem(plan)
   BARDplan <- as.vector(plan)
-  basemap$shape@data[id]<-BARDplan
+  tmpshape<-bardBasemap2spatialDataFrame(basemap)
+  tmpshape[[id]]<-BARDplan
   
-  saveres1<-try(writeSpatialShape(basemap$shape,filen))
+  saveres1<-try(writeSpatialShape(tmpshape,filen))
   saveres2<-try(write.nb.gal(basemap$nb,gal))
   retval<-(!inherits(saveres1,"try-error")  &&  !inherits(saveres2,"try-error"))
   return(retval)
@@ -214,6 +293,49 @@ function(plan,filen,id="BARDPlanID",gal=paste(filen,".GAL",sep="")) {
 #
 ##############################################################################
 
+writeBardMap<-function(filen,basemap) {
+    tmpshape<- get("shape",basemap$myenv)
+    basemap$myenv<-NULL
+    filen<-paste(filen,"_bard_save.Rdata",sep="")
+    
+    saveres <- try(save(file=filen, list=c("basemap","tmpshape")))
+    retval<- !inherits(saveres,"try-error")
+    return(invisible(retval))
+}
+
+readBardMap <-
+function(filen) {
+    filen<-sub("_bard_save\\.Rdata$","",filen,ignore.case=TRUE)
+    filen<-paste(filen,"_bard_save.Rdata",sep="")
+    loadval<-local({
+      basemap<-NULL
+      tmpshape<-NULL
+      loadres<-try(load(filen))
+      if (inherits(loadres,"try-error")) {
+        lrval <- NULL
+      } else {
+      	    
+	if (is.null(basemap) || is.null(tmpshape)) {
+		# failed to load correct values 
+		warning("failed to read image")
+		lrval<-NULL
+	} else {
+		basemap$myenv<-new.env()
+		assign("shape",tmpshape,basemap$myenv)
+		assign("self",basemap,basemap$myenv)
+        	lrval <- basemap
+	}
+      }
+      lrval
+    })
+    basemap<-loadval
+ 
+    basemap<-convertBaseMap.old(basemap)
+
+    return(basemap) 
+}
+
+
 writeBardImage <-
 function(filen, basemaps=NULL, plans=NULL) {
     if (is.null(basemaps) && is.null(plans)) {
@@ -221,6 +343,7 @@ function(filen, basemaps=NULL, plans=NULL) {
     }
 
     filen<-paste(filen,"_bard_image.Rdata",sep="")
+    
     saveres <- try(save(file=filen, list=c("basemaps","plans")))
     retval<- !inherits(saveres,"try-error")
     return(invisible(retval))
@@ -337,42 +460,45 @@ function(filen, continue=TRUE) {
 ###  pre-calculate areas and perimeters
 ###
 
-myUnionSpatialPolygons<-local( {
-	calledPermit <-FALSE
-	function(...) {
-		if (!calledPermit) {
-			if (exists("gpclibPermit")) { gpclibPermit() }
-			calledPermit<-TRUE
+myUnionSpatialPolygons<-function(...) {
+	
+		if (rgeostatus()) {
+			res<-gUnionCascaded(...)
+		} else  {
+			res<-unionSpatialPolygons(...)
 		}
-		return(unionSpatialPolygons(...))
-	}
-})
+	return(res)		
+}
 
 
 genBlockShapeInfo<-function(basemap, buildIndex=TRUE) {
- if (length(grep("+proj=latlon",basemap$shape@proj4string@projargs,ignore.case=TRUE)>0) || length(grep("+proj=longlat",basemap$shape@proj4string@projargs,ignore.case=TRUE)>0))  { tmp.longlat<-TRUE} else {tmp.longlat<-FALSE}
+	
+ bs <-bardBasemap2spatialDataFrame(basemap)
+ bp <-bs@polygons
+ nb <- dim(bs)[1]
+ 
+ if (length(grep("+proj=latlon",bs@proj4string@projargs,ignore.case=TRUE)>0) || length(grep("+proj=longlat",bs@proj4string@projargs,ignore.case=TRUE)>0))  { tmp.longlat<-TRUE} else {tmp.longlat<-FALSE}
  
  
+ if (buildIndex) {
+   tmp.perims<-sapply(1:nb, function(x)genPerim(bp[x],longlat=tmp.longlat))
+ }
    
-   tmp.perims<-sapply(1:length(basemap$polys), function(x)genPerim(basemap$shape[x,],longlat=tmp.longlat))
    
-   # calculate areas of blocks
-   area<-function(poly)sum(unlist(sapply(poly@polygons, 
-   function(x)sapply(x@Polygons,function(x)x@area))))
+   tmp.areas<-sapply(1:nb, function(x)bp[[x]]@area)
    
-   tmp.areas<-sapply(1:length(basemap$polys), function(x)area(basemap$shape[x,]))
-   
-   tmp.bboxs<-sapply(basemap$polys,function(x)bbox(x))
-  tmp.centroids<-sapply(basemap$polys,function(x)x@labpt)
+   tmp.bboxs<-sapply(1:nb,function(x)bbox(bp[[x]]))
+  tmp.centroids<-sapply(1:nb, function(x)bp[[x]]@labpt)
+  tmp.perims<-NULL
   # HMM -- performance of this is 1000x slower ?
   #tmp.bboxs<-sapply(1:dim(tmp.shape)[1],function(x)bbox(tmp.shape[x,]))
   #tmp.centroids<-sapply(1:dim(tmp.shape)[1],function(x)coordinates(tmp.shape[x,]))
   
 
   
+     basemap$longlat<-tmp.longlat
   if (buildIndex) {
    # calculate overlapping perim between each connected block
-     basemap$longlat<-tmp.longlat
      basemap$perims<-tmp.perims
      sharelist<-genPerimIndex(basemap)
   } else {
@@ -380,13 +506,14 @@ genBlockShapeInfo<-function(basemap, buildIndex=TRUE) {
   }
      tmp.timestamp<-Sys.time()
 
-   return(list(perims=tmp.perims,sharedPerims=sharelist, areas=tmp.areas, bboxs=tmp.bboxs, perims=tmp.perims, centroids=tmp.centroids, timestamp=tmp.timestamp, longlat=tmp.longlat))
+   return(list(perims=tmp.perims,sharedPerims=sharelist, areas=tmp.areas, bboxs=tmp.bboxs, centroids=tmp.centroids, timestamp=tmp.timestamp, longlat=tmp.longlat))
 }
 
 
 # calculate individual block perims
 genPerim<-function(poly,longlat=FALSE) {
-	sum(sapply(poly@polygons, 
+	
+	sum(sapply(poly, 
    function(x)sapply(x@Polygons,function(x)LineLength(x@coords,longlat=longlat))))
 }
   
@@ -396,13 +523,16 @@ genPerimIndex<-function(basemap) {
    tmp.longlat<-basemap$longlat
    tmp.perims<-basemap$perims
    
-   for ( i in seq(1,length.out=length(basemap$polys)) ) {
-   	   tmplist=sharelist[[i]]
+   for ( i in seq(1,length.out=dim(basemap)[1]) ) {
+   	   tmplist<-sharelist[[i]]
+   	   if (all(tmplist==0)) {
+   	   	   tmplist<-integer()
+   	   }
    	   for (j in seq(1,length.out=length(tmplist))) {
    	   	 tn <- tmplist[j]
    	   	 if (tn>=i) {
-   	   	 	usub <- myUnionSpatialPolygons(basemap$shape[c(i,tn),], c(1,1))
-   	   	 	totalperim <- genPerim(usub,longlat=tmp.longlat)
+   	   	 	usub <- myUnionSpatialPolygons(bardBasemap2spatialDataFrame(basemap)[c(i,tn),1], c(1,1))
+   	   	 	totalperim <- genPerim(usub@polygons,longlat=tmp.longlat)
    	   	 	sharedperim <-  tmp.perims[i] + tmp.perims[tn] - totalperim 
    	   	 	tmplist[j]<-sharedperim
    	   	 } else {
@@ -421,68 +551,12 @@ genPerimIndex<-function(basemap) {
 #### polylist structure
 ###
 
-importBardShape.polyList <-
-function(filen, id="BARDPlanID", gal=paste(filen,".GAL",sep=""), wantplan=FALSE) {
-  filen<-sub("\\.shp$","",filen,ignore.case=TRUE)
-  #migrate to spatial data frames
-  ow<-options(warn=-1)
-  tmp.shape<-try( maptools:::read.shape(filen) )
-  options(ow)
-  if (inherits(tmp.shape,"try-error")) {
-      return(NULL)
-  }
-  tmp.df <- tmp.shape$att.data
-  mapid <- NULL 
-  if ("ID" %in% names(tmp.df)) {
-    mapid<-"ID"
-  } else if ("id" %in% names(tmp.df)) {
-    mapid<-"id"
-  }
-  #migrate to spatial data frames
-  ow<-options(warn=-1)
-  tmp.polys <-  maptools:::Map2poly(tmp.shape,region.id=TRUE )
-  options(ow)
-  
-  # Note: poly2nb is very slow, so read from a file if present
-
-    
-  tmp.nb <- try(read.gal(gal))
-  if (inherits(tmp.nb,"try-error")) {
-        print(paste("No gal file found:",gal))
-        gal <- NULL
-  }
-  
-  
-  # not an else, since top condition may change
-  if (is.null(gal)) {
-    print("Generating gal file...")
-    tmp.nb <- myPoly2nb(tmp.polys)
-  }
-  
-    retval<-list(shape=tmp.shape,polys=tmp.polys,nb=tmp.nb,df=tmp.df)
-  class(retval)<-"bardBasemap"
-  if (wantplan) {
-    tmp.plan <- NULL
-    if (!is.null(tmp.df[[id]])) {
-      tmp.plan <- tmp.df[[id]]
-      attr(tmp.plan,"ndists")<-length(unique(tmp.plan))
-      basem(tmp.plan)<-retval
-      class(tmp.plan)<-"bardPlan"
-    }
-     retval<-list(retval,plan=tmp.plan)
-  } else {
-   
-    return(retval)
-  }
-}
-
-importBardShape.old <- importBardShape.polyList 
 
 isOldBasemap<-function(basemap) {
 	if (class(basemap)!="bardBasemap") {
 		return(NA)
 	}
-	if (inherits(basemap$shape,"SpatialPolygonsDataFrame")) {
+	if (is.null(basemap$shape)) {
 		return(FALSE)
 	}
 	return (TRUE)
@@ -526,16 +600,24 @@ convertBaseMap.polylist<-function(basemap) {
 	return(retval)
 }
 convertBaseMap.old<-function(basemap) {
-	basemap<-convertBaseMap.polylist(basemap)
+	if (inherits(basemap$shape,"SpatialPolygonsDataFrame")) {
+		print("Map in old format, compacting memory")
+		basemap$polys<-NULL
+		basemap$myenv<-new.env()
+		myenv<-basemap$myenv
+		assign("self",basemap,envir=myenv)
+		assign("shape",basemap$shape,envir=myenv)
+		basemap$shape<-NULL
+	} else {
+		basemap<-convertBaseMap.polylist(basemap)
 	
-	
-	if(is.null(basemap$longlat)) {
-		print("Map built in a previous version, adding indices, please wait...")
-		tmpinfo<-genBlockShapeInfo(basemap,buildIndex=TRUE)
-		basemap<-c(basemap,tmpinfo)
-		class(basemap)<-"bardBasemap"
+		if(is.null(basemap$longlat)) {
+			print("Map built in a previous version, adding indices, please wait...")
+			tmpinfo<-genBlockShapeInfo(basemap,buildIndex=TRUE)
+			basemap<-c(basemap,tmpinfo)
+			class(basemap)<-"bardBasemap"
+		}
 	}
-	
 	return(basemap)
 }
 
@@ -548,33 +630,66 @@ convertBaseMap.old<-function(basemap) {
 ###
 
 print.bardBasemap<-function(x,...) {
+	internal.print.bardBasemap(x,...)
+}
+
+HTML.bardBasemap<-function(x,...) {
+	internal.print.bardBasemap(x,...,useHTML=TRUE)
+}
+
+internal.print.bardBasemap<-function(x,...,useHTML=FALSE) {
+   if (useHTML) {
+	htmlArgs<-list(...)
+	print<-function(...)hprint(...,htmlArgs=htmlArgs)
+	cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+	plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+  } else {
+	htmlArgs<-NULL
+
+  }
     cat("Bard Basemap\n\n")
-    cat("Number of polys", length(x$polys),"\n\n")
+    cat("Number of polys", dim(x)[1],"\n\n")
     cat("Variables:\n")
     print( names(x$df),...)
 }
 
 summary.bardBasemap<-function(object,...) {
   retval<-list()
-  retval$npolys<-length(object$polys)
+  retval$npolys<-dim(object)[1]
   retval$dfsummary<-summary(object$df)
   class(retval)<-"bardBasemap.summary"
   return(retval)
 }
 
 print.bardBasemap.summary<-function(x,...) {
+	internal.print.bardBasemap.summary(x,...)
+}
+
+HTML.bardBasemap.summary<-function(x,...) {
+	internal.print.bardBasemap.summary(x,...,useHTML=TRUE)
+}
+
+internal.print.bardBasemap.summary<-function(x,...,useHTML=FALSE) {
+   if (useHTML) {
+	htmlArgs<-list(...)
+	print<-function(...)hprint(...,htmlArgs=htmlArgs)
+	cat<-function(...)hcat(...,htmlArgs=htmlArgs)
+	plot<-function(...)hplot(...,htmlArgs=htmlArgs)
+  } else {
+	htmlArgs<-NULL
+
+  }                                            
   print(x$dfsummary,...)
   cat("\n\n***\n\nNumber of polygons: ",x$npolys,"\n",...)
 }
 
+
 plot.bardBasemap<-function(x,...) {
- plot(x$shape,...)
+ plot(bardBasemap2spatialDataFrame(x),...)
 }
 
 "==.bardBasemap"<-function(e1,e2) {
-  ep1<-attributes(e1$shape$Shape)
-  ep2<-attributes(e2$shape$Shape)
-  retval<-identical(ep1,ep2)
+  retval<-identical(e1$myenv,e2$myenv)
   return(retval)
 }
 
@@ -585,10 +700,63 @@ plot.bardBasemap<-function(x,...) {
 
 
 as.data.frame.bardBasemap<-function (x, row.names = NULL, optional = FALSE, ...) {
-	as.data.frame(x$shape)
+	as.data.frame(bardBasemap2spatialDataFrame(x))
 }
 
 dim.bardBasemap<-function(x) {
-	dim(x$shape)
+	return(dim(bardBasemap2spatialDataFrame(x)))
 }
+
+RGEOSgeomCleaner<-function(x) {
+	
+	
+	quietGisValid<-function(...) {
+		ow<-options(warn=-1)
+		retval<-gIsValid(...)
+		options(ow)
+		return(retval)
+	}
+		
+	# note: only sets cleaned attribute if cleaning operation needed to be 
+	# performed to prevent uneccessary duplication of x which can be large
+	
+	if (!BARD:::rgeostatus()) {
+		return(x)
+	}
+	
+	message("checking holes with rgeos")
+
+	x<-createSPComment(x)
+	invalid <- which(!quietGisValid(x,byid=T))
+	
+	if (length(invalid>0)) {
+		warning("Found invalid polygons, attempting to clean")
+		#attr(x,"cleaned")<-TRUE
+		
+		repaired<-x[invalid,0]
+		
+		invalid2<-which(!quietGisValid(repaired,byid=T))
+		if (length(invalid2)>0) {
+			message("buffering polys")
+			repaired@polygons[invalid2]<-gBuffer(repaired[invalid2,0],byid=TRUE,width=0)@polygons
+			invalid2<-which(!quietGisValid(repaired,byid=T))
+		}
+			
+		if (length(invalid2)>0) {
+			message("Filling poly holes")
+			for (i in invalid2) {
+				repaired@polygons[i]<-gUnionCascaded(repaired[i,0])@polygons
+			}
+			invalid2<-which(!quietGisValid(repaired,byid=T))
+			if (length(invalid2)>0) {
+				warning("Could not repair invalid polygons, run 	gIsValid() to diagnose")
+				attr(x,"cleaned")<-FALSE
+			} 
+		}
+		x@polygons[invalid]<-repaired@polygons
+
+	}
+	return(x)
+}
+
 

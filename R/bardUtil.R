@@ -79,9 +79,17 @@ cs<-function(...) {
 # mrequire
 #
 # Workaround CHECK complaints for require tests of _optional_ libraries
+# and suppress warnings
 #
 #####
 
+
+mrequire <-function(package, lib.loc = NULL, quietly = FALSE, warn.conflicts=TRUE,...) {
+	ow<-options(warn=-1)
+	retval <- require (package, lib.loc, quietly=TRUE,warn.conflicts=FALSE,...)
+	options(ow)
+	return(retval)
+}
 mrequire<-require
 
 #####
