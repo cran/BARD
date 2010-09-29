@@ -38,8 +38,8 @@
 
 #if defined __sun
        #include<cstdlib>
-       inline void random_seed (unsigned int seed) {std::srand(seed);}
-       inline double random_double () {return double(std::rand())/RAND_MAX;}
+//       inline void random_seed (unsigned int seed) {std::srand(seed);}
+//       inline double random_double () {return double(std::rand())/RAND_MAX;}
 #elif !defined(__sgi) && !defined(__GNUC__)             // assume Visual C++
        #include<cstdlib>
 #endif
