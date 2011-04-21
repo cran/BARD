@@ -8,13 +8,14 @@
   techniques avoid memory duplication.
 }
 \usage{
-readBardMap(filen)
-writeBardMap(filen, basemap)
+readBardMap(filen,verbatim=FALSE)
+writeBardMap(filen, basemap,verbatim=FALSE)
 }
 
 \arguments{
   \item{filen}{Name (and path to) file to be read or written}
   \item{basemap}{single bard map }
+  \item{verbatim}{if false appends _bard_nosave.Rdata to filename *if* filename does not already contain this}
 }
 
 \value{

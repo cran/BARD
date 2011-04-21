@@ -130,3 +130,8 @@ Changelog
 -- fix bug in createAssignedDistrict in handling factors, missing blocks
 -- limit number of unassigned blocks reported in PMPreport
 -- workaround changes in Rgeos to poly_foundInBox createSPCcomment
+1.19
+-- incorporated JSS final article changes
+-- greatly reduced doc size -- thanks to Achim Zeileis and Brian Ripley
+1.20
+-- extensions to *BardMap and sdf2BardMap for DistrictBuilder

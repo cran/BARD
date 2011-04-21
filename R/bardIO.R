@@ -91,12 +91,12 @@ spatialDataFrame2bardPlan<-function(sdf,nb=NULL,queen=TRUE,id="BARDPlanID") {
 	return(res$plan)
 }
 
-spatialDataFrame2bardBasemap<-function(sdf,nb=NULL,queen=TRUE) {
-	res<-sdf2bard(sdf=sdf,nb=nb,queen=queen)
+spatialDataFrame2bardBasemap<-function(sdf,nb=NULL,queen=TRUE,keepgeom=TRUE) {
+	res<-sdf2bard(sdf=sdf,nb=nb,queen=queen,keepgeom=keepgeom)
 	return(res)
 }
 
-sdf2bard<-function(sdf,nb,id,queen) {
+sdf2bard<-function(sdf,nb,id,queen,keepgeom=TRUE) {
   buildIndex<-FALSE # until RGEOS widely available
   wantplan <- !missing(id)
   tmp.shape<-sdf
@@ -174,7 +174,7 @@ sdf2bard<-function(sdf,nb,id,queen) {
   	  	   tmp.nb<-NULL
   	  }
 }
-  if (is.null(tmp.nb)) {
+  if (is.null(tmp.nb) && keepgeom) {
   	  
     estmin <- round((dim(tmp.shape)[1]*.002)^2 / 60,2)
     
@@ -186,6 +186,9 @@ sdf2bard<-function(sdf,nb,id,queen) {
 
 
     
+  }
+  if (!keepgeom) {
+	nb<-replicate(dim(tmp.df)[1],NULL)
   }
 
    retval<- list(myenv=new.env(),nb=tmp.nb,df=tmp.df,cleaned=tmp.cleaned)
@@ -214,7 +217,9 @@ sdf2bard<-function(sdf,nb,id,queen) {
   retval$myenv<-NULL
   retval$myenv<-new.env()
   assign("self",retval,envir=retval$myenv)
-  assign("shape",sdf,envir=retval$myenv)
+  if (keepgeom) {
+  	assign("shape",sdf,envir=retval$myenv)
+  } 
 
 
   
@@ -293,10 +298,13 @@ function(plan,filen,id="BARDPlanID",gal=paste(filen,".GAL",sep="")) {
 #
 ##############################################################################
 
-writeBardMap<-function(filen,basemap) {
+writeBardMap<-function(filen,basemap,verbatim=FALSE) {
     tmpshape<- get("shape",basemap$myenv)
     basemap$myenv<-NULL
-    filen<-paste(filen,"_bard_save.Rdata",sep="")
+    if (!verbatim) {
+    	filen<-sub("_bard_save\\.Rdata$","",filen,ignore.case=TRUE)
+    	filen<-paste(filen,"_bard_save.Rdata",sep="")
+    }
     
     saveres <- try(save(file=filen, list=c("basemap","tmpshape")))
     retval<- !inherits(saveres,"try-error")
@@ -304,9 +312,11 @@ writeBardMap<-function(filen,basemap) {
 }
 
 readBardMap <-
-function(filen) {
-    filen<-sub("_bard_save\\.Rdata$","",filen,ignore.case=TRUE)
-    filen<-paste(filen,"_bard_save.Rdata",sep="")
+function(filen,verbatim=FALSE) {
+    if (!verbatim) {
+    	filen<-sub("_bard_save\\.Rdata$","",filen,ignore.case=TRUE)
+    	filen<-paste(filen,"_bard_save.Rdata",sep="")
+    }
     loadval<-local({
       basemap<-NULL
       tmpshape<-NULL

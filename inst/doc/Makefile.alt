@@ -1,0 +1,22 @@
+# stub makefile, does nothing, but causes R CMD build not to force rebuild pdf file
+
+REVAL=TRUE
+
+
+all:	bardJSS.pdf
+test:	bardJSS.tex
+
+%.tex:	%.Rnw
+	echo "Sweave(\"$<\", debug=TRUE, eval=$(REVAL))" | R --slave
+
+%.pdf:	%.tex
+	pdflatex $*
+	bibtex $*
+	pdflatex $*
+	bibtex $*
+	pdflatex $*
+
+clean:	
+	rm -f bardJSS?*.pdf bardJSS*.tex bardJSS*.eps bardJSS.aux  bardJSS.log  bardJSS.out Rplots.ps Rplots.pdf
+	rm -f bardJSS.idx bardJSS.ilg bardJSS.toc bardJSS.bbl bardJSS.blg bardJSS.inx
+

@@ -4,26 +4,28 @@
 %%% LATEX HEADERS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[article]{JSSstyle/jss}
-\usepackage{rotating}                           
+%%\documentclass[article]{JSSstyle/jss}
+%%\documentclass[article]{jss}
+\documentclass[nojss]{jss}
+%%\usepackage{rotating}                           
 \usepackage[dvips]{epsfig}
-\usepackage{multirow}
+%%\usepackage{multirow}
 \usepackage{amsfonts,amssymb,amsmath}
-\usepackage{array}                      
+%%\usepackage{array}                      
 \usepackage{url}
 \usepackage{thumbpdf}
 \usepackage{natbib}
 
-\usepackage{vmargin}
-    \setpapersize{USletter}
-    \setmarginsrb{1.0in}{1.0in}{1.0in}{1.0in}{0.5in}{0.2in}{0in}{0.2in}
-\renewcommand{\baselinestretch}{1.25}
+%% \usepackage{vmargin}
+%%   \setpapersize{USletter}
+%%    \setmarginsrb{1.0in}{1.0in}{1.0in}{1.0in}{0.5in}{0.2in}{0in}{0.2in}
+%% \renewcommand{\baselinestretch}{1.25}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% SHORTCUTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% open office tricks
+%%  open office tricks
 \newcommand\textsubscript[1]{\ensuremath{{}_{\text{#1}}}}
 
 %%%%%%%
@@ -45,12 +47,10 @@
 \Plainauthor{Micah Altman, Michael P. McDonald}
 \title{\pkg{BARD}: Better Automated Redistricting}
 \Plaintitle{BARD: Better Automated Redistricting}
-\Shorttitle{\pkg{Better Automated Redistricting}}
 \Keywords{redistricting, optimization}
 
 \Address{
 Micah Altman\\
-Senior Research Scientist\\
 Institute for Quantitative Social Science\\
 Harvard University\\
 1737 Cambridge Street, N325\\ 
@@ -60,7 +60,6 @@ E-mail: \email{micah\_altman@harvard.edu}\\
 URL: \url{http://maltman.hmdc.harvard.edu/}\\
 \\
 Michael P. McDonald\\
-Associate Professor, Department of Public and International Affairs\\
 George Mason University\\
 4400 University Drive - 3F4\\
 Fairfax, VA 22030-4444 \\
@@ -69,7 +68,7 @@ URL: \url{http://elections.gmu.edu/}\\
 }
 
 \Abstract{
-\pkg{BARD} is the first (and at time of writing, only) open source software package for general redistricting and redistricting analysis. \pkg{BARD} provides methods to create, display, compare, edit, automatically refine, evaluate, and profile political districting plans.  \pkg{BARD} aims to provide a framework for scientific analysis of redistricting plans and to facilitate wider public participation in the creation of new plans.
+\pkg{BARD} \citep{Altman+McDonald:2011} is the first (and at time of writing, only) open source software package for general redistricting and redistricting analysis. \pkg{BARD} provides methods to create, display, compare, edit, automatically refine, evaluate, and profile political districting plans.  \pkg{BARD} aims to provide a framework for scientific analysis of redistricting plans and to facilitate wider public participation in the creation of new plans.
 
 \pkg{BARD} facilitates map creation and refinement through command-line, gui, and automatic methods. Since redistricting is a computationally complex partitioning problem not amenable to 
 an exact optimization solution, \pkg{BARD} implements a variety of selectable metaheuristics that can be used to refine existing or randomly-generated redistricting plans based on user-determined criteria. 
@@ -92,20 +91,59 @@ Redistricting is a computationally-intensive problem for even modest-sized state
 \SweaveOpts{echo=TRUE, keepsource=TRUE}
 \section{Introduction}
 
+%% FORMAT Code for JSS
+<<results=hide,echo=FALSE>>= 
+options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE, digits=3, warn=1)
+@
+%%
+%% PNG ALTERNATIVE SETUP FOR LARGE PDF FIGURE
+%%
+<<echo=FALSE>>= 
+.PngNo <- 0
+@
+
+<<label=afig,echo=FALSE,eval=FALSE>>= 
+.PngNo <- .PngNo + 1; file <- paste("Fig-bitmap-", .PngNo, ".png", sep="")
+png(file=file, width = 1200, height = 1200, pointsize = 24, bg = "white")
+@
+
+<<label=zfig,echo=FALSE,eval=FALSE>>= 
+dev.null <- dev.off()
+cat("\\begin{center}")
+cat("\\includegraphics{", file, "}\n\n", sep="")
+cat("\\end{center}")
+@
+<<label=zfigShort,echo=FALSE,eval=FALSE>>= 
+dev.null <- dev.off()
+cat("\\begin{center}")
+cat("\\includegraphics[viewport=200 400 1000 1000]{", file, "}\n\n", sep="")
+cat("\\end{center}")
+@
+<<label=zfigNarrow,echo=FALSE,eval=FALSE>>= 
+dev.null <- dev.off()
+cat("\\begin{center}")
+cat("\\includegraphics[viewport=250 0 1100 1200]{", file, "}\n\n", sep="")
+cat("\\end{center}")
+@
+%%
+%%
+%%
+
+
 Legislative redistricting is among the most politically charged 
 tasks in American politics.  District lines affect which political 
 party wins control of a legislative body, the reelection success of 
 incumbents, and election of minority preferred candidates. 
 
-In the 1960s, after the U.S. Supreme Court's landmark decisions requiring equal population in districts, scholars envisioned taking politics out of redistricting by 
-programming computers to automatically draw districts \citep[][]{Vickrey61,WeaverHess63,Nagel1965}. These scholars reasoned that an algorithm implementing 
+In the 1960s, after the US Supreme Court's landmark decisions requiring equal population in districts, scholars envisioned taking politics out of redistricting by 
+programming computers to automatically draw districts \citep{Vickrey:1961,Weaver+Hess:1963,Nagel:1965}. These scholars reasoned that an algorithm implementing 
 politics-blind criteria would draw districts neutral to politics. 
 
-Automated redistricting programs were developed, and special purpose software was developed (and even freely distributed \citep[see]{Nagel1965}) for this purpose,  but the problem was too computationally difficult to solve practically.  Instead, computers were found to be well-suited to assist human planners in processing the large amounts of population, election, and geo-spatial  redistricting data.  And it was out of this use that some of the first Geographic Information Systems (GIS) 
-were born \citep{AltMacMcD05}.  
+Automated redistricting programs were developed, and special purpose software was developed, and even freely distributed \citep[see, for example][]{Nagel:1965} for this purpose,  but the problem was too computationally difficult to solve practically.  Instead, computers were found to be well-suited to assist human planners in processing the large amounts of population, election, and geo-spatial  redistricting data.  And it was out of this use that some of the first Geographic Information Systems (GIS) 
+were born \citep{Altman+MacDonald+McDonald:2005}.  
 
-Unfortunately, early computerized redistricting systems were prohibitively expensive to all but state governments or political parties, effectively shutting out the public from the redistricting process. Computer hardware and specialized redistricting GIS software have since become more affordable. However, specialized software packages for redistricting still remain unusually expensive -- costing thousands of dollars. We aim to make the redistricting process more open, by  offering the first open-source general redistricting software. We call our computer program \pkg{BARD} for \textbf{B}etter \textbf{A}utomated 
-\textbf{R}e\textbf{D}istricting.\footnote{Tolkein fans may recognize the 
+Unfortunately, early computerized redistricting systems were prohibitively expensive to all but state governments or political parties, effectively shutting out the public from the redistricting process. Computer hardware and specialized redistricting GIS software have since become more affordable. However, specialized software packages for redistricting still remain unusually expensive -- costing thousands of dollars. We aim to make the redistricting process more open, by  offering the first open-source general redistricting software. We call our computer program \pkg{BARD} for \underline{b}etter \underline{a}utomated 
+\underline{r}e\underline{d}istricting.\footnote{Tolkein fans may recognize the 
 reference to the slayer of the dragon Smaug, perhaps the most 
 terrible of salamanders.}
 
@@ -115,28 +153,28 @@ Our package permits users to draw and compare redistricting `plans'.\footnote{A 
 
 Currently \pkg{BARD} provides functionality in multiple areas, and the implementation of the \pkg{BARD} system is divided into separate independent modules to facilitate maintenance and flexibility.
 
-\begin{figure}[!h]
-The figure below illustrates these areas, and the typical phases of redistricting in \pkg{BARD} 
+ Figure~\ref{fig:barddiagram}  illustrates these areas, and the typical phases of redistricting in \pkg{BARD}.
 
+\begin{figure}[!h]
   \begin{center}
-    \includegraphics[page=1]{bardiagram.pdf}
+    \includegraphics[page=1]{bardiagram.png}
   \end{center}
 
-  \caption{\small Phases of redistricting in BARD.}
+  \caption{\small Phases of redistricting in BARD}
   \label{fig:barddiagram}
 \end{figure}
 
-First, \pkg{BARD} reads and processes redistricting data. \pkg{BARD} can read and write files representing redistricting plans in the standard ESRI ``shapefile'' format, permitting inter-operability with other GIS packages. Inter-operability is desirable since, while \pkg{BARD} has some rudimentary functionality for basic interactive map drawing, existing commercial GIS software has more sophisticated manual map-drawing tools and GUI interfaces. Furthermore, we hope that a redistricting authority will consider a plan drawn with the aid of \pkg{BARD}, which necessarily requires map export functionality. Like these other GIS programs, additional demographic and political data can be imported into \pkg{BARD} that may be essential to evaluate and optimize redistricting plans on.\footnote{At this stage \pkg{BARD} also generates a contiguity analysis of maps in preparation for later manipulation.}
+First, \pkg{BARD} reads and processes redistricting data. It can read and write files representing redistricting plans in the standard Esri ``shapefile'' format, permitting inter-operability with other GIS packages. Inter-operability is desirable since, while \pkg{BARD} has some rudimentary functionality for basic interactive map drawing, existing commercial GIS software has more sophisticated manual map-drawing tools and Graphical User Interfaces (GUI's). Furthermore, we hope that a redistricting authority will consider a plan drawn with the aid of \pkg{BARD}, which necessarily requires map export functionality. Like these other GIS programs, additional demographic and political data can be imported into \pkg{BARD} that may be essential for evaluation.\footnote{At this stage \pkg{BARD} also generates a contiguity analysis of maps in preparation for later manipulation.}
 
-Second, \pkg{BARD} evaluates redistricting plans. \pkg{BARD} will generate textual and graphical reports for a single plan or comparision of multiple plans. Currently \pkg{BARD}  shows precinct-level differences between pairs of plans, counts `holes' in plans, computes common compactness scores, calculates overall population deviation, and checks for contiguity. \pkg{BARD} computes many common political measures, such as number of majority-minority districts, plan competitiveness, etc. Since \pkg{BARD} is built on \proglang{R}, evaluation is extensible to any scoring method that can be programmed into \proglang{R}.
+Second, \pkg{BARD} evaluates redistricting plans. It will generate textual and graphical reports for a single plan or comparision of multiple plans. Currently \pkg{BARD}  shows precinct-level differences between pairs of plans, counts `holes' in plans, computes common compactness scores, calculates overall population deviation, and checks for contiguity. It computes many common political measures, such as number of majority-minority districts, plan competitiveness, etc. Since \pkg{BARD} is built on \proglang{R} \citep{R}, evaluation is extensible to any scoring method that can be programmed into \proglang{R}.
 
-Third, \pkg{BARD} \emph{generates} and \emph{refines} districting plans. Plans can be automatically generated to use as starting points in further refinement, or evaluated in their own right. A user may also choose to start refinement from pre-existing plans (e.g. chosen by the legislature, or offered by a public interest group), if available. We provide a number of different procedures for automatically generating plans including plans for pure random generation of districts (e.g., as described in \citet{Grofman82}), random-walk based methods for generating contiguous equi-populous districts, including methods described in \citet{CirDarOro00}, and both simple and weighted \emph{k}-means based plan generation. Once generated (or provided), plans may be automatically refined using metaheuristics discussed below to meet chosen goals. The application of a metaheuristic to refine plans should yield a plan that is an improvement, given a chosen scoring formula.  
+Third, \pkg{BARD} \emph{generates} and \emph{refines} districting plans. Plans can be automatically generated to use as starting points in further refinement, or evaluated in their own right. A user may also choose to start refinement from pre-existing plans (e.g., chosen by the legislature, or offered by a public interest group), if available. We provide a number of different procedures for automatically generating plans including plans for pure random generation of districts \citep[e.g., as described in][]{Grofman:1982}, random-walk based methods for generating contiguous equi-populous districts, including methods described in \citet{Cirincione+Darling+ORourke:2000}, and both simple and weighted \emph{k}-means based plan generation. Once generated (or provided), plans may be automatically refined using metaheuristics discussed below to meet chosen goals. The application of a metaheuristic to refine plans should yield a plan that is an improvement, given a chosen scoring formula.  
 
-The third phase may vary in some important ways, depending on a user's intended use of the program. For pure applied redistricting, the generation step is omitted and refinement is used to improve existing redistricting plans. For `random' redistricting analysis, such as to probe the characteristics of arbitrary redistricting plans (see \citet{EngWild77,RosJohn81,Oloughlin82,Grofman82} and \citet{CirDarOro00}), generation may be used without refinement, or with refinement only to absolute legal requirements. Analysis of legal constraints on redistricting, as in \citet{Altman97} and \citet{RogersonYang99}, may involve repeated generation and refinement. \pkg{BARD} further supports automated re-weighting of a score function to generate a profile of how one redistricting criterion changes as another is optimized and in this manner \pkg{BARD} will automatically generate profiles of plans that explore tradeoffs among redistricting criteria. (This is computationally expensive, thus \pkg{BARD} supports distributing these calculations across a computing cluster.)
+The third phase may vary in some important ways, depending on a user's intended use of the program. For pure applied redistricting, the generation step is omitted and refinement is used to improve existing redistricting plans. For `random' redistricting analysis, such as to probe the characteristics of arbitrary redistricting plans (see \citep[see][]{Engstrom+Wildgen:1977,Rossiter+Johnston:1981,Oloughlin:1982,Grofman:1982,Cirincione+Darling+ORourke:2000}, generation may be used without refinement, or with refinement only to absolute legal requirements. Analysis of legal constraints on redistricting, as in \citet{Altman:1997} and \citet{Rogerson+Yang:1999}, may involve repeated generation and refinement. \pkg{BARD} further supports automated re-weighting of a score function to generate a profile of how one redistricting criterion changes as another is optimized and in this manner it will automatically generate profiles of plans that explore tradeoffs among redistricting criteria. (This is computationally expensive, thus \pkg{BARD} supports distributing these calculations across a computing cluster.)
 
-Fourth, \pkg{BARD} compares multiple plans.  \pkg{BARD} outputs the range of overall scores, the range of scores for each component, the differences among plans, and the correlations among score components. Candidate plans may also be contrasted with the starting plans if meaningful pre-existing starting points are selected. This analysis phase can be used to probe redistricting trade-offs -- to what extent attempting to improve plans based on one criterion necessarily reduces performance on other criteria.
+Fourth, \pkg{BARD} compares multiple plans.  It outputs the range of overall scores, the range of scores for each component, the differences among plans, and the correlations among score components. Candidate plans may also be contrasted with the starting plans if meaningful pre-existing starting points are selected. This analysis phase can be used to probe redistricting trade-offs -- to what extent attempting to improve plans based on one criterion necessarily reduces performance on other criteria.
 
-\section[Example: Using BARD for Plan Evaluation and Modification]{Using \pkg{BARD} for Plan Evaluation and Modification}
+\section[Example: Using BARD for plan evaluation and modification]{Using \pkg{BARD} for plan evaluation and modification}
 
 This section demonstrates some of the basic redistricting functions in \pkg{BARD}. These functions permit users to load existing plans into \pkg{BARD} or instruct 
 the program to automatically generate a quasi-random map, permit users to manually edit plans, 
@@ -146,16 +184,15 @@ and the more complex metaheuristics used to optimize redistricting plans.
 This command loads the \pkg{BARD} package:
 
 <<results=hide>>=
- library(BARD)
+ library("BARD")
 @
 
 This command imports a standard ``shapefile'' into \pkg{BARD} which will be used as the base map.
 The file contains the coordinates of the outlines of all geographical units (the smallest of which in the United States context are known as `census blocks') along with any political and demographic variables in each unit. Our example dataset describes Suffolk County, New York. Optionally, a user can supply a variable in this file that indicates the district to which each unit is currently assigned, thereby enabling evaluation of existing plans. 
 
-<<>>= 
- # read in a shapefile with demographic data
+<<results=hide>>= 
  suffolk.map <- importBardShape(
-      file.path(system.file("shapefiles", package="BARD"),"suffolk_tracts")
+      file.path(system.file("shapefiles", package = "BARD"),"suffolk_tracts")
  )
 @
 
@@ -165,36 +202,43 @@ These commands illustrate are several \pkg{BARD} functions that create ``random'
 	\item \code{createRandomPopPlan}: Uses pure random assignment until a district reaches a target population threshold.
 	\item \code{createKmeansPlan}: Uses kmeans on geographical district centroids.
 	\item \code{createWeightedKmeansPlan}: Weights kmeans by a variable, such as population.
-	\item \code{createContiguousPlan}: Attempts to create contiguous plans through the random-walk method of \citet{CirDarOro00}.
+	\item \code{createContiguousPlan}: Attempts to create contiguous plans through the random-walk method of \citet{Cirincione+Darling+ORourke:2000}.
 \end{itemize}
 More information on these functions is included in the documentation accompanying the package.
 
 Two of these functions are illustrated below:
 <<>>= 
-  kplan <- createKmeansPlan(suffolk.map,5)
-  rplan <- createRandomPlan(suffolk.map,5)
+  kplan <- createKmeansPlan(suffolk.map, 5)
+  rplan <- createRandomPlan(suffolk.map, 5)
 @
 
 The results of these are preliminary assignments of geographic units to districts -- the assignments will need to be refined extensively in most cases to yield a legal plan. 
 
 \pkg{BARD} supports simple plotting of plans as well:
 
-<<rplot1,eval=FALSE,results=hide,echo=FALSE>>=
- plot(kplan,cols=colorRampPalette(c("red","grey"))(5),axes=F)
+<<rplot1,eval=FALSE,results=hide,echo=TRUE>>=
+ plot(kplan, col = colorRampPalette(c("red","grey"))(5), axes = FALSE)
 @
+
+The output is shown in Figure\ref{fig:rplot1}.
+
   \begin{figure}[!h]
-<<plot1a, fig=TRUE,width=7>>=
+<<plot1a,echo=FALSE,results=tex>>=
+<<afig>>
 <<rplot1>>
+<<zfigShort>>
 @
   \caption{\label{fig:rplot1} Plotting a sample plan}
   \end{figure}
 
-  % WORKAROUND LATEX FIGURE LOCATION prob
 \newpage
+  % WORKAROUND LATEX FIGURE LOCATION prob
 In addition to plan generation, \pkg{BARD} supports basic interactive editing of plans (here, by reassigning census blocks among districts).
 
+The interactive map generation interface is illustrated in Figure~\ref{fig:edit}.
+
+
 \begin{figure}[!h]
-  The interactive map generation interface is illustrated below:
   \begin{center}
     \includegraphics[page=1]{edit_map.pdf}
   \end{center}
@@ -202,50 +246,54 @@ In addition to plan generation, \pkg{BARD} supports basic interactive editing of
   \caption{\small Interactive creation of districts with \pkg{BARD}.}
   \label{fig:edit}
 \end{figure}
+
 \newpage
-
-
 Furthermore, \pkg{BARD} generates reports for plans based on built-in or user-supplied redistricting criteria, as described in the next section. Here is another brief example:
 
 \vbox{
 <<>>=
-reportPlans(plans=list("kmeans"=kplan,"random 1"=rplan))
+reportPlans(plans = list(kmeans= kplan, random1 = rplan))
 @
 }
 
 This report compares a set of plans and can report differences in aggregate scores,
-differences in district level scores, and diffences in census unit assignments between districts.
+differences in district level scores, and differences in census unit assignments between districts.
+
+For reporting, \pkg{BARD} accepts user-generated score functions, which are discussed below. Additional plotting and reporting options are available and described in detail in the accompanying documentation.  
 
 The differences between districts can be plotted, using a basic plot function. Here, identify areas in which two plans overlap:
 
-<<rplot2,eval=FALSE,echo=FALSE,results=hide>>=   
- plot(diff(kplan,rplan),plotall=TRUE,cols=colorRampPalette(c("red","grey"))(5),axes=FALSE
- ,horizontal=FALSE)
+<<rplot2,eval=FALSE,echo=TRUE,results=hide>>=   
+ plot(diff(kplan,rplan), plotall = TRUE, col = colorRampPalette(c("red","grey"))(5), axes = FALSE, horizontal=FALSE)
 @
+
+The output is shown in Figure~\ref{fig:rplot2}.
+
   \begin{figure}[!h]
   
-<<plot2a, fig=TRUE,width=7>>=
+<<plot2a,echo=FALSE, results=tex,width=8>>=
+<<afig>>
 <<rplot2>>
+<<zfigNarrow>>
 @
   \caption{\label{fig:rplot2} Plotting differences among plans}
   \end{figure}
-  
-For reporting, \pkg{BARD} accepts user-generated score functions, which are discussed below. Additional plotting and reporting options are available and described in detail in the accompanying documentation.  
 
-\section{A Mathematical Formulation of Redistricting Criteria}
+\newpage  
+\section{A mathematical formulation of redistricting criteria}
 
 When redistricting authorities draw district boundaries they do not 
-simply take pen to paper (or mouse to mousepad).\footnote{Prior to redistricting, another process of \emph{reapportionment} is used to determine the number of districts to be drawn. We do not address reapportionment algorithms here. For more information see \citet{BalYoung01}.}  They also analyze information associated with the geographic 
+simply take pen to paper (or mouse to mousepad).\footnote{Prior to redistricting, another process of \emph{reapportionment} is used to determine the number of districts to be drawn. We do not address reapportionment algorithms here. For more information see \citet{Balinski+Young:2001}}.  They also analyze information associated with the geographic 
 components of districts to ensure that maps satisfy legal requirements and political realities. 
 To solve redistricting problems with a computer, the analogous mathematical problem must be formalized.  Since redistricting 
 intrinsically involves assigning discrete blocks of geography (or 
 discrete individuals) to districts to achieve a set of goals that is a function 
 of the redistricting plan as a whole, the corresponding mathematical 
-problem thus falls into the general area of combinatoric optimization.\footnote{Generically, this formulation of the problem assumes that the fundamental units are indivisible. If units are divisible, the problem becomes a continuous optimization problem, and different approaches would apply. In practice, reaggregating census geography is difficult and uncertain (see, for example, \citet{ROAD}) the lowest level census geography is treated as indivisible in redistricting, with the rare exception of 'split blocks.' Blocks can be manually split, and \pkg{BARD} can proceed with plan evaluation and generation if a shapefile is generated that includes geographical representations of split blocks. Our software simply treats the input units as given -- so 'split blocks' can be included in the input data, although the software will not split blocks automatically.}
+problem thus falls into the general area of combinatoric optimization.\footnote{Generically, this formulation of the problem assumes that the fundamental units are indivisible. If units are divisible, the problem becomes a continuous optimization problem, and different approaches would apply. In practice, reaggregating census geography is difficult and uncertain \citep[see, for example][]{King+Palmquist+Adams+Altman+Benoit+Gay+Mayer+Reinhart:1997} the lowest level census geography is treated as indivisible in redistricting, with the rare exception of 'split blocks.' Blocks can be manually split, and \pkg{BARD} can proceed with plan evaluation and generation if a shapefile is generated that includes geographical representations of split blocks. Our software simply treats the input units as given -- so 'split blocks' can be included in the input data, although the software will not split blocks automatically.}
 
 There are many ways to represent particular redistricting problems 
 mathematically within the general combinatoric optimization 
-framework \citep[][]{Altman97}. However, representing redistricting 
+framework \citep[][]{Altman:1997}. However, representing redistricting 
 as a \emph{graph partitioning} problem is the most natural formulation, 
 since it allows the expression of geographic values, such as compactness 
 and contiguity in a simple and direct way. Furthermore, in previous 
@@ -264,9 +312,9 @@ less important, since one could convert a redistricting problem
 instance back and forth among any different NP-complete problem 
 representation in polynomial time. However, in practice, a proper 
 choice of representation can make it much easier to formulate and 
-solve the problem.In recent work,  integer programming approaches have been successsful in small problems  \citep[see][]{AerEisHeu03}, whereas success for much larger problems has bee reported using heuristics on graphs \citep[see][]{Xiao06}.}  
+solve the problem.In recent work,  integer programming approaches have been successsful in small problems  \citep[see][]{Aerts+Eisinger+Heuvelink+Stewart:2003}, whereas success for much larger problems has bee reported using heuristics on graphs \citep[see][]{Xiao:2006}}.  
 
-To put the problem in formal terms\footnote{For consistency, we use the notation previously published in \citet{Altman97} and \citet{AltmanThesis}.}:
+To put the problem in formal terms\footnote{For consistency, we use the notation previously published in \citet{Altman:1997} and \citet{AltmanThesis}}:
 
 \begin{enumerate}
 \item Let \textbf{x}\textit{\textsubscript{i}} refer to the
@@ -327,11 +375,11 @@ adjacency of those block
 %  \label{fig:example}
 %\end{figure}
 
-\subsection{Redistricting Criteria}
+\subsection{Redistricting criteria}
 
 Part of solving this problem is operationalizing the criteria important 
 for districting as functions of the demographic, political, and geographical 
-properties of the redistricting plan. Here we discuss the most commonly recognized redistricting criteria \citep[see][]{McDonald04}, 
+properties of the redistricting plan. Here we discuss the most commonly recognized redistricting criteria \citep[see][]{McDonald:2004}, 
 all of which can be easily calculated using score functions provided with \pkg{BARD}: equal population, 
 completeness, contiguity, geographic compactness, political competitiveness or partisan bias, 
 minority-opportunity to elect a candidate of choice, and 
@@ -345,7 +393,7 @@ Perhaps the most important criterion is that districts
 of less than a one percent population division to ensure that they 
 conform to legal standards.  State legislative districts are 
 permitted a ten percent population deviation under federal law, 
-though some state laws require a smaller deviation \citep[][]{CainMacMc05}. In our software, both the score function for measuring population deviation, and the methods for generating initial district assignments allow the amount of tolerable deviation in population to be specified by the user.} And the format of population data released by the U.S. Census 
+though some state laws require a smaller deviation \citep[][]{Cain+MacDonald+McDonald:2006}. In our software, both the score function for measuring population deviation, and the methods for generating initial district assignments allow the amount of tolerable deviation in population to be specified by the user.} And the format of population data released by the US Census 
 Bureau further guides how the redistricting problem is formalized.  
 These data are not reported for individuals, rather, to protect the 
 confidentiality of respondents data, these are aggregated into discrete 
@@ -353,7 +401,7 @@ geographic entities known as ``census blocks'' which roughly conform
 to a city block in urban areas. It is thus not difficult to imagine census blocks as corresponding to 
 points on a graph.  
 
-This conceptualization is how Geographic Information Systems (GIS) 
+This conceptualization is how GIS
 programs generally work: they plot the vertices of census blocks (and higher geographic 
 units, such as counties and cities) onto a screen for user 
 manipulation. GIS redistricting modules enable users to assign 
@@ -382,7 +430,7 @@ Another important criterion is that districts must (usually) be contiguous, or
 connected.\footnote{While contiguity is  a legal requirement in many states, it is
 not a Federal requirement. And there are documented instances of 
 non-contiguous districts or districts of questionable contiguity because 
-they are connected over water without a bridge \citep[][]{Altman98}.  
+they are connected over water without a bridge \citep[][]{Altman:1998}.  
 Another example, some states require districts to be composed entirely 
 of wards or other political subdivisions which are themselves sometimes non-contiguous when odd city boundaries create islands of 
 incorporated or unincorporated territory.  The Wisconsin 61\textsuperscript{st} Assembly district created in 2001 is non-contiguous 
@@ -396,16 +444,16 @@ a proposed plan satisfies contiguity.
 
 Geographic compactness is an oft-mentioned criterion for redistricting 
 that is honored in the breach.  Dozens of scores have been proposed, but 
-few are used in practice (see \citet{Altman98}, \citet{Niemi91}). \pkg{BARD} provides three functions that calculate common geographic compactness scores which capture the dispersion and dissection of districts (how much they are stretched or have chunks removed from them). \pkg{BARD} also provides a parameterized and weighted `moment-of-inertia' score that can be used to measure geographic compactness, population compactness, and cumulative distance from fixed locations, such as candidates homes, warehouses, or schools. Other scores can easily be programmed in \proglang{R}.
+few are used in practice \citep[see][]{Altman:1998,Niemi+Grofman+Carlucci+Hofeller:1991}. \pkg{BARD} provides three functions that calculate common geographic compactness scores which capture the dispersion and dissection of districts (how much they are stretched or have chunks removed from them). It also provides a parameterized and weighted `moment-of-inertia' score that can be used to measure geographic compactness, population compactness, and cumulative distance from fixed locations, such as candidates homes, warehouses, or schools. Other scores can easily be programmed in \proglang{R}.
 
 Election outcomes that may be expected from a redistricting plan can be constructed from election or demographic input variables. Estimates of how reliably 
-districts may elect partisan candidates of either party are commonly measured by estimating the expected partisan vote share in each districts \citep{McDonald06a}.\footnote{An alternative way of evaluating the political outcomes of the plan involve estimating the predicted seat-votes curve resulting from that plan. This was proposed thirty years ago 
-by \citet{Tufte73} and \citet{NieDee78}. \citet{GelKing94} provide the leading method for estimating this.} 
+districts may elect partisan candidates of either party are commonly measured by estimating the expected partisan vote share in each districts \citep[][]{McDonald:2006}.\footnote{An alternative way of evaluating the political outcomes of the plan involve estimating the predicted seat-votes curve resulting from that plan. This was proposed thirty years ago 
+by \citet{Tufte:1973} and \citet{Niemi+Deegan:1978}. \citet{Gelman+King:1994} provide the leading method for estimating this.} 
 If the expected ratio of partisan vote shares is approximately the same within a threshold tolerance, a district is deemed competitive by this measure. 
 In a similar manner, minority opportunity districts are usually identified as those in which the ratio of minority 
-population to majority population falls above a designated threshold \citep{GrofHand92}.
+population to majority population falls above a designated threshold \citep[][]{Grofman+Handley:1992}.
 These partisan or racial vote share may be estimated simply, based on voter registration in the proposed 
-district, or through a more complex model such as in \citet{GelKing94}.  The \pkg{BARD} 
+district, or through a more complex model such as in \citet{Gelman+King:1994}.  The \pkg{BARD} 
 framework provides a generalized scoring function that efficiently computes the sum of a predictor variable 
 associated with each block, or the ratio of two predictive variables. With this it is 
 possible to calculate estimates of the number of districts that may be won by a party's candidates, district competitiveness scores, 
@@ -417,23 +465,22 @@ boundaries, communities of interest (often defined by redistricting
 authorities), or other `natural'  features such as rivers or mountain ranges.  
 Capturing these criteria mathematically is straight-forward: any set 
 of census blocks can be defined as belonging to a grouping set and
-a penalty for splitting groups can be added to the score function for evaluating a redistricting plan.\footnote{We are sympathetic to the argument put forth by \citet[][]{Forest04} 
+a penalty for splitting groups can be added to the score function for evaluating a redistricting plan.\footnote{We are sympathetic to the argument put forth by \citet[][]{Forest:2004} 
 that using only quantitative data to represent communities of interest can result
 in `thin' representations of community. Using the technique just described, the \pkg{BARD} system can incorporate
 information about the boundaries of communities of interest based on external qualitative 
-analysis and ``thick'' descriptions.}  An example of this type of community cost 
+analysis and ``thick'' descriptions.}  
+
+An example of this type of community cost 
 function is included in the \pkg{BARD} package.  The twist is that these criteria are 
 often secondary to equal population, contiguity, and Voting Rights Act concerns, and so the scores
 associated with each criterion must be properly weighted in order to permit 
 some violation of feature boundaries to accommodate superseding criteria.
 All of these criteria may be calculated in \pkg{BARD}.
 
-In addition, the \pkg{BARD} score framework enables any function of model in \pkg{R} to be used in the evaluation of 
+In addition, the \pkg{BARD} score framework enables any function of model in \proglang{R} to be used in the evaluation of 
 a plan. Thus, it is relatively straightforward to add new scores to \pkg{BARD} to evaluate plans 
 based on the user's choice of statistical model.
-%such as cross-level inference model 
-%estimates of voter behavior (e.g., using \pkg{eco} or  models predicting 
-%election results or seat-votes curves such as \pkg{JudgeIt2} --  see %\citet{Imai07} and \citet{GelKing07}, respectively).
 
 We note that there is no universally agreed upon set of redistricting criteria, and many jurisdictions
 often require vague goals such as ``compact'' districts, without a specific definition to
@@ -441,38 +488,38 @@ guide implementation. For example, is compactness defined as the minimization of
 length of the district perimeter or the ratio of the district's area to that of the largest inscribed circle
 (both are proposed methods of measuring compactness)?  Different formulations may lead to substantively
 different types of districts, which means that redistricting criteria may have subtle
-``second-order biases'' \citep[][]{Parker90}, that is, the criteria are seemingly 
+``second-order biases'' \citep[][]{Parker:1990}, that is, the criteria are seemingly 
 neutral on face value but reliably produce a political outcome.  Defining criteria 
 and meaningfully weighing them against one another is an art that demands experimentation 
 since no two jurisdictions have the same geography or population distribution.  This 
 also reveals the importance of the \pkg{BARD} open source approach to formulating redistricting criteria (and automation) 
 since a black box approach is vulnerable to hidden manipulation.  
 
-\section{Use of Automated Redistricting for Plan Analysis}
+\section{Use of automated redistricting for plan analysis}
 
 In addition to evaluating and improving existing plans, automated redistricting 
 has long been used as a method for redistricting analysis, especially by political geographers.  Pioneering work by 
-\citet{ShepJen70} and \citet{GudgTayl79} employ enumeration of all 
+\citet{Jenkins+Shepherd:1970} and \citet{Gudgin+Taylor:1979} employ enumeration of all 
 possible partitions (for extremely small districting plans) to reveal the complete range of possible redistricting alternatives.  
 
 Scholars have proposed methods other than full enumeration to overcome the computational limitations of enumeration on even modestly 
-redistricting problems, with as little as 50 units to assign to districts.  Another way of using automated redistricting for analysis is taken by \citet{Altman97} and \citet{RogersonYang99}. These authors propose 
+redistricting problems, with as little as 50 units to assign to districts.  Another way of using automated redistricting for analysis is taken by \citet{Altman:1997} and \citet{Rogerson+Yang:1999}. These authors propose 
 automated refinement of redistricting plans to simulate the effects of additional legal constraints on redistricting outcomes.  Another alternative, 
 and relatively common use of automated redistricting, is to use ``random'' generation of 
-districts to probe the characteristics of arbitrary redistricting plans (see \citet{EngWild77,RosJohn81,Oloughlin82,Grofman82,CirDarOro00}). 
-Note however that work does not establish that `random' districts are probability samples from a well-described population of plans  \citep{AltmanMcDonald04}. \footnote{For example
-\citet[e.g.,]{CirDarOro00} use a random-walk like method to create contiguous districts. However, the process can be shown not to yield a simple random sample of redistricting plans in small samples, and indeed there is no evidence to establish convergence to a probability sample.  In general, as Knuth warns, algorithms that are stochastic do not necessarily yield 
-random distributions of results \citep[][]{Knuth97}. 
+districts to probe the characteristics of arbitrary redistricting plans  \citep[see][]{Engstrom+Wildgen:1977,Rossiter+Johnston:1981,Oloughlin:1982,Grofman:1982,Cirincione+Darling+ORourke:2000}. 
+Note however that work does not establish that `random' districts are probability samples from a well-described population of plans  \citep{Altman+McDonald:2004}.\footnote{For example,
+\citet{Cirincione+Darling+ORourke:2000} use a random-walk like method to create contiguous districts. However, the process can be shown not to yield a simple random sample of redistricting plans in small samples, and indeed there is no evidence to establish convergence to a probability sample.  In general, as Knuth warns, algorithms that are stochastic do not necessarily yield 
+random distributions of results \citep[][]{Knuth:1997}. 
 } We recommend that these methods be interpreted with caution.
 
 
-\section{Improving Algorithms for Automated Redistricting Refinement} 
+\section{Improving algorithms for automated redistricting refinement} 
 
 The \pkg{BARD} package provides functions to refine districts based on specified score functions. In this section we describe the formulation of the refinement problem, existing software, and the algorithms \pkg{BARD} currently provides.  
 
 Formally, redistricting is a computationally complex optimization 
-problem: Common variations of redistricting be shown to be equivalent to general optimization problems already  known to be `NP-Complete'  \citep[see][]{Altman97}. An illustration of this is the specific problem of finding equi-populous contiguous plans. Formally, this is equivalent to the the following optimization problem, known as
-``\textbf{Cut into Connected Components of Bounded Size (\& Weight)''} \citep[][]{Johnson1982}: 
+problem: Common variations of redistricting be shown to be equivalent to general optimization problems already  known to be `NP-Complete'  \citep[see][]{Altman:1997}. An illustration of this is the specific problem of finding equi-populous contiguous plans. Formally, this is equivalent to the the following optimization problem, known as
+``\textbf{Cut into Connected Components of Bounded Size (\& Weight)''} \citep[][]{Johnson:1982}: 
 
 \emph{Is there a partition of vertices}, \textbf{V,}\textit{ } \emph{into disjoint
 sets} \textbf{V}\textit{\textsubscript{1 }}\emph{and}
@@ -537,7 +584,7 @@ In practice, contiguity will
 reduce the number of feasible plans that must be enumerated, none-the-less, the number 
 of possible plans likely remains staggeringly large.  Thus, 
 selecting the globally optimal plan from a full enumeration of all 
-plans is not feasible even using the fastest computers currently available. For similar reasons, random generation of districting plans (e.g. via a random walk) is unlikely to generate feasible plans. 
+plans is not feasible even using the fastest computers currently available. For similar reasons, random generation of districting plans (e.g., via a random walk) is unlikely to generate feasible plans. 
 
 Lacking enumeration, some sort of heuristic or algorithm is needed to find an 
 optimal redistricting plan. The fact that the problem has been shown to be NP-Complete strongly suggests that there are no efficient algorithms capable of solving the problem with any guaranteed approximation of optimality. Thus researchers in this area have turned to heuristic approaches, that while not guaranteed to produce quality solutions, do complete in a reasonable amount of time. 
@@ -580,17 +627,17 @@ function to be maximized until the bridge was complete. In general, partitioning
 %problem 
 
 
-\subsection{Available Software}
+\subsection{Available software}
 
 Despite a long history of experiments in automated redistricting, 
 there are few tools publicly available for automated redistricting. 
 To our knowledge, five commercial software tools produced by Caliper 
-Corporation, ESRI, Digital Engineering Corporation (which provides 
-a redistricting add-on for ESRI's GIS program), Corona Solutions, 
+Corporation, Esri, Digital Engineering Corporation (which provides 
+a redistricting add-on for Esri's GIS program), Corona Solutions, 
 and Manifold Systems provide automated redistricting functionality 
-\citep[][]{AltMacMcD05}.\footnote{In addition to these companies, 
+\citep[][]{Altman+MacDonald+McDonald:2005}.\footnote{In addition to these companies, 
 the Texas Legislative Council developed prior to the 2001 round of redistricting a promising in-house 
-automated redistricting program known as TARGET with limited exploratory
+automated redistricting program known as \pkg{TARGET} with limited exploratory
 capabilities.}   
 
 All publicly available tools are limited in several regards.  
@@ -604,14 +651,14 @@ closed-source and their algorithmic details poorly documented, which raises tran
 electronic voting machines.  These redistricting GIS programs with automated algorithms typically 
 cost several thousand dollars (Manifold being the single notable exception), limiting their wide use.  
 
-In our testing of these programs (see \citet{AltMacMcD05}), we found that while they could generate plans of a sort automatically, these plans would not satisfy legal requirements or basic plausibility. 
-For example, ESRI's automated redistricting algorithm stops growing districts when the growing circular districts touch, yielding polka-dot districts that leave much of a jurisdiction unassigned to any district. Manifold's algorithm apparently randomly selects a number of blocks equal to the number of districts as seeds and grows districts from these seeds one district at a time, thereby sometimes producing a single-block district when other districts are first grown around it. 
+In our testing of these programs \citep[see][]{Altman+MacDonald+McDonald:2005}, we found that while they could generate plans of a sort automatically, these plans would not satisfy legal requirements or basic plausibility. 
+For example, Esri's automated redistricting algorithm stops growing districts when the growing circular districts touch, yielding polka-dot districts that leave much of a jurisdiction unassigned to any district. Manifold's algorithm apparently randomly selects a number of blocks equal to the number of districts as seeds and grows districts from these seeds one district at a time, thereby sometimes producing a single-block district when other districts are first grown around it. 
 
 Moreover, these programs are limited to balancing the allocation of a single fixed variable (measured at the unit level), sometimes in combination with a built-in (and usually idiosyncratic) measure of compactness, using a single optimization methods. These programs cannot perform multi-criteria optimization, accept user-defined weights and score functions, use alternative definitions of compactness, or probe trade-offs between the redistricting criteria and political goals. Thus, for most of the redistricting scenarios that \pkg{BARD} is intended to address, the available commercial automated redistricting software simply cannot be applied.
 
 That these companies supply rudimentary automated features is perhaps unsurprising,  since there is little \emph{market} demand for automated functionality. Well-funded redistricting authorities and consultants are reticent to hand over highly sensitive political decisions to a machine. They have little incentive to use this functionality, since they can accomplish their ends without it, and it exposes them to potential legal complications since their optimization goals would be made clear. Although there is no money in it (and hence no market), public participation in the process will, however, be aided by these functions since they make it easier to draw plans that meet legal constraints and serve public goals.
 
-\subsection{New Metaheuristic Approaches} 
+\subsection{New metaheuristic approaches} 
 
 A more general optimization heuristic is needed to address the redistricting problem. To be adaptable to any
 reasonable redistricting goal, a successful approach should consider not only additions 
@@ -619,7 +666,8 @@ of single census blocks to a district core, but also arbitrary exchanges of mult
 To avoid being trapped in local optima, such a heuristic must be permitted to make 
 some backwards (non-improving) steps in search of the global optimum, such as 
 bridging two minority communities through a white community. These features 
-of the redistricting problem suggest that \emph{metaheuristics} may be an effective practical solution.
+of the redistricting problem suggest that \emph{metaheuristics} may be an effective practical solution 
+\citep[see][for surveys of optimization algorithms used in redistricting]{Altman:1997,Cortona+Manzi+Pennisi+Ricci+Simeone:1999,Xiao:2003}.
  
 Over the last two and a half decades, a set of new and surprisingly 
 effective heuristic approaches to large optimization problems have 
@@ -632,9 +680,8 @@ have now been recognized as belonging to a more general \emph{metaheuristic} fra
 Essentially, metaheuristics are a general approach to optimization that involves 
 combining a set of basic heuristics that find optima only in a local neighborhood with a 
 larger framework for guiding and applying these heuristics 
-repeatedly in a large search space (see \citet{BlumRoli03} for an in-depth 
-survey of metaheuristics, and \citet{Altman97} \citet{CortonaEtAl99} and 
-\citet{Xiao03} for other optimization algorithms used in redistricting).  
+repeatedly in a large search space \citep[see][for an in-depth 
+survey of metaheuristics]{Blum+Roli:2003}.  
 Designing and applying metaheuristics requires dynamically 
 balancing between \emph{diversification}  and \emph{intensification}. Diversification involves generating new 
 candidate solutions in such a way as to thoroughly explore the solution space. Intensification involves using (implicitly or explicitly) 
@@ -642,7 +689,7 @@ the history of candidate solutions that have been previously evaluated to guide 
 Diversification is needed to have a high probability of finding the region of solutions that contains an optimal solution 
 and intensification is needed to find these solutions in a practical amount of time. 
 
-These metaheuristics have many variants and parameterizations, and none work well for all optimization problems \citep[][]{WolMac97}. This raises the possibility of  `third-order' bias, in which attributes of the outcome not specified in the optimization function may be affected in systematic ways by the solution method \citep[][]{Altman97}. Finding the right solution approach for a particular domain of problems is a matter of craft as much as science. Although no single metaheuristic is guaranteed to be ideal, there are many reasons 
+These metaheuristics have many variants and parameterizations, and none work well for all optimization problems \citep[][]{Wolpert+Macready:1997}. This raises the possibility of  `third-order' bias, in which attributes of the outcome not specified in the optimization function may be affected in systematic ways by the solution method \citep[][]{Altman:1997}. Finding the right solution approach for a particular domain of problems is a matter of craft as much as science. Although no single metaheuristic is guaranteed to be ideal, there are many reasons 
 why the metaheuristic framework is an appropriate one to use for redistricting:
 \begin{enumerate}
 \item First, metaheuristics have a track record of being successful on difficult combinatoric 
@@ -662,7 +709,7 @@ we reduce the threat that a particular heuristic can systematically interact
 with a redistricting goal to bias the resulting plan.
 \end{enumerate}
 
-\subsection[Optimization Methods in BARD]{Optimization Methods in \pkg{BARD}}
+\subsection[Optimization methods in BARD]{Optimization methods in \pkg{BARD}}
 
 The initial version of \pkg{BARD} includes four metaheuristics: 
 
@@ -687,9 +734,9 @@ to mutation (an alteration of the solution vector), hybridization (a reshuffling
 In addition, each round undergoes selection, where some solutions are discarded and some are 
 duplicated within the population, depending on the fitness (function evaluation) of that member.
 
-\emph{Tabu Search} (see \citet{Glover86} and the citations above) modifies hill-climbing by retaining a memory of recent moves (or attributes thereof) and avoiding those moves unless they meet particular aspiration criteria. This use of memory encourages diversification.
+\emph{Tabu Search} \citep[see][and the citations above]{Glover:1986} modifies hill-climbing by retaining a memory of recent moves (or attributes thereof) and avoiding those moves unless they meet particular aspiration criteria. This use of memory encourages diversification.
 
-\emph{Greedy Randomized Adaptive Search} or GRASP \citep{FeoRes89} is a multi-start metaheuristic. Each iteration 
+\emph{Greedy Randomized Adaptive Search} or GRASP \citep{Feo+Resende:1989} is a multi-start metaheuristic. Each iteration 
 involves two phases, generation of a random starting candidate solution, and greedy exploration of 
 the search neighborhood (hill-climbing) to find a local optimum. GRASP iterates repeatedly, and 
 returns the best solution across all iterations. 
@@ -715,30 +762,34 @@ In practice, when one starts with a current legal plan, it is much faster to gen
 than when starting from entirely randomly generated districts.  A potential problem with using the former districts as a starting point is that the same
 political motivations that predominate the district shapes may continue to influence the solution.  
 
-\section{Plan Refinement, Sampling and Profiling}
+\section{Plan refinement, sampling, and profiling}
 
 This simple demonstration shows how \pkg{BARD} can be used to repeatedly generate and refine plans by applying one optimization algorithm to a set of 21 plans: a plan generated by k-means plus 20 plans generated by \code{createRandomPlan}. Each plan is then refined using the score function and optimization function indicated:
 
 <<echo=TRUE,results=hide>>=
 myScore<-function(plan,...)combineDynamicScores(plan,scorefuns=list(calcPopScore,calcLWCompactScore))
 
-samples<-samplePlans(list(kplan), score.fun=
-	myScore, ngenplans=20, gen.fun = "createRandomPlan", refine.fun="refineNelderPlan",refine.args=list(maxit=200,dynamicscoring=TRUE))
+samples<-samplePlans(list(kplan), score.fun = myScore,  ngenplans = 20,
+	 gen.fun = "createRandomPlan", refine.fun="refineNelderPlan", 
+	refine.args = list(maxit = 200, dynamicscoring = TRUE))
 @
 
 This yields a set of improved plans, which can be summarized and plotted using methods that the package supplies for evaluating \emph{groups} of plans. \pkg{BARD} also supplies a \code{profilePlans} function that replicates samplePlans, while reweighting components of a given score function. This allows one to examine the effects of trade-offs among pairs of redistricting criteria. 
 
-<<rplot3,eval=FALSE,results=hide,echo=FALSE>>=
+<<rplot3,eval=FALSE,results=hide,echo=TRUE>>=
 plot(summary(samples))
 @
+
+The output is shown in Figure~\ref{fig:rplot3}.
+
   \begin{figure}[!h]
-<<plot3a, fig=TRUE,width=7>>=
+<<plot3a, echo=FALSE,fig=TRUE,width=7>>=
 <<rplot3>>
 @
   \caption{\label{fig:rplot3} Plotting a distribution of ``samples'' randomly generated districts}
   \end{figure}
   
-Although redistricting is a computational problem that is too difficult to ensure the resulting plan is \emph{optimal}, the program may yield a useful improvement over the starting map and may further enable the public to generate constitutionally viable plans. \footnote{To keep the run-time of this demonstration manageable, we implement the essential profiling steps  using a quick but primitive optimization method, \code{refineNelderPlan}.  In a real (and long running) application we would substitute \code{refineTabuPlan}, \code{refineAnnealPlan}, \code{refineGRASPplan}, or \code{refineGenoudPlan} for \code{refineNelderPlan} above.}  
+Although redistricting is a computational problem that is too difficult to ensure the resulting plan is \emph{optimal}, the program may yield a useful improvement over the starting map and may further enable the public to generate constitutionally viable plans.\footnote{To keep the run-time of this demonstration manageable, we implement the essential profiling steps  using a quick but primitive optimization method, \code{refineNelderPlan}.  In a real (and long running) application we would substitute \code{refineTabuPlan}, \code{refineAnnealPlan}, \code{refineGRASPplan}, or \code{refineGenoudPlan} for \code{refineNelderPlan} above.}  
 
 A unique aspect of \pkg{BARD}'s approach is that it enables
 one to explore the tradeoffs between redistricting goals, such as the
@@ -768,11 +819,11 @@ Courts and litigants have used this approach informally, especially in the
 absence of smoking gun evidence, when they examine characteristics of
 plans that were rejected to illuminate why a particular plan was
 accepted. For example, it has been used by academics to assess
-intent in North Carolina's redistricting in the 1990s \citep[][]{GronWil99}. Using automated redistricting it is possible to
+intent in North Carolina's redistricting in the 1990s \citep[][]{Gronke+Wilson:1999}. Using automated redistricting it is possible to
 systematize this method -- and \pkg{BARD} facilitates this. 
 
-Formally, this technique based on a fundamental axiom in economics, the Weak Axiom
-of Revealed Preference (WARP) \citep[][]{Samuelson48}. Any method to infer preferences
+Formally, this technique based on a fundamental axiom in economics, the weak axiom
+of revealed preference (WARP) \citep[][]{Samuelson:1948}. Any method to infer preferences
 from the actions of a rational actor must rest on WARP.  WARP states
 that if one observes a choice 
 % MathType!MTEF!2!1!+-
@@ -853,7 +904,7 @@ effectiveness will depend on how informative the data is. In some cases
 it may fail to reject any of the competing hypotheses, and one may need
 to obtain more data, such as other plans that were under consideration.
 
-\section{Efficiency in Implementation and Design}
+\section{Efficiency in implementation and design}
 
 Because of the computational intensity of plan refinement methods, performance 
 is an important consideration in the design and implementation of \pkg{BARD}. \pkg{BARD} uses a number
@@ -861,13 +912,13 @@ of techniques to improve performance and facilitate large-scale problem computat
 at different levels of computation: data structures, computing scores, refining 
 individual plans, and generating sets of plans for sampling and profiling. 
 
-\subsection{Data Structures}
+\subsection{Data structures}
 
-\pkg{BARD} employs the \proglang{maptools} \citep{Lewin07} data structures for storing 
+\pkg{BARD} employs the \pkg{maptools} \citep{Lewin-Koh+Bivand:2011} data structures for storing 
 geographic maps, in combination with a standard data frame for related variables such as 
 population, and political composition of census blocks. To determine contiguity and compactness, 
 \pkg{BARD} requires an adjacency graph. A standard distance matrix requires excessive amounts of memory, 
-so \pkg{BARD} uses the \pkg{spdep} \citep{Bivand07} package's neighborhood list structure and methods. 
+so \pkg{BARD} uses the \pkg{spdep} \citep{Bivand:2011} package's neighborhood list structure and methods. 
 Our benchmarks determined that creating subsets of neighborhood lists was quite slow, and 
 thus the implementation of score functions took some care to avoid generating such subsets.
 
@@ -876,7 +927,7 @@ identifying the number of districts and the related geographic map and data fram
 However, although \proglang{R} supports copy-on-write for its objects, we found a 
 significant amount of experimentation and care was necessary in order to avoid unnecessary duplication of redistricting plan objects. (See the appendix for details.) 
 
-\subsection{Performance Tuning} 
+\subsection{Performance tuning} 
 
 The performance of score functions is critical, since almost all of the other phases of 
 \pkg{BARD} analysis (such as reporting, refinement, and sampling) repeatedly call these functions.
@@ -900,29 +951,31 @@ In addition, combinations of scores should weight components in order to guarant
 that legally required criteria (constraints) always dominate legally optional 
 criteria. Since all score functions are standardized to produce values 
 in [0,1], this is easily accomplished by setting the weight for each 
-required constraint so that:$
-\forall j \in required,\,\,w_j  > \left( {number\,of\,districts\,*\,\sum\limits_{i \notin required} {w_i } } \right)$
+required constraint so that:
 
-\newpage
+$\forall j \in \mathit{required},\,\,w_j  > \left( {\emph{\mbox{number of districts}}*\,\sum\limits_{i \notin \mathit{required}} {w_i } } \right)$
+
+%%$
+%%\forall j \in required,\,\,w_j  > \left( {number\,of\,districts\,*\,\sum\limits_{i \notin required} {w_i } } \right)$
 \vbox{
 The following combination score function illustrates a straightforward approach to these issues:
 <<>>=
-  myCombinedS<-function(plan,lastscore=NULL,...) {
+  myCombinedS <-function(plan,lastscore=NULL,...) {
   
-    plast<-NULL
-    ctlast<-NULL
+    plast <- NULL
+    ctlast <- NULL
     if (!is.null(lastscore)) {
-      plast<-attr(lastscore,"plast")
-      ctlast<-attr(lastscore,"ctlast")
+      plast <- attr(lastscore, "plast")
+      ctlast <- attr(lastscore, "ctlast")
     }
     
-    pscore<-calcPopScore(plan,lastscore=plast,...)
-    ctscore<-calcContiguityScore(plan,lastscore=ctlast,...)
+    pscore <- calcPopScore(plan, lastscore=plast, ...)
+    ctscore <- calcContiguityScore(plan, lastscore = ctlast, ...)
     
-    combined <- exp(ctscore)*attr(plan,"ndists")*2+exp(pscore)
+    combined <- exp(ctscore) * attr(plan, "ndists") * 2 + exp(pscore)
     
-    attr(combined,"plast")<-pscore
-    attr(combined,"ctlast")<-ctscore
+    attr(combined, "plast") <- pscore
+    attr(combined, "ctlast") <-ctscore
     return(combined)
   }
 @
@@ -938,7 +991,7 @@ and performance enhancement. These facilities detect and take advantage of dynam
 in the score function, implement a score cache, provide optional bounds checking on candidate 
 plans generated by the chosen optimizer, and provide real-time graphical updates for use in demos and diagnostics. 
 This factory wrapper is transparent to both score functions and optimization heuristics, 
-allowing optimizers such as \code{optim()} and \code{genoud()} to be used ``out of the box''.
+allowing optimizers such as \code{optim()} and \code{genoud()} (using the \pkg{rgenoud} \citep{MebaneJr.+Sekhon:2011}) to be used ``out of the box''.
 
 Dynamic scoring is particularly useful for trajectory-based optimization heuristics such as 
 simulated annealing, hill-climbing (the ``greedy'' refinement method), and GRASP. \pkg{BARD}'s implementation 
@@ -952,7 +1005,7 @@ useful for population and trajectory-based optimization heuristics, although not
 strictly greedy methods (since no plan is ever revisited by these methods). \pkg{BARD}'s score 
 factory wrapper makes use of the history mechanism transparent to both the score function 
 and the optimization heuristic. For memory efficiency, the history mechanism stores 
-digests (using \pkg{digest} \citet{Eddelbuettel07}) of the plans visited, rather than complete plans.
+digests (using \pkg{digest} \citet{Eddelbuettel:2009}) of the plans visited, rather than complete plans.
 
 Each plan refinement heuristic is also adapted for application to redistricting. The details of 
 these adaptations are particular to each heuristic, but generally include: adjusting heuristic 
@@ -970,7 +1023,7 @@ parallelization across hundreds of nodes with very little communications overhea
 algorithm refinement function can use a cluster, however, because the parallelization for this function 
 is implemented at the score level, communication overhead is much higher.)
 
-\pkg{BARD} uses the \pkg{snow} \citep{Tierney07} framework to distribute work across compute clusters. This package 
+\pkg{BARD} uses the \pkg{snow} \citep{Rossini+Tierney+Li:2007} framework to distribute work across compute clusters. This package 
 encapsulates parallelization behind a set of interfaces that are similar to \code{lapply}, that take the computing cluster object as an extra parameter. (Also, a module-specific closure is used to store the current cluster object, avoiding the need to pass the cluster parameter in most cases.) Snow clusters can use  \pkg{MPI}, \pkg{PVM} or raw sockets for communication. 
 
 Internally, \pkg{BARD} further encapsulates the \pkg{snow} \code{lapply} functions behind  the \code{lapplyBardCluster} function. 
@@ -983,7 +1036,7 @@ execution is unavailable or unsuccessful. The result is that other \pkg{BARD} mo
 \code{lapply} and instantly make use of fault-tolerant parallelization whenever a cluster is available, 
 without any other changes to implementation.
 
-\section{Future Developments}
+\section{Future developments}
 
 \pkg{BARD} has recently been released to the public.  While \pkg{BARD} offers 
 a unique set of redistricting features, and serves as a usable framework for developing objective functions and redistricting algorithms, we envision extensions of it.
@@ -1021,15 +1074,16 @@ plans with a complete set of tools to read maps and data, display plans and edit
 on a range of redistricting criteria and compare them to other competing redistricting plans. 
 
 The \pkg{BARD} package runs on Windows, Linux, and MacOS, and can be obtained from the project 
-web site \url{bard.sf.net} and from any  CRAN mirror (\url{http://cran.r-project.org/}). 
+web site \url{http://bard.sf.net} and from the  Comprehensive \proglang{R} Archive Network (CRAN)  at  \url{http://CRAN.R-project.org/package=BARD} .
 
-\section{Acknowledgements}\vspace{-5pt}
+\section*{Acknowledgments}
 
-We thank Max Tsvetovat, Mike Margolis, and Simon Jackman for their comments and recommendations, 
-and Mark Rouleau for research assistance and programming.  We also thank the Joyce Foundation for financial support. 
+We thank Simon Jackman, Mike Margolis, Max Tsvetovat, Achim Zeileis for their comments and recommendations on the paper; Roger Bivand, Kurt Hornik, and Brian Ripley for their comments on the package;  and Mark Rouleau for research assistance and programming.  We also thank the Joyce Foundation and Sloan Foundation for financial support. 
 
-\section{Appendix: Memory Management Details}
+\bibliography{bardJSS}
 
+\begin{appendix}
+\section{Memory Management Details}
 As noted above, additional care in the implementation of \pkg{BARD} is needed to avoid making copies of large objects. A particular issue is the assignment of large objects as attributes of other objects. This occurs when redistricting plans contain a reference to the underlying map object on which they are based.  We 
 develop the idiom of wrapping these objects in an \code{environment} and 
 assign this environment as an attribute, which proves successful at avoiding 
@@ -1038,29 +1092,27 @@ duplication of these large data structure. We further develop a special-purpose 
 \vbox{
 This shallow copy function is illustrated below:
 <<>>=
-cs<-function(...) {
-  mc<-substitute(list(...))
-  if (length(mc)==0) {
+cs <- function(...) {
+  mc <- substitute(list(...))
+  if (length(mc) == 0) {
     return(list())
   }
-  listlength<-0
-  for (i in seq(from=2, length.out=length(mc)-1)) {
-      listlength<-listlength+length(eval.parent(mc[[i]]))
+  listlength <- 0
+  for (i in seq(from = 2, length.out = length(mc) - 1)) {
+      listlength <- listlength + length(eval.parent(mc[[i]]))
   }
   lastpos<-0
-  retval<-vector(length=listlength,mode="list")
-  for (i in seq(from=2, length.out=length(mc)-1)) {
-      tmp<-eval.parent(mc[[i]])
-      for (j in seq(from=1, length.out=length(tmp))) {
-        retval[lastpos+j] <- tmp[j]
+  retval<-vector(length = listlength, mode = "list")
+  for (i in seq(from = 2, length.out = length(mc) - 1)) {
+      tmp <- eval.parent(mc[[i]])
+      for (j in seq(from = 1, length.out = length(tmp))) {
+        retval[lastpos + j] <- tmp[j]
       }
-      lastpos<-lastpos+length(tmp)
+      lastpos <- lastpos + length(tmp)
   }
   return(retval)
 }
 @
 }
-
-
-\bibliography{bardJSS}
+\end{appendix}
 \end{document}

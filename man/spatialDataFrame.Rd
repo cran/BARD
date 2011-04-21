@@ -8,7 +8,7 @@
 	converts BARD basemap to SpatialPolygonsDataFrame and back
 }
 \usage{
-spatialDataFrame2bardBasemap(sdf,nb=NULL,queen=TRUE) 
+spatialDataFrame2bardBasemap(sdf,nb=NULL,queen=TRUE,keepgeom=TRUE) 
 spatialDataFrame2bardPlan(sdf,nb=NULL,queen=TRUE,id="BARDPlanID") 
 bardBasemap2spatialDataFrame(x)
 bardPlan2spatialDataFrame(x,id="BARDPlanID")
@@ -20,6 +20,7 @@ bardPlan2spatialDataFrame(x,id="BARDPlanID")
   \item{nb}{object of class \code{nb} }
   \item{queen}{use queen contiguity when running \code{poly2nb} }
   \item{id}{name of column used to identify plan assingnment}
+  \item{keepgeom}{keep geometry}
 }
 \value{
 	returns basemap,plan, or spatialPolygonsDataFrame, respectively
@@ -27,6 +28,9 @@ bardPlan2spatialDataFrame(x,id="BARDPlanID")
 
 \note{ 
 	Conversion from Spatial Data Frame's to bard objects is potentially slow, because BARD objects use index structures not available in the sdf's, and the conversion must create these indices.
+
+   keepgeom=FALSE is only for use with a limited set of scoring functions, does not support plots or
+   district generation. Avoid if you're not absolutely sure.
 }
 \author{ 
   Micah Altman
