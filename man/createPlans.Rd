@@ -15,7 +15,7 @@ be refined with one of the refinement functions.
 \usage{
 createRandomPlan(basemap,ndists)
 createRandomPopPlan(basemap,ndists,predvar="POP")
-createAssignedPlan(basemap,predvar="BARDPlanID")
+createAssignedPlan(basemap,predvar="BARDPlanID",nseats=NULL,magnitudes=NULL)
 createKmeansPlan(basemap,ndists)
 createWeightedKmeansPlan( basemap, ndists, centers = c(), weightVar = NULL,
                  trimfactor = 2.5, smallBlock = c("cap", "closest"))
@@ -46,6 +46,8 @@ createGreedyContiguousPlan( basemap, ndists, predvar="POP", scoreFUN=calcPopScor
   \item{scoreFUN}{Bard score function}
   \item{display}{whether to display plans while creating -- for demos and teaching}
   \item{traceLevel}{for debugging, tracelevel > 2 will turn on dynamic plotting}
+  \item{nseats}{total seats (elected officials) represented by plan -- for partial assignments}
+  \item{magnitudes}{a vector of length equal to the number of different districts in the assigned plan, with magnitudes of all districts -- for multimember plans only}
   \item{\dots}{arguments for score function}
 }
 

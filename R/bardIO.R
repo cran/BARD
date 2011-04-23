@@ -219,7 +219,9 @@ sdf2bard<-function(sdf,nb,id,queen,keepgeom=TRUE) {
   assign("self",retval,envir=retval$myenv)
   if (keepgeom) {
   	assign("shape",sdf,envir=retval$myenv)
-  } 
+  }  else {
+  	assign("shape",integer(0),envir=retval$myenv)
+  }
 
 
   

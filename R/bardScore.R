@@ -597,6 +597,10 @@ calcContiguityScoreD<-function(plan,distid,standardize=TRUE) {
     # but its very slow, so we coded our own n.comp.dist
     
     nregions <-  n.comp.include(nb,blocks)$nc
+    # adjust for entirely missing districts
+    if (nregions==0) {
+	nnregions<-1
+    }
     score<-nregions
     if (standardize) {
       score <- 1-(1/nregions)
@@ -1020,3 +1024,20 @@ sameNeighbors<-function(plan,lastscore,changelist) {
   }
   
  
+getPlanSeats<-function(plan) {
+	if (is.null(attr(plan,"nseats"))) {
+		retval<-attr(plan,"ndists")
+	} else {
+		retval <-attr(plan,"nseats")
+	}
+	return(retval)
+}
+
+getPlanMagnitudes<-function(plan) {
+	if (is.null(attr(plan,"magnitudes"))) {
+		retval <- replicate (length(plan),1)
+	} else {
+		retval <- attr(plan,"magnitudes")
+	}
+	return(retval)
+}

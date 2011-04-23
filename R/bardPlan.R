@@ -214,7 +214,7 @@ createGreedyContiguousPlan<-function( basemap, ndists, predvar="POP", scoreFUN =
 #
 ##################################
 
-createAssignedPlan<-function(basemap,predvar="BARDPlanID") {
+createAssignedPlan<-function(basemap,predvar="BARDPlanID",nseats=NULL,magnitudes=NULL) {
   nblocks<-dim(basemap)[1]
   planlevels<-NULL
    if ((length(predvar)==1) &&  is.character(predvar)) {
@@ -234,8 +234,24 @@ createAssignedPlan<-function(basemap,predvar="BARDPlanID") {
     warning("District identifiers were not continuous and were reordered")
   }
   
-  ndists<-length(unique(na.exclude(plan)))
+  if (is.null(ndists)) {
+  	ndists<-length(unique(na.exclude(plan)))
+  } 
+  if (is.null(nseats) && !is.null(magnitudes)) {
+	nseats<-sum(magnitudes)
+  }
+  if (!is.null(nseats) && nseats <ndists)  {
+    stop("number of districts supplied exceeds number of seats")
+  }
     
+  if (!is.null(magnitudes)) {
+	if ((is.vector(magnitudes)==FALSE) || (length(magnitudes) != ndists)
+		|| all.equal(as.integer(magnitudes),magnitudes) == FALSE || sum(magnitudes)>nseats) {
+		stop("Magnitudes must be integer vector of same length as number of districts, and must sum to less than nseats")
+	}
+
+	attr(plan,"magnitudes") <- as.integer(magnitudes)
+   }
   if (sum(is.na(plan))>0) {
     warning("Some blocks are not assigned. Use fillHolesPlan.")
   }
