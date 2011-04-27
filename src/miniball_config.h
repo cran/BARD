@@ -51,11 +51,15 @@
 
     #if !defined(__sgi) && !defined(__GNUC__)             // assume Visual C++
         #include<cstdlib>
+	using std::srand;
+	using std::rand;
         inline void random_seed (unsigned int seed) {srand(seed);}
         inline double random_double () {return double(rand())/RAND_MAX;}
     #else                                                 // no Visual C++
         #ifndef MINIBALL_NO_STD_NAMESPACE
             #include<cstdlib>
+            using std::srand; 
+            using std::rand;
 	    #ifdef __GNUC__
         	inline void random_seed (unsigned int seed) {srand(seed);}
         	inline double random_double () {return double(rand())/RAND_MAX;}

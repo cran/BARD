@@ -6,13 +6,15 @@ citEntry(entry = "Article",
                    as.person("Michael P. McDonald")),
   journal      = "Journal of Statistical Software",
   year         = "2011",
-  note         = "Forthcoming",
-  url          = "http://www.jstatsoft.org/",
+  volume	= "42",
+  number	= "4",
+  pages		= "1--28",
+  url          = "http://www.jstatsoft.org/v42/i04",
 
   textVersion  =
   paste("Micah Altman, Michael P. McDonald (2011).",
         "BARD: Better Automated Redistricting.",
-        "Journal of Statistical Software, Forthcoming.",
-        "URL http://www.jstatsoft.org/.")
+        "Journal of Statistical Software, 42(5): 1-28.",
+        "URL http://www.jstatsoft.org/v42/i04 .")
 )
 

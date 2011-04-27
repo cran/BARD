@@ -1,0 +1,31 @@
+***************************************************
+** jss: A Document Class for Publications in the **
+**        Journal of Statistical Software        **
+***************************************************
+
+This zip-archive contains the pdfLaTeX infrastructure
+for publications in the Journal of Statistical Software
+(JSS). The files
+  - jss.cls (LaTeX2e class)
+  - jss.bst (BibTeX style)
+  - jsslogo.jpg (JPG logo)
+need to be included in your search path (local working
+directory, texmf or localtexmf tree).
+
+A manual how to use jss.cls is provided in
+  - jss.pdf.
+
+Furthermore, there are templates for articles, code
+snippets, book reviews and software reviews available
+in 
+  - article.tex
+  - codesnippet.tex
+  - bookreview.tex
+  - softwarereview.tex
+  
+(Technical note: the class jss.cls and its documentation
+jss.pdf are generated from jss.dtx, e.g. by runing
+  pdflatex jss.dtx
+  pdflatex jss.ins
+  pdflatex jss.drv
+)

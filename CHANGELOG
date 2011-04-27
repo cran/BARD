@@ -135,3 +135,8 @@ Changelog
 -- greatly reduced doc size -- thanks to Achim Zeileis and Brian Ripley
 1.20
 -- extensions to *BardMap and sdf2BardMap for DistrictBuilder
+1.21
+-- fix bug in writeBardMap with keepgeom=false
+1.22
+-- JSS final volume citation
+-- Merge back in Brian Ripleys solaris fix for miniball
