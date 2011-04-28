@@ -712,11 +712,12 @@ plot.bardBasemap<-function(x,...) {
 
 
 as.data.frame.bardBasemap<-function (x, row.names = NULL, optional = FALSE, ...) {
-	as.data.frame(bardBasemap2spatialDataFrame(x))
+	return(x$df)
 }
 
+
 dim.bardBasemap<-function(x) {
-	return(dim(bardBasemap2spatialDataFrame(x)))
+	return(dim(as.data.frame(x)))
 }
 
 RGEOSgeomCleaner<-function(x) {

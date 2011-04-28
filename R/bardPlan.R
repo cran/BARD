@@ -234,10 +234,17 @@ createAssignedPlan<-function(basemap,predvar="BARDPlanID",nseats=NULL,magnitudes
     warning("District identifiers were not continuous and were reordered")
   }
   
-  if (is.null(ndists)) {
-  	ndists<-length(unique(na.exclude(plan)))
-  } 
+  ndists<-length(unique(na.exclude(plan)))
+
+  if (!is.null(magnitudes)) {
+	magnitudes<-as.integer(magnitudes)
+  }
   if (is.null(nseats) && !is.null(magnitudes)) {
+	if (length(nseats)>1) {
+		stop("nseats must be scalar")
+	}
+	nseats<-as.integer(nseats)
+	attr(plan,"nseats")<-nseats
 	nseats<-sum(magnitudes)
   }
   if (!is.null(nseats) && nseats <ndists)  {

@@ -140,3 +140,5 @@ Changelog
 1.22
 -- JSS final volume citation
 -- Merge back in Brian Ripleys solaris fix for miniball
+1.23
+-- Fix dim() on objects where keepgeom=false was used
