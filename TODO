@@ -1,6 +1,21 @@
 Todo:
 - HTML output refinements - report crosstabs
-- Block equivalency file output
+ ftable/xtable
+	- dynamic scores for splitScore
+	- index calculation timing
+         - block equivalency/distcit id conversion
+        - get projection string with -- warning/use rGDal
+	- simile data
+	- shape optimizations
+
+ merge generic, [.dataframe
+Incumbency protection function
+population heatmap
+Anneal on non-assigned?
+perimeter pre-indexing
+miniball pre-indexing
+
+- more compactness options with keepgeom=FALSE
 - Rgenoud cluster tuning
 - Population score method tuning
 - checkpoint during plan profiling
@@ -15,10 +30,9 @@ Todo:
 - allow double exchanges
 - block-level incremental moment scores
 - Compare plans w/differnt districts
-- as.data.frame <- data frame update methods
+- data frame update methods
 - memory leak in greedy? in C?
 - createContiguousPlan --> performance drops as ndists increase, profile, include bbox time
 - profile greedy
-- LW, calcSplitScore, and  bboxCompactess dynamic score improvemenst
 - bias/responsiveness scores
 - tune TABU search -- tabulist based on single/bidirectional, full list

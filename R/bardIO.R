@@ -468,6 +468,106 @@ function(filen, continue=TRUE) {
 }
 
 
+##############################################################################
+#
+# blockEqui2bardPlan
+# blockEquivFile2bardPlan
+#
+# Reads block equivalency files
+#
+# SEE ,Rd files
+#
+##############################################################################
+
+
+
+blockEquiv2bardPlan<-function(bedf,basemap,idvar="GEOID10") {
+	refactor <- function(x,basis) {
+  		return(factor(as.character(x), levels = levels(basis)))
+	}
+	
+		
+	bmid <- (as.data.frame(basemap)[[idvar]])
+	bmidc <- as.character(bmid)
+	beidc <- as.character(bedf[[idvar]])
+	
+	if (is.numeric(bmid)) {
+		bedf[[idvar]]<-as.numeric(bedf[[idvar]])
+	} else if (is.character(bmid)) {
+		bedf[[idvar]]<-as.character(bedf[[idvar]])
+	} else if (is.factor(bmid)) {
+		bedf[[idvar]]<-refactor(bedf[[idvar]],bmid)
+	} else {
+		stop("base map id is of unknown id type")
+	}
+
+	
+	check <- setdiff(beidc,bmidc)
+	if (length( check > 0) ){
+		warning(paste("Block id list contains unrecognized id's (dropping):", paste(check, collapse=" "),"\n",sep=" "))
+	}
+	
+	check <- setdiff(bmidc,beidc)
+	if (length( check > 0)) {
+		warning(paste("Block id list does not include :", length(check), "blocks", collapse=" "))
+	}
+	
+	check <- which(duplicated(beidc))
+	if (length(check)>0) {
+		warning(paste("Duplicated id's :", paste( beidc[check],collapse=" "), "\n" , collapse=" ",sep=" "))
+		bedf<-bedf[-check,]
+	}
+	
+	
+
+	nbedf <- merge(data.frame(bmid,rowid=1:length(bmid)),bedf,by=1,all.x=TRUE, all.y=FALSE )
+	nbedf<-nbedf[order(nbedf$rowid),c(1,3)]
+
+	if (dim(nbedf)[2]>2) {
+		magnitudes <- nbedf[[3]]
+	} else {
+		magnitudes <- NULL
+	}
+	
+	nplan <- createAssignedPlan(  basemap, predvar = nbedf[[2]],  magnitudes=magnitudes )
+	
+
+	retval<-nplan
+	return(retval)
+}
+
+importBlockEquiv<-function(filen,basemap,idvar="GEOID10") {
+	
+	predvar="BARDPlanID"
+	magvar="NumSeats"
+
+	tmpids <- read.table(filen, sep=",", colClasses="character", quote="",header=FALSE,dec=".", fill=FALSE,comment.char="",row.names=NULL) 
+	
+	if (dim(tmpids)[2]==2) {
+		names(tmpids)<-c(idvar,predvar)
+		tmpids[[2]]<-as.numeric(tmpids[[2]])
+	} else 	if (dim(tmpids)[2]==3) {
+		names(tmpids)<-c(idvar,predvar,magvar)
+		tmpids[[2]]<-as.numeric(tmpids[[2]])
+		tmpids[[3]]<-as.numeric(tmpids[[3]])
+	} else {
+		stop("Wrong number of columns")
+	}
+  	  
+	retval <- blockEquiv2bardPlan( bedf = tmpids, basemap = basemap, idvar = idvar)                
+	return(retval)
+}
+
+exportBlockEquiv<-function(filen,plan,idvar="GEOID10") {
+	ids<-as.data.frame(basem(plan))[[idvar]]
+	if (is.null(attr(plan,"magnitudes"))) {
+		tmp.df<-data.frame(ids,as.vector(plan))
+	} else {
+		tmp.df<-data.frame(ids,as.vector(plan),attr(plan,"magnitudes"))
+	}
+	write.table(tmp.df,file=filen,quote=FALSE,sep=",",na=".",row.names=FALSE,col.names=FALSE)	
+}
+
 ###
 ###  pre-calculate areas and perimeters
 ###

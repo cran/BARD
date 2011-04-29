@@ -1,7 +1,8 @@
 # district utility functions
 export( importBardShape, exportBardShape,
         readBardImage, writeBardImage,
-        readBardCheckpoint, writeBardCheckpoint , spatialDataFrame2bardBasemap, spatialDataFrame2bardPlan)
+        readBardCheckpoint, writeBardCheckpoint , spatialDataFrame2bardBasemap, spatialDataFrame2bardPlan,
+        importBlockEquiv,exportBlockEquiv,blockEquiv2bardPlan)
 
 # general utility functions
 export( miniball )

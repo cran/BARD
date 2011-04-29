@@ -22,7 +22,7 @@ License: \tab AGPL 3.0 \cr
 
 Bard supports several areas of functionality: 
   1. Plan input output. Reading and writing plans in various formats.
-  ( \link{readBardImage}, \link{writeBardImage}, \link{readBardCheckpoint}, \link{writeBardCheckpoint},\link{importBardShape}, \link{exportBardShape},\link{readBardMap},\link{writeBardMap} )
+  ( \link{importBlockEquiv}, link{readBardImage}, \link{readBardCheckpoint}, \link{exportBardShape},\link{readBardMap},\link{writeBardMap} )
   
   2. Initial plan generation. 
   

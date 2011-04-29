@@ -142,3 +142,5 @@ Changelog
 -- Merge back in Brian Ripleys solaris fix for miniball
 1.23
 -- Fix dim() on objects where keepgeom=false was used
+1.24
+-- added blockEquiv2bardPlan,importBlockEquiv, exportBlockEquiv for handling block equivalency files
